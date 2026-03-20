@@ -19,7 +19,7 @@ operational data, suitable for longitudinal research and AI-driven analysis.
 | Database | Source | What It Adds | Status |
 |---|---|---|---|
 | `990_data.db` | IRS Form 990 via ProPublica | Audited financials for private nonprofits | In progress |
-| `ipeds_data.db` | NCES IPEDS | Enrollment, admissions, outcomes — all institutions | Building now |
+| `ipeds_data.db` | NCES IPEDS | Enrollment, admissions, outcomes — all institutions | **Complete** (6.6M rows, 2000–2024, commit c3a4680) |
 | `eada_data.db` | Dept. of Education EADA | Athletics financials | Complete |
 | `scorecard_data.db` | College Scorecard API | Post-grad earnings & debt by program | Planned |
 
@@ -472,18 +472,34 @@ Document decisions here as they're made so they don't get relitigated.
 ## What "Done" Looks Like for Each Phase
 
 ### Phase 1 Complete (current target)
-- [ ] IPEDS fully loaded: all 12 components, 2000–present, all 5,800 institutions
+- [x] IPEDS fully loaded: all 9 core components, 2000–2024, 13,609 institutions — commit c3a4680
 - [ ] 990 pipeline: 10+ institutions, FY2020–2024
 - [ ] `institution_master` complete with EIN + UNITID for all 990 institutions
 - [ ] All schema SQL files committed
 - [ ] `tests/test_schema_integrity.py` passes clean
-- [ ] `CHANGELOG.md` current
+- [x] `CHANGELOG.md` current
+
+**IPEDS known open items (carry forward):**
+- `enrtot` NULL for all 2000–2001 EF rows: pre-2002 EF Part A uses `line`/`section`
+  layout instead of `efalevel`. Loader does not handle old format. 12,643 rows affected.
+  Fix requires reverse-engineering the old schema.
+- `ipeds_hr` starts at 2012: NCES does not publish `S{year}_SIS.zip` before 2012.
+  No HR coverage for 2000–2011.
 
 ### Phase 2 Complete
 - [ ] GitHub repo public
 - [ ] PostgreSQL on Supabase, migrated from SQLite
 - [ ] College Scorecard loaded
 - [ ] Read-only API endpoint live
+
+---
+
+## Environment
+
+- **OS:** Linux Mint (Ubuntu Noble base)
+- **Python:** 3.x (standard library sqlite3; `requests` required for downloader)
+- **Git:** initialized at commit c3a4680 (Phase 1 IPEDS checkpoint, March 2026)
+- **Database:** SQLite at `data/databases/ipeds_data.db` (.gitignored — rebuild from source)
 
 ---
 
