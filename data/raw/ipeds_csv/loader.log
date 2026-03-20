@@ -1,0 +1,415 @@
+2026-03-19 22:02:36,644 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-19 22:02:37,037 [INFO] institution_master: 6049 institutions loaded from IC 2023
+2026-03-19 22:02:37,342 [INFO] IC 2023: 6049 institutions
+2026-03-19 22:02:37,462 [INFO] IC 2023: 6049 rows loaded
+2026-03-19 22:02:37,484 [INFO] 
+============================================================
+2026-03-19 22:02:37,484 [INFO] Load complete: 12,098 total rows inserted/updated
+2026-03-19 22:08:22,339 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-19 22:08:22,724 [INFO] institution_master: 6256 institutions loaded from HD 2022
+2026-03-19 22:08:23,107 [INFO] institution_master: 6163 institutions loaded from HD 2023
+2026-03-19 22:08:23,395 [INFO] IC 2022: 6138 institutions
+2026-03-19 22:08:23,518 [INFO] IC 2022: 6138 rows loaded
+2026-03-19 22:08:23,807 [INFO] IC 2023: 6049 institutions
+2026-03-19 22:08:23,940 [INFO] IC 2023: 6049 rows loaded
+2026-03-19 22:08:23,962 [INFO] 
+============================================================
+2026-03-19 22:08:23,962 [INFO] Load complete: 24,606 total rows inserted/updated
+2026-03-19 22:12:22,018 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-19 22:12:22,675 [INFO] IC 2022: 6138 institutions (IC=6138, AY=3876)
+2026-03-19 22:12:22,862 [INFO] IC 2022: 6138 rows loaded
+2026-03-19 22:12:23,504 [INFO] IC 2023: 6049 institutions (IC=6049, AY=3825)
+2026-03-19 22:12:23,677 [INFO] IC 2023: 6049 rows loaded
+2026-03-19 22:12:23,720 [INFO] 
+============================================================
+2026-03-19 22:12:23,721 [INFO] Load complete: 12,187 total rows inserted/updated
+2026-03-19 22:17:35,974 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-19 22:17:36,349 [INFO] institution_master: 6256 institutions loaded from HD 2022
+2026-03-19 22:17:36,727 [INFO] institution_master: 6163 institutions loaded from HD 2023
+2026-03-19 22:17:37,355 [INFO] IC 2022: 6138 institutions (IC=6138, AY=3876)
+2026-03-19 22:17:37,525 [INFO] IC 2022: 6138 rows loaded
+2026-03-19 22:17:38,175 [INFO] IC 2023: 6049 institutions (IC=6049, AY=3825)
+2026-03-19 22:17:38,347 [INFO] IC 2023: 6049 rows loaded
+2026-03-19 22:17:38,501 [INFO] ADM 2022: 1991 rows loaded
+2026-03-19 22:17:38,619 [INFO] ADM 2023: 1972 rows loaded
+2026-03-19 22:17:38,741 [INFO] EF-D 2022: 5706 rows
+2026-03-19 22:17:43,260 [INFO] EF-A 2022: 93808 rows
+2026-03-19 22:17:43,670 [INFO] EF-D 2023: 5646 rows
+2026-03-19 22:17:48,064 [INFO] EF-A 2023: 93015 rows
+2026-03-19 22:17:55,328 [INFO] C 2022: 300877 raw rows
+2026-03-19 22:18:04,456 [INFO] C 2022: 300877 rows loaded
+2026-03-19 22:18:11,765 [INFO] C 2023: 303292 raw rows
+2026-03-19 22:18:21,387 [INFO] C 2023: 303292 rows loaded
+2026-03-19 22:18:23,482 [INFO] GR 2022: 48151 rows loaded
+2026-03-19 22:18:25,373 [INFO] GR 2023: 51368 rows loaded
+2026-03-19 22:18:26,954 [INFO] SFA 2022: 5653 rows loaded
+2026-03-19 22:18:27,293 [INFO] F-FASB 2022: 1916 rows loaded
+2026-03-19 22:18:27,561 [INFO] F-GASB 2022: 1916 rows loaded
+2026-03-19 22:18:27,581 [INFO] 
+============================================================
+2026-03-19 22:18:27,581 [INFO] Load complete: 939,917 total rows inserted/updated
+2026-03-19 22:21:01,369 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-19 22:21:02,497 [INFO] HR 2022: 21088 rows loaded
+2026-03-19 22:21:03,610 [INFO] HR 2023: 20912 rows loaded
+2026-03-19 22:21:03,625 [INFO] 
+============================================================
+2026-03-19 22:21:03,625 [INFO] Load complete: 42,000 total rows inserted/updated
+2026-03-19 22:26:58,746 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-19 22:26:58,913 [INFO] EF-D 2022: 5706 rows
+2026-03-19 22:27:03,491 [INFO] EF-A 2022: 93808 rows (updated=93808, inserted=0)
+2026-03-19 22:27:03,928 [INFO] EF-D 2023: 5646 rows
+2026-03-19 22:27:08,222 [INFO] EF-A 2023: 93015 rows (updated=93015, inserted=0)
+2026-03-19 22:27:09,134 [INFO] IC 2022: 6138 institutions (IC=6138, AY=3876)
+2026-03-19 22:27:09,307 [INFO] IC 2022: 6138 rows loaded
+2026-03-19 22:27:09,922 [INFO] IC 2023: 6049 institutions (IC=6049, AY=3825)
+2026-03-19 22:27:10,091 [INFO] IC 2023: 6049 rows loaded
+2026-03-19 22:27:10,131 [INFO] 
+============================================================
+2026-03-19 22:27:10,131 [INFO] Load complete: 210,362 total rows inserted/updated
+2026-03-19 22:31:57,624 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-19 22:31:57,780 [INFO] EF-D 2022: 5706 rows
+2026-03-19 22:32:01,297 [INFO] EF-A 2022: 5978 rows (updated=5706, inserted=272)
+2026-03-19 22:32:01,635 [INFO] EF-D 2023: 5646 rows
+2026-03-19 22:32:05,131 [INFO] EF-A 2023: 5913 rows (updated=5647, inserted=266)
+2026-03-19 22:32:05,346 [INFO] 
+============================================================
+2026-03-19 22:32:05,346 [INFO] Load complete: 23,243 total rows inserted/updated
+2026-03-20 16:50:26,827 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-20 16:50:26,827 [WARNING] institution_master 2000: HD file not found — run downloader.py --component HD first
+2026-03-20 16:50:26,828 [WARNING] institution_master 2001: HD file not found — run downloader.py --component HD first
+2026-03-20 16:50:28,188 [INFO] institution_master: 7643 institutions loaded from HD 2002
+2026-03-20 16:50:28,837 [INFO] institution_master: 7030 institutions loaded from HD 2003
+2026-03-20 16:50:29,272 [INFO] institution_master: 6916 institutions loaded from HD 2004
+2026-03-20 16:50:29,692 [INFO] institution_master: 7018 institutions loaded from HD 2005
+2026-03-20 16:50:30,138 [INFO] institution_master: 7052 institutions loaded from HD 2006
+2026-03-20 16:50:30,605 [INFO] institution_master: 7052 institutions loaded from HD 2007
+2026-03-20 16:50:31,063 [INFO] institution_master: 7126 institutions loaded from HD 2008
+2026-03-20 16:50:31,523 [INFO] institution_master: 7316 institutions loaded from HD 2009
+2026-03-20 16:50:32,056 [INFO] institution_master: 7503 institutions loaded from HD 2010
+2026-03-20 16:50:32,580 [INFO] institution_master: 7643 institutions loaded from HD 2011
+2026-03-20 16:50:33,113 [INFO] institution_master: 7735 institutions loaded from HD 2012
+2026-03-20 16:50:33,693 [INFO] institution_master: 7764 institutions loaded from HD 2013
+2026-03-20 16:50:34,234 [INFO] institution_master: 7687 institutions loaded from HD 2014
+2026-03-20 16:50:34,769 [INFO] institution_master: 7647 institutions loaded from HD 2015
+2026-03-20 16:50:35,333 [INFO] institution_master: 7521 institutions loaded from HD 2016
+2026-03-20 16:50:35,842 [INFO] institution_master: 7153 institutions loaded from HD 2017
+2026-03-20 16:50:36,346 [INFO] institution_master: 6857 institutions loaded from HD 2018
+2026-03-20 16:50:36,881 [INFO] institution_master: 6559 institutions loaded from HD 2019
+2026-03-20 16:50:37,372 [INFO] institution_master: 6440 institutions loaded from HD 2020
+2026-03-20 16:50:37,925 [INFO] institution_master: 6289 institutions loaded from HD 2021
+2026-03-20 16:50:38,428 [INFO] institution_master: 6256 institutions loaded from HD 2022
+2026-03-20 16:50:38,961 [INFO] institution_master: 6163 institutions loaded from HD 2023
+2026-03-20 16:50:39,406 [INFO] institution_master: 6072 institutions loaded from HD 2024
+2026-03-20 16:50:40,073 [INFO] IC 2000: 9513 institutions (IC=9513, AY=4552)
+2026-03-20 16:50:40,242 [ERROR] IC 2000: FOREIGN KEY constraint failed
+2026-03-20 16:50:41,122 [INFO] IC 2001: 6896 institutions (IC=6896, AY=6896)
+2026-03-20 16:50:41,264 [ERROR] IC 2001: FOREIGN KEY constraint failed
+2026-03-20 16:50:42,095 [INFO] IC 2002: 6823 institutions (IC=6823, AY=4706)
+2026-03-20 16:50:42,302 [INFO] IC 2002: 6823 rows loaded
+2026-03-20 16:50:43,181 [INFO] IC 2003: 6875 institutions (IC=6875, AY=4730)
+2026-03-20 16:50:43,381 [INFO] IC 2003: 6875 rows loaded
+2026-03-20 16:50:44,227 [INFO] IC 2004: 6804 institutions (IC=6804, AY=4631)
+2026-03-20 16:50:44,467 [INFO] IC 2004: 6804 rows loaded
+2026-03-20 16:50:45,323 [INFO] IC 2005: 6844 institutions (IC=6844, AY=4568)
+2026-03-20 16:50:45,526 [INFO] IC 2005: 6844 rows loaded
+2026-03-20 16:50:46,323 [INFO] IC 2006: 6891 institutions (IC=6891, AY=4573)
+2026-03-20 16:50:46,514 [INFO] IC 2006: 6891 rows loaded
+2026-03-20 16:50:47,264 [INFO] IC 2007: 6902 institutions (IC=6902, AY=4563)
+2026-03-20 16:50:47,452 [INFO] IC 2007: 6902 rows loaded
+2026-03-20 16:50:48,302 [INFO] IC 2008: 7034 institutions (IC=7034, AY=4603)
+2026-03-20 16:50:48,552 [INFO] IC 2008: 7034 rows loaded
+2026-03-20 16:50:49,054 [ERROR] Error reading /home/bob/claude/projects/project-jenni/data/raw/ipeds_csv/IC/2009/ic2009_ay.csv: 'NoneType' object has no attribute 'lower'
+2026-03-20 16:50:49,055 [INFO] IC 2009: 7135 institutions (IC=7135, AY=0)
+2026-03-20 16:50:49,234 [INFO] IC 2009: 7135 rows loaded
+2026-03-20 16:50:49,711 [ERROR] Error reading /home/bob/claude/projects/project-jenni/data/raw/ipeds_csv/IC/2010/ic2010_ay.csv: 'NoneType' object has no attribute 'lower'
+2026-03-20 16:50:49,711 [INFO] IC 2010: 7367 institutions (IC=7367, AY=0)
+2026-03-20 16:50:49,881 [INFO] IC 2010: 7367 rows loaded
+2026-03-20 16:50:50,377 [ERROR] Error reading /home/bob/claude/projects/project-jenni/data/raw/ipeds_csv/IC/2011/ic2011_ay.csv: 'NoneType' object has no attribute 'lower'
+2026-03-20 16:50:50,377 [INFO] IC 2011: 7591 institutions (IC=7591, AY=0)
+2026-03-20 16:50:50,594 [INFO] IC 2011: 7591 rows loaded
+2026-03-20 16:50:51,108 [ERROR] Error reading /home/bob/claude/projects/project-jenni/data/raw/ipeds_csv/IC/2012/ic2012_ay.csv: 'NoneType' object has no attribute 'lower'
+2026-03-20 16:50:51,108 [INFO] IC 2012: 7651 institutions (IC=7651, AY=0)
+2026-03-20 16:50:51,305 [INFO] IC 2012: 7651 rows loaded
+2026-03-20 16:50:52,204 [INFO] IC 2013: 7614 institutions (IC=7614, AY=4783)
+2026-03-20 16:50:52,420 [INFO] IC 2013: 7614 rows loaded
+2026-03-20 16:50:53,159 [INFO] IC 2014: 7531 institutions (IC=7531, AY=4660)
+2026-03-20 16:50:53,434 [INFO] IC 2014: 7531 rows loaded
+2026-03-20 16:50:54,150 [INFO] IC 2015: 7418 institutions (IC=7418, AY=4607)
+2026-03-20 16:50:54,362 [INFO] IC 2015: 7418 rows loaded
+2026-03-20 16:50:55,032 [INFO] IC 2016: 7047 institutions (IC=7047, AY=4397)
+2026-03-20 16:50:55,282 [INFO] IC 2016: 7047 rows loaded
+2026-03-20 16:50:55,978 [INFO] IC 2017: 6882 institutions (IC=6882, AY=4281)
+2026-03-20 16:50:56,190 [INFO] IC 2017: 6882 rows loaded
+2026-03-20 16:50:56,857 [INFO] IC 2018: 6668 institutions (IC=6668, AY=4125)
+2026-03-20 16:50:57,109 [INFO] IC 2018: 6668 rows loaded
+2026-03-20 16:50:57,742 [INFO] IC 2019: 6362 institutions (IC=6362, AY=3993)
+2026-03-20 16:50:57,935 [INFO] IC 2019: 6362 rows loaded
+2026-03-20 16:50:58,554 [INFO] IC 2020: 6264 institutions (IC=6264, AY=3911)
+2026-03-20 16:50:58,793 [INFO] IC 2020: 6264 rows loaded
+2026-03-20 16:50:59,408 [INFO] IC 2021: 6179 institutions (IC=6179, AY=3871)
+2026-03-20 16:50:59,596 [INFO] IC 2021: 6179 rows loaded
+2026-03-20 16:51:00,256 [INFO] IC 2022: 6138 institutions (IC=6138, AY=3876)
+2026-03-20 16:51:00,518 [INFO] IC 2022: 6138 rows loaded
+2026-03-20 16:51:01,173 [INFO] IC 2023: 6049 institutions (IC=6049, AY=3825)
+2026-03-20 16:51:01,386 [INFO] IC 2023: 6049 rows loaded
+2026-03-20 16:51:01,868 [INFO] IC 2024: 5963 institutions (IC=5963, AY=5963)
+2026-03-20 16:51:02,082 [INFO] IC 2024: 5963 rows loaded
+2026-03-20 16:51:02,234 [INFO] ADM 2014: 2236 rows loaded
+2026-03-20 16:51:02,355 [INFO] ADM 2015: 2210 rows loaded
+2026-03-20 16:51:02,460 [INFO] ADM 2016: 2068 rows loaded
+2026-03-20 16:51:02,572 [INFO] ADM 2017: 2075 rows loaded
+2026-03-20 16:51:02,684 [INFO] ADM 2018: 2038 rows loaded
+2026-03-20 16:51:02,794 [INFO] ADM 2019: 2011 rows loaded
+2026-03-20 16:51:02,894 [INFO] ADM 2020: 1989 rows loaded
+2026-03-20 16:51:02,998 [INFO] ADM 2021: 1981 rows loaded
+2026-03-20 16:51:03,124 [INFO] ADM 2022: 1991 rows loaded
+2026-03-20 16:51:03,300 [INFO] ADM 2023: 1972 rows loaded
+2026-03-20 16:51:03,378 [ERROR] EF 2000: FOREIGN KEY constraint failed
+2026-03-20 16:51:04,560 [ERROR] EF 2001: FOREIGN KEY constraint failed
+2026-03-20 16:51:04,747 [INFO] EF-D 2002: 6129 rows
+2026-03-20 16:51:07,019 [INFO] EF-A 2002: 6526 rows (updated=6116, inserted=410)
+2026-03-20 16:51:07,299 [INFO] EF-D 2003: 6081 rows
+2026-03-20 16:51:09,624 [INFO] EF-A 2003: 6576 rows (updated=6079, inserted=497)
+2026-03-20 16:51:09,881 [INFO] EF-D 2004: 6172 rows
+2026-03-20 16:51:12,273 [INFO] EF-A 2004: 6629 rows (updated=6165, inserted=464)
+2026-03-20 16:51:12,529 [INFO] EF-D 2005: 6230 rows
+2026-03-20 16:51:15,005 [INFO] EF-A 2005: 6689 rows (updated=6223, inserted=466)
+2026-03-20 16:51:15,269 [INFO] EF-D 2006: 6050 rows
+2026-03-20 16:51:18,314 [INFO] EF-A 2006: 6748 rows (updated=6040, inserted=708)
+2026-03-20 16:51:18,636 [INFO] EF-D 2007: 6071 rows
+2026-03-20 16:51:21,771 [INFO] EF-A 2007: 6761 rows (updated=6069, inserted=692)
+2026-03-20 16:51:22,145 [INFO] EF-D 2008: 6178 rows
+2026-03-20 16:51:28,952 [INFO] EF-A 2008: 6886 rows (updated=6172, inserted=714)
+2026-03-20 16:51:29,525 [INFO] EF-D 2009: 6672 rows
+2026-03-20 16:51:35,886 [INFO] EF-A 2009: 6990 rows (updated=6672, inserted=318)
+2026-03-20 16:51:36,475 [INFO] EF-D 2010: 6929 rows
+2026-03-20 16:51:40,351 [INFO] EF-A 2010: 7246 rows (updated=6927, inserted=319)
+2026-03-20 16:51:40,804 [INFO] EF-D 2011: 7124 rows
+2026-03-20 16:51:44,732 [INFO] EF-A 2011: 7465 rows (updated=7124, inserted=341)
+2026-03-20 16:51:45,172 [INFO] EF-D 2012: 7166 rows
+2026-03-20 16:51:49,176 [INFO] EF-A 2012: 7505 rows (updated=7166, inserted=339)
+2026-03-20 16:51:49,611 [INFO] EF-D 2013: 7151 rows
+2026-03-20 16:51:53,599 [INFO] EF-A 2013: 7462 rows (updated=7151, inserted=311)
+2026-03-20 16:51:54,082 [INFO] EF-D 2014: 7050 rows
+2026-03-20 16:51:58,035 [INFO] EF-A 2014: 7360 rows (updated=7050, inserted=310)
+2026-03-20 16:51:58,502 [INFO] EF-D 2015: 6914 rows
+2026-03-20 16:52:02,369 [INFO] EF-A 2015: 7228 rows (updated=6914, inserted=314)
+2026-03-20 16:52:02,832 [INFO] EF-D 2016: 6506 rows
+2026-03-20 16:52:06,460 [INFO] EF-A 2016: 6819 rows (updated=6506, inserted=313)
+2026-03-20 16:52:06,879 [INFO] EF-D 2017: 6371 rows
+2026-03-20 16:52:10,488 [INFO] EF-A 2017: 6676 rows (updated=6371, inserted=305)
+2026-03-20 16:52:10,930 [INFO] EF-D 2018: 6053 rows
+2026-03-20 16:52:14,333 [INFO] EF-A 2018: 6352 rows (updated=6053, inserted=299)
+2026-03-20 16:52:14,741 [INFO] EF-D 2019: 5885 rows
+2026-03-20 16:52:18,089 [INFO] EF-A 2019: 6179 rows (updated=5885, inserted=294)
+2026-03-20 16:52:18,508 [INFO] EF-D 2020: 5845 rows
+2026-03-20 16:52:21,841 [INFO] EF-A 2020: 6129 rows (updated=5842, inserted=287)
+2026-03-20 16:52:22,278 [INFO] EF-D 2021: 5770 rows
+2026-03-20 16:52:25,595 [INFO] EF-A 2021: 6049 rows (updated=5770, inserted=279)
+2026-03-20 16:52:26,034 [INFO] EF-D 2022: 5706 rows
+2026-03-20 16:52:29,406 [INFO] EF-A 2022: 5978 rows (updated=5978, inserted=0)
+2026-03-20 16:52:29,795 [INFO] EF-D 2023: 5646 rows
+2026-03-20 16:52:33,128 [INFO] EF-A 2023: 5913 rows (updated=5913, inserted=0)
+2026-03-20 16:52:35,626 [INFO] C 2000: 173137 raw rows
+2026-03-20 16:52:35,751 [ERROR] C 2000: FOREIGN KEY constraint failed
+2026-03-20 16:52:38,541 [INFO] C 2001: 194569 raw rows
+2026-03-20 16:52:39,004 [ERROR] C 2001: FOREIGN KEY constraint failed
+2026-03-20 16:52:43,070 [INFO] C 2002: 200336 raw rows
+2026-03-20 16:52:48,691 [INFO] C 2002: 200336 rows loaded
+2026-03-20 16:52:53,084 [INFO] C 2003: 211859 raw rows
+2026-03-20 16:52:59,424 [INFO] C 2003: 211859 rows loaded
+2026-03-20 16:53:04,020 [INFO] C 2004: 219682 raw rows
+2026-03-20 16:53:10,580 [INFO] C 2004: 219682 rows loaded
+2026-03-20 16:53:15,519 [INFO] C 2005: 230135 raw rows
+2026-03-20 16:53:22,527 [INFO] C 2005: 230135 rows loaded
+2026-03-20 16:53:27,526 [INFO] C 2006: 238406 raw rows
+2026-03-20 16:53:34,874 [INFO] C 2006: 238406 rows loaded
+2026-03-20 16:53:39,924 [INFO] C 2007: 240507 raw rows
+2026-03-20 16:53:47,550 [INFO] C 2007: 240507 rows loaded
+2026-03-20 16:53:58,495 [INFO] C 2008: 247075 raw rows
+2026-03-20 16:54:07,093 [INFO] C 2008: 247075 rows loaded
+2026-03-20 16:54:18,842 [INFO] C 2009: 255884 raw rows
+2026-03-20 16:54:28,470 [INFO] C 2009: 255884 rows loaded
+2026-03-20 16:54:40,681 [INFO] C 2010: 265604 raw rows
+2026-03-20 16:54:50,651 [INFO] C 2010: 265604 rows loaded
+2026-03-20 16:54:57,634 [INFO] C 2011: 265808 raw rows
+2026-03-20 16:55:06,859 [INFO] C 2011: 265808 rows loaded
+2026-03-20 16:55:13,691 [INFO] C 2012: 270166 raw rows
+2026-03-20 16:55:23,313 [INFO] C 2012: 270166 rows loaded
+2026-03-20 16:55:30,642 [INFO] C 2013: 284907 raw rows
+2026-03-20 16:55:40,760 [INFO] C 2013: 284907 rows loaded
+2026-03-20 16:55:47,842 [INFO] C 2014: 293259 raw rows
+2026-03-20 16:55:58,255 [INFO] C 2014: 293259 rows loaded
+2026-03-20 16:56:05,668 [INFO] C 2015: 300222 raw rows
+2026-03-20 16:56:16,313 [INFO] C 2015: 300222 rows loaded
+2026-03-20 16:56:23,613 [INFO] C 2016: 301984 raw rows
+2026-03-20 16:56:34,384 [INFO] C 2016: 301984 rows loaded
+2026-03-20 16:56:41,937 [INFO] C 2017: 308943 raw rows
+2026-03-20 16:56:53,216 [INFO] C 2017: 308943 rows loaded
+2026-03-20 16:57:00,355 [INFO] C 2018: 290119 raw rows
+2026-03-20 16:57:10,920 [INFO] C 2018: 290119 rows loaded
+2026-03-20 16:57:17,865 [INFO] C 2019: 291052 raw rows
+2026-03-20 16:57:28,513 [INFO] C 2019: 291052 rows loaded
+2026-03-20 16:57:35,473 [INFO] C 2020: 289792 raw rows
+2026-03-20 16:57:46,154 [INFO] C 2020: 289792 rows loaded
+2026-03-20 16:57:53,377 [INFO] C 2021: 296343 raw rows
+2026-03-20 16:58:04,236 [INFO] C 2021: 296343 rows loaded
+2026-03-20 16:58:11,538 [INFO] C 2022: 300877 raw rows
+2026-03-20 16:58:29,699 [INFO] C 2022: 300877 rows loaded
+2026-03-20 16:58:37,086 [INFO] C 2023: 303292 raw rows
+2026-03-20 16:58:54,936 [INFO] C 2023: 303292 rows loaded
+2026-03-20 16:59:02,462 [INFO] C 2024: 307707 raw rows
+2026-03-20 16:59:13,534 [INFO] C 2024: 307707 rows loaded
+2026-03-20 16:59:14,648 [ERROR] GR 2000: FOREIGN KEY constraint failed
+2026-03-20 16:59:15,671 [ERROR] GR 2001: FOREIGN KEY constraint failed
+2026-03-20 16:59:16,935 [INFO] GR 2002: 42390 rows loaded
+2026-03-20 16:59:18,190 [INFO] GR 2003: 40214 rows loaded
+2026-03-20 16:59:19,217 [INFO] GR 2004: 34148 rows loaded
+2026-03-20 16:59:20,298 [INFO] GR 2005: 34874 rows loaded
+2026-03-20 16:59:21,431 [INFO] GR 2006: 35232 rows loaded
+2026-03-20 16:59:22,552 [INFO] GR 2007: 35956 rows loaded
+2026-03-20 16:59:24,622 [INFO] GR 2008: 36479 rows loaded
+2026-03-20 16:59:26,964 [INFO] GR 2009: 42351 rows loaded
+2026-03-20 16:59:29,375 [INFO] GR 2010: 43199 rows loaded
+2026-03-20 16:59:31,401 [INFO] GR 2011: 55346 rows loaded
+2026-03-20 16:59:33,404 [INFO] GR 2012: 56221 rows loaded
+2026-03-20 16:59:35,500 [INFO] GR 2013: 56741 rows loaded
+2026-03-20 16:59:37,580 [INFO] GR 2014: 57362 rows loaded
+2026-03-20 16:59:39,636 [INFO] GR 2015: 57333 rows loaded
+2026-03-20 16:59:41,627 [INFO] GR 2016: 55742 rows loaded
+2026-03-20 16:59:43,629 [INFO] GR 2017: 54714 rows loaded
+2026-03-20 16:59:45,513 [INFO] GR 2018: 51868 rows loaded
+2026-03-20 16:59:47,306 [INFO] GR 2019: 50447 rows loaded
+2026-03-20 16:59:49,103 [INFO] GR 2020: 50098 rows loaded
+2026-03-20 16:59:50,858 [INFO] GR 2021: 49539 rows loaded
+2026-03-20 16:59:52,609 [INFO] GR 2022: 48151 rows loaded
+2026-03-20 16:59:54,475 [INFO] GR 2023: 51368 rows loaded
+2026-03-20 16:59:54,767 [INFO] SFA 2001: 5729 rows loaded
+2026-03-20 16:59:54,969 [INFO] SFA 2002: 6028 rows loaded
+2026-03-20 16:59:55,186 [INFO] SFA 2003: 6074 rows loaded
+2026-03-20 16:59:55,423 [INFO] SFA 2004: 6191 rows loaded
+2026-03-20 16:59:55,642 [INFO] SFA 2005: 6185 rows loaded
+2026-03-20 16:59:55,870 [INFO] SFA 2006: 6197 rows loaded
+2026-03-20 16:59:56,227 [INFO] SFA 2007: 6524 rows loaded
+2026-03-20 16:59:57,092 [INFO] SFA 2008: 6632 rows loaded
+2026-03-20 16:59:58,309 [INFO] SFA 2009: 6852 rows loaded
+2026-03-20 17:00:00,091 [INFO] SFA 2010: 7081 rows loaded
+2026-03-20 17:00:01,952 [INFO] SFA 2011: 7137 rows loaded
+2026-03-20 17:00:03,721 [INFO] SFA 2012: 7156 rows loaded
+2026-03-20 17:00:05,475 [INFO] SFA 2013: 7075 rows loaded
+2026-03-20 17:00:07,265 [INFO] SFA 2014: 6959 rows loaded
+2026-03-20 17:00:08,891 [INFO] SFA 2015: 6544 rows loaded
+2026-03-20 17:00:10,510 [INFO] SFA 2016: 6394 rows loaded
+2026-03-20 17:00:12,093 [INFO] SFA 2017: 6114 rows loaded
+2026-03-20 17:00:13,539 [INFO] SFA 2018: 5909 rows loaded
+2026-03-20 17:00:15,082 [INFO] SFA 2019: 5859 rows loaded
+2026-03-20 17:00:16,506 [INFO] SFA 2020: 5779 rows loaded
+2026-03-20 17:00:18,001 [INFO] SFA 2021: 5709 rows loaded
+2026-03-20 17:00:19,594 [INFO] SFA 2022: 5653 rows loaded
+2026-03-20 17:00:19,806 [ERROR] F 2000: FOREIGN KEY constraint failed
+2026-03-20 17:00:20,016 [INFO] F-FASB 2001: 1280 rows loaded
+2026-03-20 17:00:20,211 [INFO] F-GASB 2001: 1280 rows loaded
+2026-03-20 17:00:20,488 [INFO] F-FASB 2002: 1655 rows loaded
+2026-03-20 17:00:20,751 [INFO] F-GASB 2002: 1655 rows loaded
+2026-03-20 17:00:20,994 [INFO] F-FASB 2003: 1902 rows loaded
+2026-03-20 17:00:21,286 [INFO] F-GASB 2003: 1902 rows loaded
+2026-03-20 17:00:21,545 [INFO] F-FASB 2004: 1902 rows loaded
+2026-03-20 17:00:21,806 [INFO] F-GASB 2004: 1902 rows loaded
+2026-03-20 17:00:22,128 [INFO] F-FASB 2005: 1971 rows loaded
+2026-03-20 17:00:22,439 [INFO] F-GASB 2005: 1971 rows loaded
+2026-03-20 17:00:22,783 [INFO] F-FASB 2006: 1971 rows loaded
+2026-03-20 17:00:23,096 [INFO] F-GASB 2006: 1971 rows loaded
+2026-03-20 17:00:23,485 [INFO] F-FASB 2007: 1960 rows loaded
+2026-03-20 17:00:23,823 [INFO] F-GASB 2007: 1960 rows loaded
+2026-03-20 17:00:24,157 [INFO] F-FASB 2008: 1871 rows loaded
+2026-03-20 17:00:24,501 [INFO] F-GASB 2008: 1871 rows loaded
+2026-03-20 17:00:24,848 [INFO] F-FASB 2009: 1862 rows loaded
+2026-03-20 17:00:25,230 [INFO] F-GASB 2009: 1862 rows loaded
+2026-03-20 17:00:25,559 [INFO] F-FASB 2010: 1888 rows loaded
+2026-03-20 17:00:25,894 [INFO] F-GASB 2010: 1888 rows loaded
+2026-03-20 17:00:26,234 [INFO] F-FASB 2011: 2004 rows loaded
+2026-03-20 17:00:26,569 [INFO] F-GASB 2011: 2004 rows loaded
+2026-03-20 17:00:26,883 [INFO] F-FASB 2012: 1995 rows loaded
+2026-03-20 17:00:27,207 [INFO] F-GASB 2012: 1995 rows loaded
+2026-03-20 17:00:27,506 [INFO] F-FASB 2013: 1988 rows loaded
+2026-03-20 17:00:27,861 [INFO] F-GASB 2013: 1988 rows loaded
+2026-03-20 17:00:28,204 [INFO] F-FASB 2014: 1922 rows loaded
+2026-03-20 17:00:28,545 [INFO] F-GASB 2014: 1922 rows loaded
+2026-03-20 17:00:28,789 [INFO] F-FASB 2015: 1888 rows loaded
+2026-03-20 17:00:29,086 [INFO] F-GASB 2015: 1888 rows loaded
+2026-03-20 17:00:29,336 [INFO] F-FASB 2016: 1884 rows loaded
+2026-03-20 17:00:29,586 [INFO] F-GASB 2016: 1884 rows loaded
+2026-03-20 17:00:29,861 [INFO] F-FASB 2017: 1964 rows loaded
+2026-03-20 17:00:30,083 [INFO] F-GASB 2017: 1964 rows loaded
+2026-03-20 17:00:30,318 [INFO] F-FASB 2018: 1961 rows loaded
+2026-03-20 17:00:30,583 [INFO] F-GASB 2018: 1961 rows loaded
+2026-03-20 17:00:30,859 [INFO] F-FASB 2019: 1949 rows loaded
+2026-03-20 17:00:31,128 [INFO] F-GASB 2019: 1949 rows loaded
+2026-03-20 17:00:31,476 [INFO] F-FASB 2020: 1946 rows loaded
+2026-03-20 17:00:31,762 [INFO] F-GASB 2020: 1946 rows loaded
+2026-03-20 17:00:32,061 [INFO] F-FASB 2021: 1936 rows loaded
+2026-03-20 17:00:32,372 [INFO] F-GASB 2021: 1936 rows loaded
+2026-03-20 17:00:32,674 [INFO] F-FASB 2022: 1916 rows loaded
+2026-03-20 17:00:32,941 [INFO] F-GASB 2022: 1916 rows loaded
+2026-03-20 17:00:32,958 [WARNING] HR 2000: no SIS or SAL files found
+2026-03-20 17:00:32,958 [WARNING] HR 2001: no SIS or SAL files found
+2026-03-20 17:00:32,958 [WARNING] HR 2002: no SIS or SAL files found
+2026-03-20 17:00:32,958 [WARNING] HR 2003: no SIS or SAL files found
+2026-03-20 17:00:32,958 [WARNING] HR 2004: no SIS or SAL files found
+2026-03-20 17:00:32,958 [WARNING] HR 2005: no SIS or SAL files found
+2026-03-20 17:00:32,959 [WARNING] HR 2006: no SIS or SAL files found
+2026-03-20 17:00:32,959 [WARNING] HR 2007: no SIS or SAL files found
+2026-03-20 17:00:32,959 [WARNING] HR 2008: no SIS or SAL files found
+2026-03-20 17:00:32,959 [WARNING] HR 2009: no SIS or SAL files found
+2026-03-20 17:00:32,959 [WARNING] HR 2010: no SIS or SAL files found
+2026-03-20 17:00:32,959 [WARNING] HR 2011: no SIS or SAL files found
+2026-03-20 17:00:33,751 [INFO] HR 2012: 22353 rows loaded
+2026-03-20 17:00:34,592 [INFO] HR 2013: 22471 rows loaded
+2026-03-20 17:00:35,373 [INFO] HR 2014: 21994 rows loaded
+2026-03-20 17:00:36,140 [INFO] HR 2015: 21609 rows loaded
+2026-03-20 17:00:37,353 [INFO] HR 2016: 22704 rows loaded
+2026-03-20 17:00:38,505 [INFO] HR 2017: 22502 rows loaded
+2026-03-20 17:00:39,614 [INFO] HR 2018: 21780 rows loaded
+2026-03-20 17:00:40,722 [INFO] HR 2019: 21423 rows loaded
+2026-03-20 17:00:41,818 [INFO] HR 2020: 21051 rows loaded
+2026-03-20 17:00:42,864 [INFO] HR 2021: 20986 rows loaded
+2026-03-20 17:00:43,933 [INFO] HR 2022: 21088 rows loaded
+2026-03-20 17:00:44,994 [INFO] HR 2023: 20912 rows loaded
+2026-03-20 17:00:45,006 [WARNING] HR 2024: no SIS or SAL files found
+2026-03-20 17:00:45,006 [INFO] 
+============================================================
+2026-03-20 17:00:45,006 [INFO] Load complete: 8,366,526 total rows inserted/updated
+2026-03-20 17:00:45,006 [WARNING] 9 errors:
+2026-03-20 17:00:45,006 [WARNING]   IC 2000: FOREIGN KEY constraint failed
+2026-03-20 17:00:45,006 [WARNING]   IC 2001: FOREIGN KEY constraint failed
+2026-03-20 17:00:45,006 [WARNING]   EF 2000: FOREIGN KEY constraint failed
+2026-03-20 17:00:45,006 [WARNING]   EF 2001: FOREIGN KEY constraint failed
+2026-03-20 17:00:45,006 [WARNING]   C 2000: FOREIGN KEY constraint failed
+2026-03-20 17:00:45,006 [WARNING]   C 2001: FOREIGN KEY constraint failed
+2026-03-20 17:00:45,006 [WARNING]   GR 2000: FOREIGN KEY constraint failed
+2026-03-20 17:00:45,006 [WARNING]   GR 2001: FOREIGN KEY constraint failed
+2026-03-20 17:00:45,006 [WARNING]   F 2000: FOREIGN KEY constraint failed
+2026-03-20 17:09:24,740 [INFO] Database initialized: data/databases/ipeds_data.db
+2026-03-20 17:09:25,155 [INFO] institution_master 2000: seeded 2150 stubs (HD unavailable, IC fallback)
+2026-03-20 17:09:25,557 [INFO] institution_master 2001: seeded 1 stubs (HD unavailable, IC fallback)
+2026-03-20 17:09:26,183 [INFO] IC 2000: 9513 institutions (IC=9513, AY=4552)
+2026-03-20 17:09:26,564 [INFO] IC 2000: 9513 rows loaded
+2026-03-20 17:09:27,399 [INFO] IC 2001: 6896 institutions (IC=6896, AY=6896)
+2026-03-20 17:09:27,681 [INFO] IC 2001: 6896 rows loaded
+2026-03-20 17:09:27,964 [INFO] EF-D 2000: 6083 rows
+2026-03-20 17:09:28,774 [INFO] EF-A 2000: 0 rows (updated=0, inserted=0)
+2026-03-20 17:09:30,489 [INFO] EF-D 2001: 65786 rows
+2026-03-20 17:09:31,535 [INFO] EF-A 2001: 0 rows (updated=0, inserted=0)
+2026-03-20 17:09:33,866 [INFO] C 2000: 173137 raw rows
+2026-03-20 17:09:40,045 [INFO] C 2000: 173137 rows loaded
+2026-03-20 17:09:42,834 [INFO] C 2001: 194569 raw rows
+2026-03-20 17:09:49,279 [INFO] C 2001: 194569 rows loaded
+2026-03-20 17:09:50,378 [INFO] GR 2000: 27872 rows loaded
+2026-03-20 17:09:51,477 [INFO] GR 2001: 34528 rows loaded
+2026-03-20 17:09:51,735 [INFO] F-FASB 2000: 1895 rows loaded
+2026-03-20 17:09:51,903 [INFO] F-GASB 2000: 1895 rows loaded
+2026-03-20 17:09:52,107 [INFO] F-FASB 2001: 1280 rows loaded
+2026-03-20 17:09:52,348 [INFO] F-GASB 2001: 1280 rows loaded
+2026-03-20 17:09:52,364 [INFO] 
+============================================================
+2026-03-20 17:09:52,364 [INFO] Load complete: 526,885 total rows inserted/updated

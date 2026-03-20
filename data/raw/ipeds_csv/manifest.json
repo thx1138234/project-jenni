@@ -1,0 +1,1887 @@
+{
+  "IC:2022": {
+    "status": "downloaded",
+    "filename": "IC2022.zip",
+    "timestamp": "2026-03-20T02:01:26.182512"
+  },
+  "IC:2023": {
+    "status": "downloaded",
+    "filename": "IC2023.zip",
+    "timestamp": "2026-03-20T02:01:28.576812"
+  },
+  "HD:2022": {
+    "status": "downloaded",
+    "filename": "HD2022.zip",
+    "timestamp": "2026-03-20T02:08:06.036631"
+  },
+  "HD:2023": {
+    "status": "downloaded",
+    "filename": "HD2023.zip",
+    "timestamp": "2026-03-20T02:08:10.068419"
+  },
+  "IC_AY:2022": {
+    "status": "downloaded",
+    "filename": "IC2022_AY.zip",
+    "timestamp": "2026-03-20T02:12:11.905370"
+  },
+  "IC_AY:2023": {
+    "status": "downloaded",
+    "filename": "IC2023_AY.zip",
+    "timestamp": "2026-03-20T02:12:15.074322"
+  },
+  "EF_A:2022": {
+    "status": "downloaded",
+    "filename": "EF2022A.zip",
+    "timestamp": "2026-03-20T02:16:02.640128"
+  },
+  "EF_A:2023": {
+    "status": "downloaded",
+    "filename": "EF2023A.zip",
+    "timestamp": "2026-03-20T02:16:06.783154"
+  },
+  "EF_B:2022": {
+    "status": "downloaded",
+    "filename": "EF2022B.zip",
+    "timestamp": "2026-03-20T02:16:11.604474"
+  },
+  "EF_B:2023": {
+    "status": "downloaded",
+    "filename": "EF2023B.zip",
+    "timestamp": "2026-03-20T02:16:14.857315"
+  },
+  "EF_C:2022": {
+    "status": "downloaded",
+    "filename": "EF2022C.zip",
+    "timestamp": "2026-03-20T02:16:17.484114"
+  },
+  "EF_C:2023": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:50:10.552614"
+  },
+  "EF_D:2022": {
+    "status": "downloaded",
+    "filename": "EF2022D.zip",
+    "timestamp": "2026-03-20T02:16:21.360151"
+  },
+  "EF_D:2023": {
+    "status": "downloaded",
+    "filename": "EF2023D.zip",
+    "timestamp": "2026-03-20T02:16:23.642794"
+  },
+  "ADM:2022": {
+    "status": "downloaded",
+    "filename": "ADM2022.zip",
+    "timestamp": "2026-03-20T02:16:26.848554"
+  },
+  "ADM:2023": {
+    "status": "downloaded",
+    "filename": "ADM2023.zip",
+    "timestamp": "2026-03-20T02:16:29.136675"
+  },
+  "C:2022": {
+    "status": "downloaded",
+    "filename": "C2022_A.zip",
+    "timestamp": "2026-03-20T02:16:38.265612"
+  },
+  "C:2023": {
+    "status": "downloaded",
+    "filename": "C2023_A.zip",
+    "timestamp": "2026-03-20T02:16:49.724201"
+  },
+  "GR:2022": {
+    "status": "downloaded",
+    "filename": "GR2022.zip",
+    "timestamp": "2026-03-20T02:16:52.838167"
+  },
+  "GR:2023": {
+    "status": "downloaded",
+    "filename": "GR2023.zip",
+    "timestamp": "2026-03-20T02:16:57.801931"
+  },
+  "SFA:2022": {
+    "status": "downloaded",
+    "filename": "SFA2223.zip",
+    "timestamp": "2026-03-20T02:17:01.995888"
+  },
+  "SFA:2023": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:58:16.138010"
+  },
+  "F_FASB:2022": {
+    "status": "downloaded",
+    "filename": "F2223_F1A.zip",
+    "timestamp": "2026-03-20T02:17:07.620832"
+  },
+  "F_FASB:2023": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:59:49.531206"
+  },
+  "F_GASB:2022": {
+    "status": "downloaded",
+    "filename": "F2223_F2.zip",
+    "timestamp": "2026-03-20T02:17:13.237567"
+  },
+  "F_GASB:2023": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:08.580826"
+  },
+  "HR:2022": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:17:17.865244"
+  },
+  "HR:2023": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:17:20.174847"
+  },
+  "HR_SIS:2022": {
+    "status": "downloaded",
+    "filename": "S2022_SIS.zip",
+    "timestamp": "2026-03-20T02:19:57.782309"
+  },
+  "HR_SIS:2023": {
+    "status": "downloaded",
+    "filename": "S2023_SIS.zip",
+    "timestamp": "2026-03-20T02:19:59.934734"
+  },
+  "HR_SAL:2022": {
+    "status": "downloaded",
+    "filename": "SAL2022_IS.zip",
+    "timestamp": "2026-03-20T02:20:03.997303"
+  },
+  "HR_SAL:2023": {
+    "status": "downloaded",
+    "filename": "SAL2023_IS.zip",
+    "timestamp": "2026-03-20T02:20:06.921990"
+  },
+  "HD:2000": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:41:27.207078"
+  },
+  "HD:2001": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:41:29.482024"
+  },
+  "HD:2002": {
+    "status": "downloaded",
+    "filename": "HD2002.zip",
+    "timestamp": "2026-03-20T02:41:32.865323"
+  },
+  "HD:2003": {
+    "status": "downloaded",
+    "filename": "HD2003.zip",
+    "timestamp": "2026-03-20T02:41:36.646818"
+  },
+  "HD:2004": {
+    "status": "downloaded",
+    "filename": "HD2004.zip",
+    "timestamp": "2026-03-20T02:41:39.716738"
+  },
+  "HD:2005": {
+    "status": "downloaded",
+    "filename": "HD2005.zip",
+    "timestamp": "2026-03-20T02:41:42.332925"
+  },
+  "HD:2006": {
+    "status": "downloaded",
+    "filename": "HD2006.zip",
+    "timestamp": "2026-03-20T02:41:44.827882"
+  },
+  "HD:2007": {
+    "status": "downloaded",
+    "filename": "HD2007.zip",
+    "timestamp": "2026-03-20T02:41:48.213043"
+  },
+  "HD:2008": {
+    "status": "downloaded",
+    "filename": "HD2008.zip",
+    "timestamp": "2026-03-20T02:41:50.829202"
+  },
+  "HD:2009": {
+    "status": "downloaded",
+    "filename": "HD2009.zip",
+    "timestamp": "2026-03-20T02:41:54.009655"
+  },
+  "HD:2010": {
+    "status": "downloaded",
+    "filename": "HD2010.zip",
+    "timestamp": "2026-03-20T02:41:56.557970"
+  },
+  "HD:2011": {
+    "status": "downloaded",
+    "filename": "HD2011.zip",
+    "timestamp": "2026-03-20T02:41:59.395131"
+  },
+  "HD:2012": {
+    "status": "downloaded",
+    "filename": "HD2012.zip",
+    "timestamp": "2026-03-20T02:42:02.244551"
+  },
+  "HD:2013": {
+    "status": "downloaded",
+    "filename": "HD2013.zip",
+    "timestamp": "2026-03-20T02:42:06.279626"
+  },
+  "HD:2014": {
+    "status": "downloaded",
+    "filename": "HD2014.zip",
+    "timestamp": "2026-03-20T02:42:09.937834"
+  },
+  "HD:2015": {
+    "status": "downloaded",
+    "filename": "HD2015.zip",
+    "timestamp": "2026-03-20T02:42:12.923061"
+  },
+  "HD:2016": {
+    "status": "downloaded",
+    "filename": "HD2016.zip",
+    "timestamp": "2026-03-20T02:42:15.892601"
+  },
+  "HD:2017": {
+    "status": "downloaded",
+    "filename": "HD2017.zip",
+    "timestamp": "2026-03-20T02:42:18.760285"
+  },
+  "HD:2018": {
+    "status": "downloaded",
+    "filename": "HD2018.zip",
+    "timestamp": "2026-03-20T02:42:21.738433"
+  },
+  "HD:2019": {
+    "status": "downloaded",
+    "filename": "HD2019.zip",
+    "timestamp": "2026-03-20T02:42:25.274318"
+  },
+  "HD:2020": {
+    "status": "downloaded",
+    "filename": "HD2020.zip",
+    "timestamp": "2026-03-20T02:42:28.188346"
+  },
+  "HD:2021": {
+    "status": "downloaded",
+    "filename": "HD2021.zip",
+    "timestamp": "2026-03-20T02:42:30.932892"
+  },
+  "HD:2024": {
+    "status": "downloaded",
+    "filename": "HD2024.zip",
+    "timestamp": "2026-03-20T02:42:34.101831"
+  },
+  "IC:2000": {
+    "status": "downloaded",
+    "filename": "IC2000.zip",
+    "timestamp": "2026-03-20T02:42:36.354041"
+  },
+  "IC:2001": {
+    "status": "downloaded",
+    "filename": "IC2001.zip",
+    "timestamp": "2026-03-20T02:42:38.731177"
+  },
+  "IC:2002": {
+    "status": "downloaded",
+    "filename": "IC2002.zip",
+    "timestamp": "2026-03-20T02:42:41.296056"
+  },
+  "IC:2003": {
+    "status": "downloaded",
+    "filename": "IC2003.zip",
+    "timestamp": "2026-03-20T02:42:43.699067"
+  },
+  "IC:2004": {
+    "status": "downloaded",
+    "filename": "IC2004.zip",
+    "timestamp": "2026-03-20T02:42:46.384698"
+  },
+  "IC:2005": {
+    "status": "downloaded",
+    "filename": "IC2005.zip",
+    "timestamp": "2026-03-20T02:42:48.755912"
+  },
+  "IC:2006": {
+    "status": "downloaded",
+    "filename": "IC2006.zip",
+    "timestamp": "2026-03-20T02:42:51.265876"
+  },
+  "IC:2007": {
+    "status": "downloaded",
+    "filename": "IC2007.zip",
+    "timestamp": "2026-03-20T02:42:53.655372"
+  },
+  "IC:2008": {
+    "status": "downloaded",
+    "filename": "IC2008.zip",
+    "timestamp": "2026-03-20T02:42:56.242797"
+  },
+  "IC:2009": {
+    "status": "downloaded",
+    "filename": "IC2009.zip",
+    "timestamp": "2026-03-20T02:42:58.818952"
+  },
+  "IC:2010": {
+    "status": "downloaded",
+    "filename": "IC2010.zip",
+    "timestamp": "2026-03-20T02:43:01.577418"
+  },
+  "IC:2011": {
+    "status": "downloaded",
+    "filename": "IC2011.zip",
+    "timestamp": "2026-03-20T02:43:04.750380"
+  },
+  "IC:2012": {
+    "status": "downloaded",
+    "filename": "IC2012.zip",
+    "timestamp": "2026-03-20T02:43:07.812312"
+  },
+  "IC:2013": {
+    "status": "downloaded",
+    "filename": "IC2013.zip",
+    "timestamp": "2026-03-20T02:43:11.176732"
+  },
+  "IC:2014": {
+    "status": "downloaded",
+    "filename": "IC2014.zip",
+    "timestamp": "2026-03-20T02:43:13.534714"
+  },
+  "IC:2015": {
+    "status": "downloaded",
+    "filename": "IC2015.zip",
+    "timestamp": "2026-03-20T02:43:15.881848"
+  },
+  "IC:2016": {
+    "status": "downloaded",
+    "filename": "IC2016.zip",
+    "timestamp": "2026-03-20T02:43:18.232734"
+  },
+  "IC:2017": {
+    "status": "downloaded",
+    "filename": "IC2017.zip",
+    "timestamp": "2026-03-20T02:43:21.609747"
+  },
+  "IC:2018": {
+    "status": "downloaded",
+    "filename": "IC2018.zip",
+    "timestamp": "2026-03-20T02:43:24.254358"
+  },
+  "IC:2019": {
+    "status": "downloaded",
+    "filename": "IC2019.zip",
+    "timestamp": "2026-03-20T02:43:26.657189"
+  },
+  "IC:2020": {
+    "status": "downloaded",
+    "filename": "IC2020.zip",
+    "timestamp": "2026-03-20T02:43:30.114637"
+  },
+  "IC:2021": {
+    "status": "downloaded",
+    "filename": "IC2021.zip",
+    "timestamp": "2026-03-20T02:43:32.751939"
+  },
+  "IC:2024": {
+    "status": "downloaded",
+    "filename": "IC2024.zip",
+    "timestamp": "2026-03-20T02:43:35.011168"
+  },
+  "IC_AY:2000": {
+    "status": "downloaded",
+    "filename": "IC2000_AY.zip",
+    "timestamp": "2026-03-20T02:43:37.764448"
+  },
+  "IC_AY:2001": {
+    "status": "downloaded",
+    "filename": "IC2001_AY.zip",
+    "timestamp": "2026-03-20T02:43:40.128583"
+  },
+  "IC_AY:2002": {
+    "status": "downloaded",
+    "filename": "IC2002_AY.zip",
+    "timestamp": "2026-03-20T02:43:42.554413"
+  },
+  "IC_AY:2003": {
+    "status": "downloaded",
+    "filename": "IC2003_AY.zip",
+    "timestamp": "2026-03-20T02:43:45.197240"
+  },
+  "IC_AY:2004": {
+    "status": "downloaded",
+    "filename": "IC2004_AY.zip",
+    "timestamp": "2026-03-20T02:43:47.653848"
+  },
+  "IC_AY:2005": {
+    "status": "downloaded",
+    "filename": "IC2005_AY.zip",
+    "timestamp": "2026-03-20T02:43:50.050796"
+  },
+  "IC_AY:2006": {
+    "status": "downloaded",
+    "filename": "IC2006_AY.zip",
+    "timestamp": "2026-03-20T02:43:52.740388"
+  },
+  "IC_AY:2007": {
+    "status": "downloaded",
+    "filename": "IC2007_AY.zip",
+    "timestamp": "2026-03-20T02:43:55.127765"
+  },
+  "IC_AY:2008": {
+    "status": "downloaded",
+    "filename": "IC2008_AY.zip",
+    "timestamp": "2026-03-20T02:43:57.690500"
+  },
+  "IC_AY:2009": {
+    "status": "downloaded",
+    "filename": "IC2009_AY.zip",
+    "timestamp": "2026-03-20T02:44:00.291157"
+  },
+  "IC_AY:2010": {
+    "status": "downloaded",
+    "filename": "IC2010_AY.zip",
+    "timestamp": "2026-03-20T02:44:03.903496"
+  },
+  "IC_AY:2011": {
+    "status": "downloaded",
+    "filename": "IC2011_AY.zip",
+    "timestamp": "2026-03-20T02:44:07.540104"
+  },
+  "IC_AY:2012": {
+    "status": "downloaded",
+    "filename": "IC2012_AY.zip",
+    "timestamp": "2026-03-20T02:44:10.221966"
+  },
+  "IC_AY:2013": {
+    "status": "downloaded",
+    "filename": "IC2013_AY.zip",
+    "timestamp": "2026-03-20T02:44:12.642985"
+  },
+  "IC_AY:2014": {
+    "status": "downloaded",
+    "filename": "IC2014_AY.zip",
+    "timestamp": "2026-03-20T02:44:15.064595"
+  },
+  "IC_AY:2015": {
+    "status": "downloaded",
+    "filename": "IC2015_AY.zip",
+    "timestamp": "2026-03-20T02:44:17.747028"
+  },
+  "IC_AY:2016": {
+    "status": "downloaded",
+    "filename": "IC2016_AY.zip",
+    "timestamp": "2026-03-20T02:44:20.151234"
+  },
+  "IC_AY:2017": {
+    "status": "downloaded",
+    "filename": "IC2017_AY.zip",
+    "timestamp": "2026-03-20T02:44:22.569848"
+  },
+  "IC_AY:2018": {
+    "status": "downloaded",
+    "filename": "IC2018_AY.zip",
+    "timestamp": "2026-03-20T02:44:24.940191"
+  },
+  "IC_AY:2019": {
+    "status": "downloaded",
+    "filename": "IC2019_AY.zip",
+    "timestamp": "2026-03-20T02:44:27.631826"
+  },
+  "IC_AY:2020": {
+    "status": "downloaded",
+    "filename": "IC2020_AY.zip",
+    "timestamp": "2026-03-20T02:44:30.131778"
+  },
+  "IC_AY:2021": {
+    "status": "downloaded",
+    "filename": "IC2021_AY.zip",
+    "timestamp": "2026-03-20T02:44:32.583356"
+  },
+  "IC_AY:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:44:35.503332"
+  },
+  "EF_A:2000": {
+    "status": "downloaded",
+    "filename": "EF2000A.zip",
+    "timestamp": "2026-03-20T02:44:39.109400"
+  },
+  "EF_A:2001": {
+    "status": "downloaded",
+    "filename": "EF2001A.zip",
+    "timestamp": "2026-03-20T02:44:42.565699"
+  },
+  "EF_A:2002": {
+    "status": "downloaded",
+    "filename": "EF2002A.zip",
+    "timestamp": "2026-03-20T02:44:47.911946"
+  },
+  "EF_A:2003": {
+    "status": "downloaded",
+    "filename": "EF2003A.zip",
+    "timestamp": "2026-03-20T02:44:51.298581"
+  },
+  "EF_A:2004": {
+    "status": "downloaded",
+    "filename": "EF2004A.zip",
+    "timestamp": "2026-03-20T02:44:57.312611"
+  },
+  "EF_A:2005": {
+    "status": "downloaded",
+    "filename": "EF2005A.zip",
+    "timestamp": "2026-03-20T02:45:05.342584"
+  },
+  "EF_A:2006": {
+    "status": "downloaded",
+    "filename": "EF2006A.zip",
+    "timestamp": "2026-03-20T02:45:13.003009"
+  },
+  "EF_A:2007": {
+    "status": "downloaded",
+    "filename": "EF2007A.zip",
+    "timestamp": "2026-03-20T02:45:21.145017"
+  },
+  "EF_A:2008": {
+    "status": "downloaded",
+    "filename": "EF2008A.zip",
+    "timestamp": "2026-03-20T02:45:28.922971"
+  },
+  "EF_A:2009": {
+    "status": "downloaded",
+    "filename": "EF2009A.zip",
+    "timestamp": "2026-03-20T02:45:38.876954"
+  },
+  "EF_A:2010": {
+    "status": "downloaded",
+    "filename": "EF2010A.zip",
+    "timestamp": "2026-03-20T02:45:54.077605"
+  },
+  "EF_A:2011": {
+    "status": "downloaded",
+    "filename": "EF2011A.zip",
+    "timestamp": "2026-03-20T02:46:00.756590"
+  },
+  "EF_A:2012": {
+    "status": "downloaded",
+    "filename": "EF2012A.zip",
+    "timestamp": "2026-03-20T02:46:11.253962"
+  },
+  "EF_A:2013": {
+    "status": "downloaded",
+    "filename": "EF2013A.zip",
+    "timestamp": "2026-03-20T02:46:19.512365"
+  },
+  "EF_A:2014": {
+    "status": "downloaded",
+    "filename": "EF2014A.zip",
+    "timestamp": "2026-03-20T02:46:28.111984"
+  },
+  "EF_A:2015": {
+    "status": "downloaded",
+    "filename": "EF2015A.zip",
+    "timestamp": "2026-03-20T02:46:37.418757"
+  },
+  "EF_A:2016": {
+    "status": "downloaded",
+    "filename": "EF2016A.zip",
+    "timestamp": "2026-03-20T02:46:44.896856"
+  },
+  "EF_A:2017": {
+    "status": "downloaded",
+    "filename": "EF2017A.zip",
+    "timestamp": "2026-03-20T02:46:52.141864"
+  },
+  "EF_A:2018": {
+    "status": "downloaded",
+    "filename": "EF2018A.zip",
+    "timestamp": "2026-03-20T02:46:59.587855"
+  },
+  "EF_A:2019": {
+    "status": "downloaded",
+    "filename": "EF2019A.zip",
+    "timestamp": "2026-03-20T02:47:04.891605"
+  },
+  "EF_A:2020": {
+    "status": "downloaded",
+    "filename": "EF2020A.zip",
+    "timestamp": "2026-03-20T02:47:15.210259"
+  },
+  "EF_A:2021": {
+    "status": "downloaded",
+    "filename": "EF2021A.zip",
+    "timestamp": "2026-03-20T02:47:20.108872"
+  },
+  "EF_A:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:47:23.335979"
+  },
+  "EF_B:2000": {
+    "status": "downloaded",
+    "filename": "EF2000B.zip",
+    "timestamp": "2026-03-20T02:47:25.697931"
+  },
+  "EF_B:2001": {
+    "status": "downloaded",
+    "filename": "EF2001B.zip",
+    "timestamp": "2026-03-20T02:47:29.009214"
+  },
+  "EF_B:2002": {
+    "status": "downloaded",
+    "filename": "EF2002B.zip",
+    "timestamp": "2026-03-20T02:47:33.174210"
+  },
+  "EF_B:2003": {
+    "status": "downloaded",
+    "filename": "EF2003B.zip",
+    "timestamp": "2026-03-20T02:47:37.869907"
+  },
+  "EF_B:2004": {
+    "status": "downloaded",
+    "filename": "EF2004B.zip",
+    "timestamp": "2026-03-20T02:47:45.320458"
+  },
+  "EF_B:2005": {
+    "status": "downloaded",
+    "filename": "EF2005B.zip",
+    "timestamp": "2026-03-20T02:47:50.287767"
+  },
+  "EF_B:2006": {
+    "status": "downloaded",
+    "filename": "EF2006B.zip",
+    "timestamp": "2026-03-20T02:47:56.657516"
+  },
+  "EF_B:2007": {
+    "status": "downloaded",
+    "filename": "EF2007B.zip",
+    "timestamp": "2026-03-20T02:48:02.415447"
+  },
+  "EF_B:2008": {
+    "status": "downloaded",
+    "filename": "EF2008B.zip",
+    "timestamp": "2026-03-20T02:48:08.011855"
+  },
+  "EF_B:2009": {
+    "status": "downloaded",
+    "filename": "EF2009B.zip",
+    "timestamp": "2026-03-20T02:48:15.027072"
+  },
+  "EF_B:2010": {
+    "status": "downloaded",
+    "filename": "EF2010B.zip",
+    "timestamp": "2026-03-20T02:48:18.845182"
+  },
+  "EF_B:2011": {
+    "status": "downloaded",
+    "filename": "EF2011B.zip",
+    "timestamp": "2026-03-20T02:48:24.162814"
+  },
+  "EF_B:2012": {
+    "status": "downloaded",
+    "filename": "EF2012B.zip",
+    "timestamp": "2026-03-20T02:48:30.481252"
+  },
+  "EF_B:2013": {
+    "status": "downloaded",
+    "filename": "EF2013B.zip",
+    "timestamp": "2026-03-20T02:48:39.026815"
+  },
+  "EF_B:2014": {
+    "status": "downloaded",
+    "filename": "EF2014B.zip",
+    "timestamp": "2026-03-20T02:48:44.736625"
+  },
+  "EF_B:2015": {
+    "status": "downloaded",
+    "filename": "EF2015B.zip",
+    "timestamp": "2026-03-20T02:48:51.162173"
+  },
+  "EF_B:2016": {
+    "status": "downloaded",
+    "filename": "EF2016B.zip",
+    "timestamp": "2026-03-20T02:48:54.547573"
+  },
+  "EF_B:2017": {
+    "status": "downloaded",
+    "filename": "EF2017B.zip",
+    "timestamp": "2026-03-20T02:48:59.684158"
+  },
+  "EF_B:2018": {
+    "status": "downloaded",
+    "filename": "EF2018B.zip",
+    "timestamp": "2026-03-20T02:49:03.189566"
+  },
+  "EF_B:2019": {
+    "status": "downloaded",
+    "filename": "EF2019B.zip",
+    "timestamp": "2026-03-20T02:49:08.474326"
+  },
+  "EF_B:2020": {
+    "status": "downloaded",
+    "filename": "EF2020B.zip",
+    "timestamp": "2026-03-20T02:49:12.835828"
+  },
+  "EF_B:2021": {
+    "status": "downloaded",
+    "filename": "EF2021B.zip",
+    "timestamp": "2026-03-20T02:49:18.899413"
+  },
+  "EF_B:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:21.139825"
+  },
+  "EF_C:2000": {
+    "status": "downloaded",
+    "filename": "EF2000C.zip",
+    "timestamp": "2026-03-20T02:49:23.516167"
+  },
+  "EF_C:2001": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:25.017860"
+  },
+  "EF_C:2002": {
+    "status": "downloaded",
+    "filename": "EF2002C.zip",
+    "timestamp": "2026-03-20T02:49:27.359858"
+  },
+  "EF_C:2003": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:28.862980"
+  },
+  "EF_C:2004": {
+    "status": "downloaded",
+    "filename": "EF2004C.zip",
+    "timestamp": "2026-03-20T02:49:31.589265"
+  },
+  "EF_C:2005": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:33.092987"
+  },
+  "EF_C:2006": {
+    "status": "downloaded",
+    "filename": "EF2006C.zip",
+    "timestamp": "2026-03-20T02:49:35.940119"
+  },
+  "EF_C:2007": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:37.443583"
+  },
+  "EF_C:2008": {
+    "status": "downloaded",
+    "filename": "EF2008C.zip",
+    "timestamp": "2026-03-20T02:49:40.951718"
+  },
+  "EF_C:2009": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:42.453622"
+  },
+  "EF_C:2010": {
+    "status": "downloaded",
+    "filename": "EF2010C.zip",
+    "timestamp": "2026-03-20T02:49:45.297464"
+  },
+  "EF_C:2011": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:46.799525"
+  },
+  "EF_C:2012": {
+    "status": "downloaded",
+    "filename": "EF2012C.zip",
+    "timestamp": "2026-03-20T02:49:49.443036"
+  },
+  "EF_C:2013": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:50.944834"
+  },
+  "EF_C:2014": {
+    "status": "downloaded",
+    "filename": "EF2014C.zip",
+    "timestamp": "2026-03-20T02:49:53.712230"
+  },
+  "EF_C:2015": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:55.215707"
+  },
+  "EF_C:2016": {
+    "status": "downloaded",
+    "filename": "EF2016C.zip",
+    "timestamp": "2026-03-20T02:49:58.214079"
+  },
+  "EF_C:2017": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:49:59.716265"
+  },
+  "EF_C:2018": {
+    "status": "downloaded",
+    "filename": "EF2018C.zip",
+    "timestamp": "2026-03-20T02:50:03.046742"
+  },
+  "EF_C:2019": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:50:04.548343"
+  },
+  "EF_C:2020": {
+    "status": "downloaded",
+    "filename": "EF2020C.zip",
+    "timestamp": "2026-03-20T02:50:07.547726"
+  },
+  "EF_C:2021": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:50:09.050038"
+  },
+  "EF_C:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:50:12.449764"
+  },
+  "EF_D:2000": {
+    "status": "downloaded",
+    "filename": "EF2000D.zip",
+    "timestamp": "2026-03-20T02:50:14.762590"
+  },
+  "EF_D:2001": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:50:17.621427"
+  },
+  "EF_D:2002": {
+    "status": "downloaded",
+    "filename": "EF2002D.zip",
+    "timestamp": "2026-03-20T02:50:19.675161"
+  },
+  "EF_D:2003": {
+    "status": "downloaded",
+    "filename": "EF2003D.zip",
+    "timestamp": "2026-03-20T02:50:21.876834"
+  },
+  "EF_D:2004": {
+    "status": "downloaded",
+    "filename": "EF2004D.zip",
+    "timestamp": "2026-03-20T02:50:24.195035"
+  },
+  "EF_D:2005": {
+    "status": "downloaded",
+    "filename": "EF2005D.zip",
+    "timestamp": "2026-03-20T02:50:26.439095"
+  },
+  "EF_D:2006": {
+    "status": "downloaded",
+    "filename": "EF2006D.zip",
+    "timestamp": "2026-03-20T02:50:28.754869"
+  },
+  "EF_D:2007": {
+    "status": "downloaded",
+    "filename": "EF2007D.zip",
+    "timestamp": "2026-03-20T02:50:31.262562"
+  },
+  "EF_D:2008": {
+    "status": "downloaded",
+    "filename": "EF2008D.zip",
+    "timestamp": "2026-03-20T02:50:33.930144"
+  },
+  "EF_D:2009": {
+    "status": "downloaded",
+    "filename": "EF2009D.zip",
+    "timestamp": "2026-03-20T02:50:37.098816"
+  },
+  "EF_D:2010": {
+    "status": "downloaded",
+    "filename": "EF2010D.zip",
+    "timestamp": "2026-03-20T02:50:39.593610"
+  },
+  "EF_D:2011": {
+    "status": "downloaded",
+    "filename": "EF2011D.zip",
+    "timestamp": "2026-03-20T02:50:41.909352"
+  },
+  "EF_D:2012": {
+    "status": "downloaded",
+    "filename": "EF2012D.zip",
+    "timestamp": "2026-03-20T02:50:44.392324"
+  },
+  "EF_D:2013": {
+    "status": "downloaded",
+    "filename": "EF2013D.zip",
+    "timestamp": "2026-03-20T02:50:46.737494"
+  },
+  "EF_D:2014": {
+    "status": "downloaded",
+    "filename": "EF2014D.zip",
+    "timestamp": "2026-03-20T02:50:49.122111"
+  },
+  "EF_D:2015": {
+    "status": "downloaded",
+    "filename": "EF2015D.zip",
+    "timestamp": "2026-03-20T02:50:51.494258"
+  },
+  "EF_D:2016": {
+    "status": "downloaded",
+    "filename": "EF2016D.zip",
+    "timestamp": "2026-03-20T02:50:54.195347"
+  },
+  "EF_D:2017": {
+    "status": "downloaded",
+    "filename": "EF2017D.zip",
+    "timestamp": "2026-03-20T02:50:56.644882"
+  },
+  "EF_D:2018": {
+    "status": "downloaded",
+    "filename": "EF2018D.zip",
+    "timestamp": "2026-03-20T02:50:59.921388"
+  },
+  "EF_D:2019": {
+    "status": "downloaded",
+    "filename": "EF2019D.zip",
+    "timestamp": "2026-03-20T02:51:02.280428"
+  },
+  "EF_D:2020": {
+    "status": "downloaded",
+    "filename": "EF2020D.zip",
+    "timestamp": "2026-03-20T02:51:05.596247"
+  },
+  "EF_D:2021": {
+    "status": "downloaded",
+    "filename": "EF2021D.zip",
+    "timestamp": "2026-03-20T02:51:08.323853"
+  },
+  "EF_D:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:10.590738"
+  },
+  "ADM:2000": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:12.093288"
+  },
+  "ADM:2001": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:13.596890"
+  },
+  "ADM:2002": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:15.104277"
+  },
+  "ADM:2003": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:16.610038"
+  },
+  "ADM:2004": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:18.116125"
+  },
+  "ADM:2005": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:19.620552"
+  },
+  "ADM:2006": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:21.128199"
+  },
+  "ADM:2007": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:22.630390"
+  },
+  "ADM:2008": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:24.135476"
+  },
+  "ADM:2009": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:25.639970"
+  },
+  "ADM:2010": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:27.142309"
+  },
+  "ADM:2011": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:28.648662"
+  },
+  "ADM:2012": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:30.153139"
+  },
+  "ADM:2013": {
+    "status": "no_candidates",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:31.656045"
+  },
+  "ADM:2014": {
+    "status": "downloaded",
+    "filename": "ADM2014.zip",
+    "timestamp": "2026-03-20T02:51:34.329521"
+  },
+  "ADM:2015": {
+    "status": "downloaded",
+    "filename": "ADM2015.zip",
+    "timestamp": "2026-03-20T02:51:36.771283"
+  },
+  "ADM:2016": {
+    "status": "downloaded",
+    "filename": "ADM2016.zip",
+    "timestamp": "2026-03-20T02:51:39.262408"
+  },
+  "ADM:2017": {
+    "status": "downloaded",
+    "filename": "ADM2017.zip",
+    "timestamp": "2026-03-20T02:51:41.778418"
+  },
+  "ADM:2018": {
+    "status": "downloaded",
+    "filename": "ADM2018.zip",
+    "timestamp": "2026-03-20T02:51:44.577730"
+  },
+  "ADM:2019": {
+    "status": "downloaded",
+    "filename": "ADM2019.zip",
+    "timestamp": "2026-03-20T02:51:46.910365"
+  },
+  "ADM:2020": {
+    "status": "downloaded",
+    "filename": "ADM2020.zip",
+    "timestamp": "2026-03-20T02:51:49.268982"
+  },
+  "ADM:2021": {
+    "status": "downloaded",
+    "filename": "ADM2021.zip",
+    "timestamp": "2026-03-20T02:51:51.550850"
+  },
+  "ADM:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:51:54.289852"
+  },
+  "C:2000": {
+    "status": "downloaded",
+    "filename": "C2000_A.zip",
+    "timestamp": "2026-03-20T02:52:00.225619"
+  },
+  "C:2001": {
+    "status": "downloaded",
+    "filename": "C2001_A.zip",
+    "timestamp": "2026-03-20T02:52:03.623315"
+  },
+  "C:2002": {
+    "status": "downloaded",
+    "filename": "C2002_A.zip",
+    "timestamp": "2026-03-20T02:52:09.869574"
+  },
+  "C:2003": {
+    "status": "downloaded",
+    "filename": "C2003_A.zip",
+    "timestamp": "2026-03-20T02:52:15.382034"
+  },
+  "C:2004": {
+    "status": "downloaded",
+    "filename": "C2004_A.zip",
+    "timestamp": "2026-03-20T02:52:22.529930"
+  },
+  "C:2005": {
+    "status": "downloaded",
+    "filename": "C2005_A.zip",
+    "timestamp": "2026-03-20T02:52:29.629042"
+  },
+  "C:2006": {
+    "status": "downloaded",
+    "filename": "C2006_A.zip",
+    "timestamp": "2026-03-20T02:52:39.407121"
+  },
+  "C:2007": {
+    "status": "downloaded",
+    "filename": "C2007_A.zip",
+    "timestamp": "2026-03-20T02:52:47.101871"
+  },
+  "C:2008": {
+    "status": "downloaded",
+    "filename": "C2008_A.zip",
+    "timestamp": "2026-03-20T02:52:57.941575"
+  },
+  "C:2009": {
+    "status": "downloaded",
+    "filename": "C2009_A.zip",
+    "timestamp": "2026-03-20T02:53:11.011148"
+  },
+  "C:2010": {
+    "status": "downloaded",
+    "filename": "C2010_A.zip",
+    "timestamp": "2026-03-20T02:53:23.130197"
+  },
+  "C:2011": {
+    "status": "downloaded",
+    "filename": "C2011_A.zip",
+    "timestamp": "2026-03-20T02:53:29.493731"
+  },
+  "C:2012": {
+    "status": "downloaded",
+    "filename": "C2012_A.zip",
+    "timestamp": "2026-03-20T02:53:35.814157"
+  },
+  "C:2013": {
+    "status": "downloaded",
+    "filename": "C2013_A.zip",
+    "timestamp": "2026-03-20T02:53:42.954361"
+  },
+  "C:2014": {
+    "status": "downloaded",
+    "filename": "C2014_A.zip",
+    "timestamp": "2026-03-20T02:53:52.540425"
+  },
+  "C:2015": {
+    "status": "downloaded",
+    "filename": "C2015_A.zip",
+    "timestamp": "2026-03-20T02:54:03.204566"
+  },
+  "C:2016": {
+    "status": "downloaded",
+    "filename": "C2016_A.zip",
+    "timestamp": "2026-03-20T02:54:12.946858"
+  },
+  "C:2017": {
+    "status": "downloaded",
+    "filename": "C2017_A.zip",
+    "timestamp": "2026-03-20T02:54:29.202838"
+  },
+  "C:2018": {
+    "status": "downloaded",
+    "filename": "C2018_A.zip",
+    "timestamp": "2026-03-20T02:54:36.958801"
+  },
+  "C:2019": {
+    "status": "downloaded",
+    "filename": "C2019_A.zip",
+    "timestamp": "2026-03-20T02:54:44.785723"
+  },
+  "C:2020": {
+    "status": "downloaded",
+    "filename": "C2020_A.zip",
+    "timestamp": "2026-03-20T02:54:51.931033"
+  },
+  "C:2021": {
+    "status": "downloaded",
+    "filename": "C2021_A.zip",
+    "timestamp": "2026-03-20T02:54:59.503817"
+  },
+  "C:2024": {
+    "status": "downloaded",
+    "filename": "C2024_A.zip",
+    "timestamp": "2026-03-20T02:55:04.852663"
+  },
+  "GR:2000": {
+    "status": "downloaded",
+    "filename": "GR2000.zip",
+    "timestamp": "2026-03-20T02:55:07.330598"
+  },
+  "GR:2001": {
+    "status": "downloaded",
+    "filename": "GR2001.zip",
+    "timestamp": "2026-03-20T02:55:09.987368"
+  },
+  "GR:2002": {
+    "status": "downloaded",
+    "filename": "GR2002.zip",
+    "timestamp": "2026-03-20T02:55:12.860188"
+  },
+  "GR:2003": {
+    "status": "downloaded",
+    "filename": "GR2003.zip",
+    "timestamp": "2026-03-20T02:55:15.522624"
+  },
+  "GR:2004": {
+    "status": "downloaded",
+    "filename": "GR2004.zip",
+    "timestamp": "2026-03-20T02:55:18.488101"
+  },
+  "GR:2005": {
+    "status": "downloaded",
+    "filename": "GR2005.zip",
+    "timestamp": "2026-03-20T02:55:21.454926"
+  },
+  "GR:2006": {
+    "status": "downloaded",
+    "filename": "GR2006.zip",
+    "timestamp": "2026-03-20T02:55:24.838186"
+  },
+  "GR:2007": {
+    "status": "downloaded",
+    "filename": "GR2007.zip",
+    "timestamp": "2026-03-20T02:55:29.254194"
+  },
+  "GR:2008": {
+    "status": "downloaded",
+    "filename": "GR2008.zip",
+    "timestamp": "2026-03-20T02:55:33.109112"
+  },
+  "GR:2009": {
+    "status": "downloaded",
+    "filename": "GR2009.zip",
+    "timestamp": "2026-03-20T02:55:37.560158"
+  },
+  "GR:2010": {
+    "status": "downloaded",
+    "filename": "GR2010.zip",
+    "timestamp": "2026-03-20T02:55:41.318385"
+  },
+  "GR:2011": {
+    "status": "downloaded",
+    "filename": "GR2011.zip",
+    "timestamp": "2026-03-20T02:55:44.846649"
+  },
+  "GR:2012": {
+    "status": "downloaded",
+    "filename": "GR2012.zip",
+    "timestamp": "2026-03-20T02:55:50.397437"
+  },
+  "GR:2013": {
+    "status": "downloaded",
+    "filename": "GR2013.zip",
+    "timestamp": "2026-03-20T02:55:53.753384"
+  },
+  "GR:2014": {
+    "status": "downloaded",
+    "filename": "GR2014.zip",
+    "timestamp": "2026-03-20T02:55:57.445837"
+  },
+  "GR:2015": {
+    "status": "downloaded",
+    "filename": "GR2015.zip",
+    "timestamp": "2026-03-20T02:56:03.052984"
+  },
+  "GR:2016": {
+    "status": "downloaded",
+    "filename": "GR2016.zip",
+    "timestamp": "2026-03-20T02:56:09.517509"
+  },
+  "GR:2017": {
+    "status": "downloaded",
+    "filename": "GR2017.zip",
+    "timestamp": "2026-03-20T02:56:13.247557"
+  },
+  "GR:2018": {
+    "status": "downloaded",
+    "filename": "GR2018.zip",
+    "timestamp": "2026-03-20T02:56:18.865095"
+  },
+  "GR:2019": {
+    "status": "downloaded",
+    "filename": "GR2019.zip",
+    "timestamp": "2026-03-20T02:56:21.949788"
+  },
+  "GR:2020": {
+    "status": "downloaded",
+    "filename": "GR2020.zip",
+    "timestamp": "2026-03-20T02:56:26.066627"
+  },
+  "GR:2021": {
+    "status": "downloaded",
+    "filename": "GR2021.zip",
+    "timestamp": "2026-03-20T02:56:32.595787"
+  },
+  "GR:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:56:35.786357"
+  },
+  "SFA:2000": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:56:38.400745"
+  },
+  "SFA:2001": {
+    "status": "downloaded",
+    "filename": "SFA0102.zip",
+    "timestamp": "2026-03-20T02:56:40.828407"
+  },
+  "SFA:2002": {
+    "status": "downloaded",
+    "filename": "SFA0203.zip",
+    "timestamp": "2026-03-20T02:56:43.725065"
+  },
+  "SFA:2003": {
+    "status": "downloaded",
+    "filename": "SFA0304.zip",
+    "timestamp": "2026-03-20T02:56:46.267083"
+  },
+  "SFA:2004": {
+    "status": "downloaded",
+    "filename": "SFA0405.zip",
+    "timestamp": "2026-03-20T02:56:49.814106"
+  },
+  "SFA:2005": {
+    "status": "downloaded",
+    "filename": "SFA0506.zip",
+    "timestamp": "2026-03-20T02:56:52.476518"
+  },
+  "SFA:2006": {
+    "status": "downloaded",
+    "filename": "SFA0607.zip",
+    "timestamp": "2026-03-20T02:56:56.129131"
+  },
+  "SFA:2007": {
+    "status": "downloaded",
+    "filename": "SFA0708.zip",
+    "timestamp": "2026-03-20T02:56:59.061016"
+  },
+  "SFA:2008": {
+    "status": "downloaded",
+    "filename": "SFA0809.zip",
+    "timestamp": "2026-03-20T02:57:03.552441"
+  },
+  "SFA:2009": {
+    "status": "downloaded",
+    "filename": "SFA0910.zip",
+    "timestamp": "2026-03-20T02:57:09.300187"
+  },
+  "SFA:2010": {
+    "status": "downloaded",
+    "filename": "SFA1011.zip",
+    "timestamp": "2026-03-20T02:57:14.135388"
+  },
+  "SFA:2011": {
+    "status": "downloaded",
+    "filename": "SFA1112.zip",
+    "timestamp": "2026-03-20T02:57:21.071344"
+  },
+  "SFA:2012": {
+    "status": "downloaded",
+    "filename": "SFA1213.zip",
+    "timestamp": "2026-03-20T02:57:28.462221"
+  },
+  "SFA:2013": {
+    "status": "downloaded",
+    "filename": "SFA1314.zip",
+    "timestamp": "2026-03-20T02:57:35.226369"
+  },
+  "SFA:2014": {
+    "status": "downloaded",
+    "filename": "SFA1415.zip",
+    "timestamp": "2026-03-20T02:57:41.465687"
+  },
+  "SFA:2015": {
+    "status": "downloaded",
+    "filename": "SFA1516.zip",
+    "timestamp": "2026-03-20T02:57:45.702841"
+  },
+  "SFA:2016": {
+    "status": "downloaded",
+    "filename": "SFA1617.zip",
+    "timestamp": "2026-03-20T02:57:50.013544"
+  },
+  "SFA:2017": {
+    "status": "downloaded",
+    "filename": "SFA1718.zip",
+    "timestamp": "2026-03-20T02:57:54.661946"
+  },
+  "SFA:2018": {
+    "status": "downloaded",
+    "filename": "SFA1819.zip",
+    "timestamp": "2026-03-20T02:58:00.258709"
+  },
+  "SFA:2019": {
+    "status": "downloaded",
+    "filename": "SFA1920.zip",
+    "timestamp": "2026-03-20T02:58:05.697712"
+  },
+  "SFA:2020": {
+    "status": "downloaded",
+    "filename": "SFA2021.zip",
+    "timestamp": "2026-03-20T02:58:09.540866"
+  },
+  "SFA:2021": {
+    "status": "downloaded",
+    "filename": "SFA2122.zip",
+    "timestamp": "2026-03-20T02:58:13.367449"
+  },
+  "SFA:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:58:19.415521"
+  },
+  "F_FASB:2000": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:58:23.033515"
+  },
+  "F_FASB:2001": {
+    "status": "downloaded",
+    "filename": "F0102_F1A.zip",
+    "timestamp": "2026-03-20T02:58:26.549377"
+  },
+  "F_FASB:2002": {
+    "status": "downloaded",
+    "filename": "F0203_F1A.zip",
+    "timestamp": "2026-03-20T02:58:29.220701"
+  },
+  "F_FASB:2003": {
+    "status": "downloaded",
+    "filename": "F0304_F1A.zip",
+    "timestamp": "2026-03-20T02:58:33.723731"
+  },
+  "F_FASB:2004": {
+    "status": "downloaded",
+    "filename": "F0405_F1A.zip",
+    "timestamp": "2026-03-20T02:58:38.093103"
+  },
+  "F_FASB:2005": {
+    "status": "downloaded",
+    "filename": "F0506_F1A.zip",
+    "timestamp": "2026-03-20T02:58:41.106970"
+  },
+  "F_FASB:2006": {
+    "status": "downloaded",
+    "filename": "F0607_F1A.zip",
+    "timestamp": "2026-03-20T02:58:44.181495"
+  },
+  "F_FASB:2007": {
+    "status": "downloaded",
+    "filename": "F0708_F1A.zip",
+    "timestamp": "2026-03-20T02:58:47.655418"
+  },
+  "F_FASB:2008": {
+    "status": "downloaded",
+    "filename": "F0809_F1A.zip",
+    "timestamp": "2026-03-20T02:58:54.466636"
+  },
+  "F_FASB:2009": {
+    "status": "downloaded",
+    "filename": "F0910_F1A.zip",
+    "timestamp": "2026-03-20T02:58:58.035609"
+  },
+  "F_FASB:2010": {
+    "status": "downloaded",
+    "filename": "F1011_F1A.zip",
+    "timestamp": "2026-03-20T02:59:03.263331"
+  },
+  "F_FASB:2011": {
+    "status": "downloaded",
+    "filename": "F1112_F1A.zip",
+    "timestamp": "2026-03-20T02:59:07.413850"
+  },
+  "F_FASB:2012": {
+    "status": "downloaded",
+    "filename": "F1213_F1A.zip",
+    "timestamp": "2026-03-20T02:59:12.553682"
+  },
+  "F_FASB:2013": {
+    "status": "downloaded",
+    "filename": "F1314_F1A.zip",
+    "timestamp": "2026-03-20T02:59:15.941004"
+  },
+  "F_FASB:2014": {
+    "status": "downloaded",
+    "filename": "F1415_F1A.zip",
+    "timestamp": "2026-03-20T02:59:20.620678"
+  },
+  "F_FASB:2015": {
+    "status": "downloaded",
+    "filename": "F1516_F1A.zip",
+    "timestamp": "2026-03-20T02:59:24.172901"
+  },
+  "F_FASB:2016": {
+    "status": "downloaded",
+    "filename": "F1617_F1A.zip",
+    "timestamp": "2026-03-20T02:59:28.766640"
+  },
+  "F_FASB:2017": {
+    "status": "downloaded",
+    "filename": "F1718_F1A.zip",
+    "timestamp": "2026-03-20T02:59:31.776558"
+  },
+  "F_FASB:2018": {
+    "status": "downloaded",
+    "filename": "F1819_F1A.zip",
+    "timestamp": "2026-03-20T02:59:35.908591"
+  },
+  "F_FASB:2019": {
+    "status": "downloaded",
+    "filename": "F1920_F1A.zip",
+    "timestamp": "2026-03-20T02:59:39.284744"
+  },
+  "F_FASB:2020": {
+    "status": "downloaded",
+    "filename": "F2021_F1A.zip",
+    "timestamp": "2026-03-20T02:59:43.800484"
+  },
+  "F_FASB:2021": {
+    "status": "downloaded",
+    "filename": "F2122_F1A.zip",
+    "timestamp": "2026-03-20T02:59:46.781555"
+  },
+  "F_FASB:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T02:59:52.249482"
+  },
+  "F_GASB:2000": {
+    "status": "downloaded",
+    "filename": "F0001_F2.zip",
+    "timestamp": "2026-03-20T02:59:55.581972"
+  },
+  "F_GASB:2001": {
+    "status": "downloaded",
+    "filename": "F0102_F2.zip",
+    "timestamp": "2026-03-20T02:59:58.684328"
+  },
+  "F_GASB:2002": {
+    "status": "downloaded",
+    "filename": "F0203_F2.zip",
+    "timestamp": "2026-03-20T03:00:01.313648"
+  },
+  "F_GASB:2003": {
+    "status": "downloaded",
+    "filename": "F0304_F2.zip",
+    "timestamp": "2026-03-20T03:00:04.157845"
+  },
+  "F_GASB:2004": {
+    "status": "downloaded",
+    "filename": "F0405_F2.zip",
+    "timestamp": "2026-03-20T03:00:07.395086"
+  },
+  "F_GASB:2005": {
+    "status": "downloaded",
+    "filename": "F0506_F2.zip",
+    "timestamp": "2026-03-20T03:00:11.649711"
+  },
+  "F_GASB:2006": {
+    "status": "downloaded",
+    "filename": "F0607_F2.zip",
+    "timestamp": "2026-03-20T03:00:14.471920"
+  },
+  "F_GASB:2007": {
+    "status": "downloaded",
+    "filename": "F0708_F2.zip",
+    "timestamp": "2026-03-20T03:00:18.294029"
+  },
+  "F_GASB:2008": {
+    "status": "downloaded",
+    "filename": "F0809_F2.zip",
+    "timestamp": "2026-03-20T03:00:21.313761"
+  },
+  "F_GASB:2009": {
+    "status": "downloaded",
+    "filename": "F0910_F2.zip",
+    "timestamp": "2026-03-20T03:00:24.229326"
+  },
+  "F_GASB:2010": {
+    "status": "downloaded",
+    "filename": "F1011_F2.zip",
+    "timestamp": "2026-03-20T03:00:27.306824"
+  },
+  "F_GASB:2011": {
+    "status": "downloaded",
+    "filename": "F1112_F2.zip",
+    "timestamp": "2026-03-20T03:00:31.177104"
+  },
+  "F_GASB:2012": {
+    "status": "downloaded",
+    "filename": "F1213_F2.zip",
+    "timestamp": "2026-03-20T03:00:34.433240"
+  },
+  "F_GASB:2013": {
+    "status": "downloaded",
+    "filename": "F1314_F2.zip",
+    "timestamp": "2026-03-20T03:00:37.596985"
+  },
+  "F_GASB:2014": {
+    "status": "downloaded",
+    "filename": "F1415_F2.zip",
+    "timestamp": "2026-03-20T03:00:42.603377"
+  },
+  "F_GASB:2015": {
+    "status": "downloaded",
+    "filename": "F1516_F2.zip",
+    "timestamp": "2026-03-20T03:00:46.511347"
+  },
+  "F_GASB:2016": {
+    "status": "downloaded",
+    "filename": "F1617_F2.zip",
+    "timestamp": "2026-03-20T03:00:49.724814"
+  },
+  "F_GASB:2017": {
+    "status": "downloaded",
+    "filename": "F1718_F2.zip",
+    "timestamp": "2026-03-20T03:00:52.316794"
+  },
+  "F_GASB:2018": {
+    "status": "downloaded",
+    "filename": "F1819_F2.zip",
+    "timestamp": "2026-03-20T03:00:55.825800"
+  },
+  "F_GASB:2019": {
+    "status": "downloaded",
+    "filename": "F1920_F2.zip",
+    "timestamp": "2026-03-20T03:00:58.879941"
+  },
+  "F_GASB:2020": {
+    "status": "downloaded",
+    "filename": "F2021_F2.zip",
+    "timestamp": "2026-03-20T03:01:02.155558"
+  },
+  "F_GASB:2021": {
+    "status": "downloaded",
+    "filename": "F2122_F2.zip",
+    "timestamp": "2026-03-20T03:01:05.317726"
+  },
+  "F_GASB:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:11.857508"
+  },
+  "HR_SIS:2000": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:14.240541"
+  },
+  "HR_SIS:2001": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:16.569251"
+  },
+  "HR_SIS:2002": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:18.975678"
+  },
+  "HR_SIS:2003": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:21.892903"
+  },
+  "HR_SIS:2004": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:24.400102"
+  },
+  "HR_SIS:2005": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:27.729725"
+  },
+  "HR_SIS:2006": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:30.185721"
+  },
+  "HR_SIS:2007": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:32.511360"
+  },
+  "HR_SIS:2008": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:35.819259"
+  },
+  "HR_SIS:2009": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:38.211179"
+  },
+  "HR_SIS:2010": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:40.539241"
+  },
+  "HR_SIS:2011": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:01:42.870291"
+  },
+  "HR_SIS:2012": {
+    "status": "downloaded",
+    "filename": "S2012_SIS.zip",
+    "timestamp": "2026-03-20T03:01:45.248555"
+  },
+  "HR_SIS:2013": {
+    "status": "downloaded",
+    "filename": "S2013_SIS.zip",
+    "timestamp": "2026-03-20T03:01:47.568996"
+  },
+  "HR_SIS:2014": {
+    "status": "downloaded",
+    "filename": "S2014_SIS.zip",
+    "timestamp": "2026-03-20T03:01:49.941630"
+  },
+  "HR_SIS:2015": {
+    "status": "downloaded",
+    "filename": "S2015_SIS.zip",
+    "timestamp": "2026-03-20T03:01:52.489854"
+  },
+  "HR_SIS:2016": {
+    "status": "downloaded",
+    "filename": "S2016_SIS.zip",
+    "timestamp": "2026-03-20T03:01:55.014257"
+  },
+  "HR_SIS:2017": {
+    "status": "downloaded",
+    "filename": "S2017_SIS.zip",
+    "timestamp": "2026-03-20T03:01:57.782409"
+  },
+  "HR_SIS:2018": {
+    "status": "downloaded",
+    "filename": "S2018_SIS.zip",
+    "timestamp": "2026-03-20T03:02:00.345429"
+  },
+  "HR_SIS:2019": {
+    "status": "downloaded",
+    "filename": "S2019_SIS.zip",
+    "timestamp": "2026-03-20T03:02:03.688532"
+  },
+  "HR_SIS:2020": {
+    "status": "downloaded",
+    "filename": "S2020_SIS.zip",
+    "timestamp": "2026-03-20T03:02:06.207343"
+  },
+  "HR_SIS:2021": {
+    "status": "downloaded",
+    "filename": "S2021_SIS.zip",
+    "timestamp": "2026-03-20T03:02:08.571573"
+  },
+  "HR_SIS:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:10.850958"
+  },
+  "HR_SAL:2000": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:13.168641"
+  },
+  "HR_SAL:2001": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:15.480734"
+  },
+  "HR_SAL:2002": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:18.176093"
+  },
+  "HR_SAL:2003": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:20.875403"
+  },
+  "HR_SAL:2004": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:23.741671"
+  },
+  "HR_SAL:2005": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:26.747383"
+  },
+  "HR_SAL:2006": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:29.989577"
+  },
+  "HR_SAL:2007": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:32.651569"
+  },
+  "HR_SAL:2008": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:35.928336"
+  },
+  "HR_SAL:2009": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:38.626567"
+  },
+  "HR_SAL:2010": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:41.062806"
+  },
+  "HR_SAL:2011": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:02:44.120401"
+  },
+  "HR_SAL:2012": {
+    "status": "downloaded",
+    "filename": "SAL2012_IS.zip",
+    "timestamp": "2026-03-20T03:02:47.198829"
+  },
+  "HR_SAL:2013": {
+    "status": "downloaded",
+    "filename": "SAL2013_IS.zip",
+    "timestamp": "2026-03-20T03:02:50.873880"
+  },
+  "HR_SAL:2014": {
+    "status": "downloaded",
+    "filename": "SAL2014_IS.zip",
+    "timestamp": "2026-03-20T03:02:53.806957"
+  },
+  "HR_SAL:2015": {
+    "status": "downloaded",
+    "filename": "SAL2015_IS.zip",
+    "timestamp": "2026-03-20T03:02:56.675547"
+  },
+  "HR_SAL:2016": {
+    "status": "downloaded",
+    "filename": "SAL2016_IS.zip",
+    "timestamp": "2026-03-20T03:03:00.151547"
+  },
+  "HR_SAL:2017": {
+    "status": "downloaded",
+    "filename": "SAL2017_IS.zip",
+    "timestamp": "2026-03-20T03:03:03.766150"
+  },
+  "HR_SAL:2018": {
+    "status": "downloaded",
+    "filename": "SAL2018_IS.zip",
+    "timestamp": "2026-03-20T03:03:07.081122"
+  },
+  "HR_SAL:2019": {
+    "status": "downloaded",
+    "filename": "SAL2019_IS.zip",
+    "timestamp": "2026-03-20T03:03:13.139406"
+  },
+  "HR_SAL:2020": {
+    "status": "downloaded",
+    "filename": "SAL2020_IS.zip",
+    "timestamp": "2026-03-20T03:03:19.063265"
+  },
+  "HR_SAL:2021": {
+    "status": "downloaded",
+    "filename": "SAL2021_IS.zip",
+    "timestamp": "2026-03-20T03:03:22.243276"
+  },
+  "HR_SAL:2024": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-20T03:03:24.539747"
+  }
+}

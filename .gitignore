@@ -1,0 +1,32 @@
+# Database files — never commit; rebuild from source
+data/databases/*.db
+data/databases/*.db-wal
+data/databases/*.db-shm
+
+# Raw source data — too large for git
+data/raw/ipeds_csv/**/*.csv
+data/raw/ipeds_csv/**/*.zip
+data/raw/990_xml/
+data/raw/eada_csv/
+
+# Keep the manifest and log files
+!data/raw/ipeds_csv/manifest.json
+!data/raw/ipeds_csv/loader.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp
