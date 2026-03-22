@@ -174,7 +174,7 @@ The use cases above should inform every schema and data decision:
 
 4. **Institution master richness matters** — clean entity resolution is
    critical. "Babson," "Babson College," and "F.W. Olin Graduate School
-   of Business at Babson College" must all resolve to UNITID 164739.
+   of Business at Babson College" must all resolve to UNITID 164580.
    Common name aliases and system membership belong in institution_master.
 
 5. **The signal layer is not optional** — a `financial_health_signals`
@@ -377,8 +377,10 @@ XML e-filing is reliable from 2012 onward. Pre-2012 = PDFs only = different prob
 Effective 990 coverage: **FY2012–present** for most institutions.
 
 ### Current State
-- Babson College FY2023 loaded from CSV (sample data in `data/sample/`)
-- XML parser written but pipeline not yet run at scale
+- Babson College UNITID = **164580** (EIN 042103544) — primary spot-check institution
+- No sample data in `data/sample/` yet; 990 XML not yet ingested
+- XML parser not yet written; IRSx installed but IRS bulk XML downloads are
+  currently unavailable (see IRS 990 XML access issue below)
 - Target: 10+ institutions, FY2020–2024, before repo goes public
 
 ### Private Nonprofit Universe for 990
