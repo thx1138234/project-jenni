@@ -481,6 +481,12 @@ Document decisions here as they're made so they don't get relitigated.
 - No ORM — raw SQL and sqlite3 throughout
 - Public university GASB audited statements explicitly out of scope
   (PDF-only, no central repository, not machine-readable at scale)
+- **EF enrollment backfill (2000–2007) deferred**: `enrtot` is NULL for all
+  2000–2007 rows due to old NCES column schema (`efrace`-based totals, uppercase
+  column names pre-2008). The wedge use case (financial early warning, trend
+  analysis) requires 2008–present, giving 15+ years of longitudinal data —
+  sufficient for the core product. Pre-2008 enrollment is a backfill candidate;
+  defer until there is a specific analytical need.
 
 **Open:**
 - Hugging Face dataset publication — when and how
