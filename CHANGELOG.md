@@ -25,8 +25,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 | `ipeds_gr` | 106,234 | 2000–2023 | |
 | `ipeds_sfa` | 139,781 | 2001–2022 | AY 2023-24 not yet released |
 | `ipeds_finance` | 87,020 | 2000–2022 | 43,510 FASB + 43,510 GASB; AY 2023-24 not yet released |
-| `ipeds_hr` | 46,768 | 2012–2023 | HR files start 2012 on NCES |
-| **Total** | **6,660,353** | | |
+| `ipeds_hr` | 44,661 | 2012–2023 | HR files start 2012 on NCES; row count reduced from 46,768 after facstat fix |
+| **Total** | **6,658,246** | | |
 
 - IPEDS 2022 & 2023 initial build (before full range):
   - `institution_master`: 6,349 institutions (HD source, includes EIN + OPEID)
@@ -46,6 +46,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   with `reporting_framework`. Decision: accept both as loaded. The cross-sector
   comparison warnings in `docs/gasb_fasb_crosswalk.md` still apply.
   CLAUDE.md updated to reflect actual state.
+
+### Fixed — HR loader facstat filter (March 2026)
+- **`ft_instr_total` now correct for all years 2012–2023**: SIS file has one row
+  per institution × `facstat` (tenure-status category). Without a filter, upsert
+  on `(unitid, survey_year)` last-write-wins, storing whichever facstat row sorted
+  last in the CSV. This varied by institution and year as NCES added new codes
+  (44, 45 introduced in 2016), producing wrong values and spurious cliffs:
+  Harvard 104→11 (-89%) and Babson 44→1 (-98%) at the 2015→2016 transition.
+  MIT was consistently storing `facstat=50` (PT instructional) in `ft_instr_total`.
+  Fix: skip rows where `facstat.strip() != '10'`. `facstat=10` is the FT
+  instructional total summary row. Confirmed post-fix: Babson 187–203,
+  Harvard 2,130–2,156, MIT 996–1,024 — all stable with <5% YoY variation.
+  Full HR reload: 44,661 rows (2012–2023).
+- **`tests/test_schema_integrity.py` passes clean**: 0 failures, 3 warnings
+  (EF NULL enrtot in 2008/2010/2020, all ≤0.09%, within 1% threshold).
 
 ### Fixed — Finance field mapping (March 2026)
 - **FASB expense subtotals and net assets corrected**: F2E expense columns use
