@@ -472,6 +472,48 @@ and regression checks whenever the 990 schema or loader changes.
 All five have been verified against `institution_master` (name, state, control,
 EIN, OPEID all correct as of March 2026).
 
+### Finance Gut Check — Run After Any Finance Loader Change or Full Reload
+
+**FASB check (private nonprofits) — all five validation institutions:**
+
+```sql
+SELECT im.institution_name, f.survey_year, f.reporting_framework,
+       f.rev_total, f.exp_total, f.netassets_total,
+       f.assets_total, f.liab_total
+FROM institution_master im
+JOIN ipeds_finance f ON im.unitid = f.unitid
+WHERE im.unitid IN (164580, 164739, 164924, 166027, 166683)
+  AND f.survey_year = (SELECT MAX(survey_year) FROM ipeds_finance
+                       WHERE unitid = im.unitid)
+ORDER BY im.institution_name;
+```
+
+For each row, confirm:
+1. `reporting_framework = 'FASB'` — all five are private nonprofits; GASB here means a loader label bug
+2. `rev_total` is in the hundreds of millions (≥ $50M) — values in the thousands indicate wrong field mapping (e.g., mapping to a line item instead of a total)
+3. `exp_total` is in the hundreds of millions (≥ $50M) — same signal as rev_total
+4. `netassets_total` is positive and plausible (negative is a red flag; zero suggests NULL stored as 0)
+5. `assets_total > liab_total` — basic balance sheet sanity; reversal suggests wrong field mapping
+
+**GASB check (public institutions) — UCCS and Prairie View:**
+
+```sql
+SELECT im.institution_name, f.survey_year, f.reporting_framework,
+       f.rev_total, f.exp_total, f.netassets_total
+FROM institution_master im
+JOIN ipeds_finance f ON im.unitid = f.unitid
+WHERE im.unitid IN (126580, 227526)   -- UCCS, Prairie View A&M
+  AND f.survey_year = (SELECT MAX(survey_year) FROM ipeds_finance
+                       WHERE unitid = im.unitid)
+ORDER BY im.institution_name;
+```
+
+For each row, confirm:
+6. `reporting_framework = 'GASB'` — both are public; FASB here means a loader label bug
+   `rev_total` is in the hundreds of millions — UCCS ~$260M, Prairie View ~$343M as of 2022
+
+Running both checks together ensures FASB and GASB field mappings are validated every time.
+
 ---
 
 ## Active Decisions & Open Questions
