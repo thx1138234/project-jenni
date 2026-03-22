@@ -896,6 +896,15 @@ class HRLoader:
                 if not unitid:
                     continue
 
+                # SIS has one row per institution × facstat (tenure-status category).
+                # facstat=10 is the FT instructional total — the only row we want.
+                # Without this filter the upsert last-write-wins on (unitid, survey_year),
+                # storing whichever facstat row sorts last in the CSV (varies by year
+                # as NCES adds new codes), producing wrong and inconsistent values.
+                facstat = (raw.get("facstat") or "").strip()
+                if facstat != "10":
+                    continue
+
                 sal_data = sal_by_unitid.get(unitid, {})
                 sal_total = sal_data.get("sal")
                 sal_n     = sal_data.get("n")
