@@ -47,6 +47,46 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   comparison warnings in `docs/gasb_fasb_crosswalk.md` still apply.
   CLAUDE.md updated to reflect actual state.
 
+### Fixed — Finance field mapping (March 2026)
+- **FASB expense subtotals and net assets corrected**: F2E expense columns use
+  3-digit suffixes (`f2e011`…`f2e121`), not the 2-digit names previously mapped.
+  `exp_total` fixed to `f2b02`; `netassets_total` fixed to `f2b07`. Full reload.
+- **GASB revenue, expenses, and net position corrected**: `rev_total` was mapping
+  to `f1c02`/`f1b17` (wrong lines); fixed to `f1b25` (total operating revenues) with
+  `f1d01` fallback. Expense subtotals were mapped to F1D01–F1D06 (income statement
+  totals), not functional categories; fixed to F1C011–F1C191. `netassets_total`
+  fixed to `f1a18` (ending net position). `rev_state_approp` added (`f1b19`).
+  Full reload.
+- **find_csv fallback fixed**: fallback to first CSV alphabetically only fires when
+  no pattern hints are provided. Previously caused year-2000 GASB slot to load the
+  FASB file (no F1A file exists for 2000), creating 1,895 bad GASB rows. Fixed.
+- **Finance integrity test updated**: GASB/FASB equality check replaced with
+  "both present" check (equality was an artifact of the filename bug).
+  `EF_ENRTOT_NULL_KNOWN_YEARS` extended to 2000–2007. `VALIDATION_FINANCE_YEAR`
+  set to 2016 (most recent year all five validation institutions reported).
+
+#### Stratified spot check — 10 institutions, survey_year 2022 (March 2026)
+All 10 institutions confirmed clean after Finance field mapping fixes:
+
+| Institution | Type | FW | rev_total | exp_total | netassets | tuition |
+|---|---|---|---|---|---|---|
+| Univ of Colorado Colorado Springs | Public R2 | GASB | $259.7M | $258.9M | $270.0M | $111.5M |
+| Prairie View A&M University | Public R2 / HBCU | GASB | $343.4M | $301.2M | $768.0M | $58.7M |
+| Boston University | Private NP R1 | FASB | $2,836.2M | $2,421.6M | $5,652.3M | $1,343.9M |
+| Harvard University | Private NP R1 | FASB | $6,159.9M | $5,911.8M | $61,519.5M | $1,110.3M |
+| Claremont McKenna College | Private NP Lib Arts | FASB | $196.2M | $170.7M | $1,778.2M | $52.5M |
+| Wheaton College (IL) | Private NP Lib Arts | FASB | $178.6M | $134.6M | $862.5M | $55.4M |
+| Gonzaga University | Private NP Masters | FASB | $271.0M | $280.0M | $744.2M | $181.5M |
+| Robert Morris University | Private NP Masters | FASB | $109.8M | $120.3M | $143.5M | $59.3M |
+| Lone Star College System | Community College | GASB | $625.1M | $537.3M | $384.5M | $53.6M |
+| Spelman College | HBCU Lib Arts | FASB | $187.9M | $138.3M | $798.9M | $46.8M |
+
+- All `reporting_framework` labels match control type (public=GASB, private NP=FASB)
+- UCCS $259.7M and Prairie View $343.4M match post-fix expected values exactly
+- No negative values, no implausible outliers
+- `tests/test_schema_integrity.py` passes: 0 failures, 3 warnings (EF NULL enrtot
+  2008/2010/2020 all ≤0.09%, within 1% threshold)
+
 ### Fixed — EF loader and room & board (March 2026)
 - **EF enrollment totals now correct**: `_load_part_a` was filtering on
   `lstudy in ("", "1")` which missed the all-student aggregate row
