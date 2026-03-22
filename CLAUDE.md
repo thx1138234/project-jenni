@@ -448,6 +448,26 @@ join/filter patterns. Query them instead of writing raw joins each time:
 
 ---
 
+## Validation Institutions
+
+These five institutions are the primary validation set for the 990 pipeline
+and the financial stress signal layer. All are private nonprofits in MA with
+confirmed EINs in `institution_master`. Use them for spot checks, smoke tests,
+and regression checks whenever the 990 schema or loader changes.
+
+| Institution | UNITID | EIN |
+|---|---|---|
+| Babson College | 164580 | 042103544 |
+| Bentley University | 164739 | 041081650 |
+| Boston College | 164924 | 042103545 |
+| Harvard University | 166027 | 042103580 |
+| Massachusetts Institute of Technology | 166683 | 042103594 |
+
+All five have been verified against `institution_master` (name, state, control,
+EIN, OPEID all correct as of March 2026).
+
+---
+
 ## Active Decisions & Open Questions
 
 Document decisions here as they're made so they don't get relitigated.
