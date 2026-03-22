@@ -529,6 +529,10 @@ Document decisions here as they're made so they don't get relitigated.
   spot check uses 2016 (most recent year all five institutions are present).
 - `ipeds_hr` starts at 2012: NCES does not publish `S{year}_SIS.zip` before 2012.
   No HR coverage for 2000–2011.
+- `ipeds_ic` tuition NULL for 2024: `IC2024_AY.zip` not yet released by NCES as of
+  2026-03-22 (manifest: `not_found`). All tuition/fee/room-board fields NULL for
+  survey_year=2024. Retry `--component IC --year 2024 --force` when AY 2024-25
+  data is published.
 
 ### Phase 2 Complete
 - [ ] GitHub repo public
