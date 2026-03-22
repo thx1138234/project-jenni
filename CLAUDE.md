@@ -502,9 +502,19 @@ Document decisions here as they're made so they don't get relitigated.
 - [x] `CHANGELOG.md` current
 
 **IPEDS known open items (carry forward):**
-- `enrtot` NULL for all 2000–2001 EF rows: pre-2002 EF Part A uses `line`/`section`
-  layout instead of `efalevel`. Loader does not handle old format. 12,643 rows affected.
-  Fix requires reverse-engineering the old schema.
+- `enrtot` NULL for **2000–2007** EF rows (expanded from 2000–2001):
+  - 2000–2001: EF Part A uses `line`/`section` layout — no `efalevel` column at all.
+  - 2002–2007: `efalevel` present but `eftotlt` (enrollment total) not yet introduced
+    by NCES. Enrollment totals were stored in `efrace`-based columns. Additionally,
+    2004–2007 use uppercase column names (`EFALEVEL`, `EFTOTLT`) which the loader
+    does not currently handle. All eight years require loader updates.
+  - `eftotlt` was introduced in 2008. All years 2008+ load correctly.
+  - Total affected rows: ~47,000 (years 2000–2007).
+- `ipeds_finance` has incomplete institution coverage: NCES Finance survey
+  participation is not universal. Well-known private nonprofits (Babson, Harvard,
+  Boston College, etc.) are absent from NCES FASB submissions for many years.
+  This is source data behavior — not a loader bug. The validation institution
+  spot check uses 2016 (most recent year all five institutions are present).
 - `ipeds_hr` starts at 2012: NCES does not publish `S{year}_SIS.zip` before 2012.
   No HR coverage for 2000–2011.
 

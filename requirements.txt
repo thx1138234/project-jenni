@@ -1,2 +1,11 @@
+# Direct dependencies
 irsx==0.3.3
 requests==2.32.5
+
+# Pinned transitive dependencies
+certifi==2026.2.25
+charset-normalizer==3.4.6
+idna==3.11
+unicodecsv==0.14.1
+urllib3==2.6.3
+xmltodict==1.0.4
