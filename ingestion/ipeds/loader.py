@@ -157,11 +157,14 @@ def find_csv(component_key, year, pattern_hints):
             if hint.lower() in f.name.lower() and f.suffix.lower() == ".csv":
                 return f
 
-    # Fallback: return first CSV found
-    csvs = list(base.glob("*.csv"))
-    if csvs:
-        logger.debug(f"Fallback CSV: {csvs[0]}")
-        return csvs[0]
+    # Fallback: only when no hints were given. If hints were provided and none
+    # matched, returning the wrong file is worse than returning nothing — callers
+    # load 0 rows and move on rather than silently ingesting the wrong data.
+    if not pattern_hints:
+        csvs = list(base.glob("*.csv"))
+        if csvs:
+            logger.debug(f"Fallback CSV: {csvs[0]}")
+            return csvs[0]
     return None
 
 
