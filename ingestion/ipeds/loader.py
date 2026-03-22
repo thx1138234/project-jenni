@@ -667,9 +667,15 @@ class FinanceLoader:
                 "survey_year":         year,
                 "reporting_framework": "GASB",
 
-                # Revenue
+                # Revenue — F1B section.
+                # f1b25 = total operating revenues = f1d01 (same value, confirmed empirically).
+                # NOTE: for GASB institutions, state appropriations (f1b19) are classified as
+                # NON-operating revenue and are NOT included in f1b25. rev_total therefore
+                # understates total economic resources vs FASB rev_total, which includes all
+                # revenue. Do not compare GASB and FASB rev_total directly without adjustment.
                 "rev_tuition_fees":    to_int(raw.get("f1b01") or raw.get("tuitionrev")),
-                "tuition_discounts":   to_int(raw.get("f1b04") or raw.get("discounts")),
+                "tuition_discounts":   to_int(raw.get("f1b04")),
+                "rev_state_approp":    to_int(raw.get("f1b19")),  # non-operating; major GASB revenue source
                 "rev_fed_grants":      to_int(raw.get("f1b07")),
                 "rev_state_grants":    to_int(raw.get("f1b08")),
                 "rev_private_grants":  to_int(raw.get("f1b09")),
@@ -678,29 +684,33 @@ class FinanceLoader:
                 "rev_auxiliary":       to_int(raw.get("f1b12")),
                 "rev_hospitals":       to_int(raw.get("f1b13")),
                 "rev_other":           to_int(raw.get("f1b14")),
-                "rev_total":           to_int(raw.get("f1c02") or raw.get("f1b17")),
+                "rev_total":           to_int(raw.get("f1b25") or raw.get("f1d01")),
 
-                # Expenses
-                "exp_instruction":       to_int(raw.get("f1d01")),
-                "exp_research":          to_int(raw.get("f1d02")),
-                "exp_public_service":    to_int(raw.get("f1d03")),
-                "exp_academic_support":  to_int(raw.get("f1d04")),
-                "exp_student_services":  to_int(raw.get("f1d05")),
-                "exp_institutional_support": to_int(raw.get("f1d06")),
-                "exp_net_scholarships":  to_int(raw.get("f1d09")),
-                "exp_aux_enterprises":   to_int(raw.get("f1d11")),
-                "exp_hospitals":         to_int(raw.get("f1d12")),
-                "exp_total":             to_int(raw.get("f1e01") or raw.get("f1d15")),
+                # Expenses — F1C section (3-digit suffixes, stable across all years).
+                # F1D01–F1D06 are income statement totals, NOT functional expense categories.
+                # GASB does not have an "academic support" category (FASB distinction only).
+                # f1c081 = scholarships/fellowships (2001–2010 files only; NULL in 2015+).
+                # f1c091 = auxiliary enterprises (2001–2010 files only; NULL in 2015+).
+                # exp_total: f1d02 = total operating expenses = f1c191 (confirmed same value).
+                "exp_instruction":       to_int(raw.get("f1c011")),
+                "exp_research":          to_int(raw.get("f1c021")),
+                "exp_public_service":    to_int(raw.get("f1c031")),
+                "exp_student_services":  to_int(raw.get("f1c051")),
+                "exp_institutional_support": to_int(raw.get("f1c061")),
+                "exp_net_scholarships":  to_int(raw.get("f1c081")),   # NULL for 2015+
+                "exp_aux_enterprises":   to_int(raw.get("f1c091")),   # NULL for 2015+
+                "exp_total":             to_int(raw.get("f1d02") or raw.get("f1c191")),
 
-                # Balance Sheet
-                "assets_total":          to_int(raw.get("f1h01")),
-                "assets_endowment":      to_int(raw.get("f1h10")),
+                # Balance Sheet / Net Position
+                # f1a06 = total assets (present in all years from 2001).
+                # f1a18 = total ending net position = f1d06 (confirmed same value).
+                # f1h section mirrors F2H: f1h01 = beginning unrestricted net position,
+                # f1h02 = ending unrestricted net position (may be NULL for some institutions).
+                "assets_total":          to_int(raw.get("f1a06")),
                 "liab_total":            to_int(raw.get("f1h18")),
                 "liab_longterm_debt":    to_int(raw.get("f1h16")),
-                "netassets_total":       to_int(raw.get("f1h27") or raw.get("f1h29")),
-                "netassets_unrestricted":     to_int(raw.get("f1h24")),
-                "netassets_restricted_temp":  to_int(raw.get("f1h25")),
-                "netassets_restricted_perm":  to_int(raw.get("f1h26")),
+                "netassets_total":       to_int(raw.get("f1a18")),
+                "netassets_unrestricted":     to_int(raw.get("f1h02")),
             }
             out_rows.append(row)
 
