@@ -7,7 +7,7 @@ Schema integrity checks for ipeds_data.db.
 Checks:
   1.  No orphaned rows (unitid FK violations in each child table)
   2.  No NULL unitids in any table
-  3.  GASB/FASB row counts balance in ipeds_finance
+  3.  GASB/FASB both present in ipeds_finance (counts not required to match — GASB > FASB is normal)
   4.  Year coverage gaps — flag years missing from each table vs. expected range
   5.  NULL enrtot in ipeds_ef — suppresses known gaps (2000–2007),
       flags as failure if NULL rate > 1% in other years
@@ -141,19 +141,24 @@ def run_checks(conn):
     # ------------------------------------------------------------------
     # 3. GASB/FASB balance
     # ------------------------------------------------------------------
-    _section("3. GASB/FASB Balance (ipeds_finance)")
+    _section("3. GASB/FASB Coverage (ipeds_finance)")
     fasb    = conn.execute("SELECT count(*) FROM ipeds_finance WHERE reporting_framework='FASB'").fetchone()[0]
     gasb    = conn.execute("SELECT count(*) FROM ipeds_finance WHERE reporting_framework='GASB'").fetchone()[0]
     unknown = conn.execute(
         "SELECT count(*) FROM ipeds_finance "
         "WHERE reporting_framework NOT IN ('FASB','GASB') OR reporting_framework IS NULL"
     ).fetchone()[0]
-    print(f"  FASB: {fasb:,}  |  GASB: {gasb:,}  |  Unknown/NULL: {unknown}")
-    if fasb != gasb:
-        print(f"  FAIL: counts do not balance")
-        failures.append(f"ipeds_finance GASB/FASB imbalance: FASB={fasb:,}, GASB={gasb:,}")
+    print(f"  FASB (private nonprofits): {fasb:,}  |  GASB (public): {gasb:,}  |  Unknown/NULL: {unknown}")
+    # GASB >= FASB is expected: more public institutions than private nonprofits report to NCES Finance.
+    # Equality check removed — old equality was an artifact of the filename bug (both slots loading F1A).
+    if fasb == 0:
+        print(f"  FAIL: no FASB rows")
+        failures.append(f"ipeds_finance: zero FASB rows")
+    elif gasb == 0:
+        print(f"  FAIL: no GASB rows")
+        failures.append(f"ipeds_finance: zero GASB rows")
     else:
-        print(f"  OK: balanced")
+        print(f"  OK: both frameworks present")
     if unknown > 0:
         print(f"  FAIL: {unknown} rows with unknown/NULL reporting_framework")
         failures.append(f"ipeds_finance: {unknown} rows with unknown/NULL reporting_framework")

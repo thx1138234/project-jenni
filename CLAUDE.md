@@ -241,6 +241,12 @@ higher-ed-db/
 
 ## Critical Conventions — Read Before Writing Any Code
 
+### 0. Empirical Evidence Beats Documentation
+When instructions, docstrings, or external documentation conflict with empirical
+file content or database state, always trust the empirical evidence. Flag the
+conflict before proceeding. Example: NCES F1A files are documented as FASB
+(private nonprofit) but empirically contain public institutions — the data wins.
+
 ### 1. Year Convention
 **All year fields use fiscal year END as the canonical label.**
 

@@ -643,10 +643,13 @@ class FinanceLoader:
         return total
 
     def _load_fasb(self, conn, year, year2):
-        """Private nonprofit institutions (FASB)."""
+        """Public institutions (GASB) — F1A file. Despite the method name,
+        empirically F1A contains public/GASB institutions. reporting_framework
+        is set to 'GASB'. See CLAUDE.md §0 (Empirical Evidence Beats Documentation)."""
+        yr1 = str(year)[-2:]
         csv_path = find_csv(self.COMPONENT, year, [
-            f"f{year}{year2}_f1a.csv", f"F{year}{year2}_F1A.csv",
-            f"f{year}{year2}_f1a23.csv"   # Some years have suffix
+            f"f{yr1}{year2}_f1a.csv", f"F{yr1}{year2}_F1A.csv",
+            f"f{yr1}{year2}_f1a23.csv"   # Some years have extra suffix
         ])
         if not csv_path:
             return 0
@@ -662,7 +665,7 @@ class FinanceLoader:
             row = {
                 "unitid":              unitid,
                 "survey_year":         year,
-                "reporting_framework": "FASB",
+                "reporting_framework": "GASB",
 
                 # Revenue
                 "rev_tuition_fees":    to_int(raw.get("f1b01") or raw.get("tuitionrev")),
@@ -702,13 +705,16 @@ class FinanceLoader:
             out_rows.append(row)
 
         n = upsert_rows(conn, self.TABLE, out_rows, ["unitid", "survey_year"])
-        logger.info(f"F-FASB {year}: {n} rows loaded")
+        logger.info(f"F-F1A (GASB/public) {year}: {n} rows loaded")
         return n
 
     def _load_gasb(self, conn, year, year2):
-        """Public institutions (GASB)."""
+        """Private nonprofit institutions (FASB) — F2 file. Despite the method
+        name, empirically F2 contains private/FASB institutions. reporting_framework
+        is set to 'FASB'. See CLAUDE.md §0 (Empirical Evidence Beats Documentation)."""
+        yr1 = str(year)[-2:]
         csv_path = find_csv(self.COMPONENT, year, [
-            f"f{year}{year2}_f2.csv", f"F{year}{year2}_F2.csv"
+            f"f{yr1}{year2}_f2.csv", f"F{yr1}{year2}_F2.csv"
         ])
         if not csv_path:
             return 0
@@ -724,7 +730,7 @@ class FinanceLoader:
             row = {
                 "unitid":              unitid,
                 "survey_year":         year,
-                "reporting_framework": "GASB",
+                "reporting_framework": "FASB",
 
                 # Revenue (GASB line items differ from FASB)
                 "rev_tuition_fees":    to_int(raw.get("f2d01")),
