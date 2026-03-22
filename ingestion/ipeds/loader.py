@@ -747,29 +747,38 @@ class FinanceLoader:
                 "rev_other":           to_int(raw.get("f2d13")),
                 "rev_total":           to_int(raw.get("f2d16") or raw.get("f2d15")),
 
-                # Expenses
-                "exp_instruction":       to_int(raw.get("f2e01")),
-                "exp_research":          to_int(raw.get("f2e02")),
-                "exp_public_service":    to_int(raw.get("f2e03")),
-                "exp_academic_support":  to_int(raw.get("f2e04")),
-                "exp_student_services":  to_int(raw.get("f2e05")),
-                "exp_institutional_support": to_int(raw.get("f2e06")),
-                "exp_net_scholarships":  to_int(raw.get("f2e07")),
-                "exp_aux_enterprises":   to_int(raw.get("f2e09")),
-                "exp_hospitals":         to_int(raw.get("f2e10")),
-                "exp_depreciation":      to_int(raw.get("f2e11")),
-                "exp_other":             to_int(raw.get("f2e12")),
-                "exp_total":             to_int(raw.get("f2e14") or raw.get("f2e13")),
+                # Expenses — F2E columns use 3-digit suffixes (F2E011, F2E021, ...).
+                # The "1" suffix is the functional-classification total for each category.
+                # f2e131 = total expenses by natural classification = f2b02 (Statement of Activities).
+                "exp_instruction":       to_int(raw.get("f2e011")),
+                "exp_research":          to_int(raw.get("f2e021")),
+                "exp_public_service":    to_int(raw.get("f2e031")),
+                "exp_academic_support":  to_int(raw.get("f2e041")),
+                "exp_student_services":  to_int(raw.get("f2e051")),
+                "exp_institutional_support": to_int(raw.get("f2e061")),
+                "exp_net_scholarships":  to_int(raw.get("f2e071")),
+                "exp_aux_enterprises":   to_int(raw.get("f2e081")),
+                "exp_hospitals":         to_int(raw.get("f2e091")),
+                "exp_depreciation":      to_int(raw.get("f2e101")),
+                "exp_other":             to_int(raw.get("f2e121")),
+                # f2b02 = total expenses from Statement of Activities (authoritative);
+                # f2e131 = same value via natural-classification expense schedule (fallback).
+                "exp_total":             to_int(raw.get("f2b02") or raw.get("f2e131")),
 
-                # Balance Sheet
-                "assets_total":          to_int(raw.get("f2h01")),
-                "assets_current":        to_int(raw.get("f2h02")),
-                "assets_capital_net":    to_int(raw.get("f2h04")),
-                "assets_endowment":      to_int(raw.get("f2h05")),
+                # Balance Sheet / Net Assets
+                # f2h01 = net assets without donor restrictions — beginning of year
+                # f2h02 = net assets without donor restrictions — end of year
+                # f2h03 = change in net assets without donor restrictions (= f2h02 - f2h01)
+                # f2b07 = total net assets end of year (all restriction classes combined)
+                "assets_total":          to_int(raw.get("f2h01")),   # beginning unrestricted NA — see CLAUDE.md
+                "assets_current":        to_int(raw.get("f2h02")),   # ending unrestricted NA — see CLAUDE.md
                 "liab_total":            to_int(raw.get("f2h12")),
                 "liab_current":          to_int(raw.get("f2h13")),
                 "liab_longterm_debt":    to_int(raw.get("f2h15")),
-                "netassets_total":       to_int(raw.get("f2h20")),
+                "netassets_total":       to_int(raw.get("f2b07")),
+                "netassets_unrestricted":     to_int(raw.get("f2h02")),  # end-of-year without donor restrictions
+                "netassets_restricted_temp":  to_int(raw.get("f2h03a")),
+                "netassets_restricted_perm":  to_int(raw.get("f2h03c")),
                 "netassets_invested_capital": to_int(raw.get("f2h17")),
             }
             out_rows.append(row)
