@@ -66,7 +66,9 @@ CREATE TABLE IF NOT EXISTS scorecard_institution (
 -- scorecard_programs
 -- Field-of-study level earnings and debt data.
 -- One row per institution × CIP 4-digit code × credential level × data year.
--- Source: programs.cip_4digit nested fields in the Scorecard API.
+-- Source: programs.cip_4_digit (underscore) nested fields in the Scorecard API.
+-- Note: API only supports "latest" program data (year-prefix returns HTTP 500).
+--       All rows loaded with the current data year; historical not available via API.
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS scorecard_programs (
