@@ -91,8 +91,9 @@ PROG_FIELDS = ",".join([
     "programs.cip_4_digit.credential.level",
     "programs.cip_4_digit.earnings.highest.1_yr.overall_median_earnings",
     "programs.cip_4_digit.earnings.highest.2_yr.overall_median_earnings",
-    "programs.cip_4_digit.debt.median_debt",
-    "programs.cip_4_digit.debt.mean_debt",
+    "programs.cip_4_digit.debt.staff_grad_plus.all.eval_inst.median",
+    "programs.cip_4_digit.debt.staff_grad_plus.all.eval_inst.average",
+    "programs.cip_4_digit.debt.staff_grad_plus.all.all_inst.median",
     "programs.cip_4_digit.counts.ipeds_awards1",
 ])
 
@@ -269,6 +270,10 @@ def load_programs(conn: sqlite3.Connection, api_key: str,
                 earn = p.get("earnings") or {}
                 highest = earn.get("highest") or {} if isinstance(earn, dict) else {}
                 debt_d = p.get("debt") or {}
+                sgp   = (debt_d.get("staff_grad_plus") or {}) if isinstance(debt_d, dict) else {}
+                sgp_all = (sgp.get("all") or {}) if isinstance(sgp, dict) else {}
+                eval_inst = (sgp_all.get("eval_inst") or {}) if isinstance(sgp_all, dict) else {}
+                all_inst  = (sgp_all.get("all_inst")  or {}) if isinstance(sgp_all, dict) else {}
                 counts = p.get("counts") or {}
                 rows.append({
                     "unitid":            uid,
@@ -278,8 +283,9 @@ def load_programs(conn: sqlite3.Connection, api_key: str,
                     "credential_level":  cred,
                     "earnings_1yr_median": (highest.get("1_yr") or {}).get("overall_median_earnings"),
                     "earnings_2yr_median": (highest.get("2_yr") or {}).get("overall_median_earnings"),
-                    "debt_median":       debt_d.get("median_debt") if isinstance(debt_d, dict) else None,
-                    "debt_mean":         debt_d.get("mean_debt")   if isinstance(debt_d, dict) else None,
+                    "debt_inst_median":  eval_inst.get("median"),
+                    "debt_inst_avg":     eval_inst.get("average"),
+                    "debt_natl_median":  all_inst.get("median"),
                     "n_students":        counts.get("ipeds_awards1") if isinstance(counts, dict) else None,
                 })
         return rows

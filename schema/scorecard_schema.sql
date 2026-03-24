@@ -82,9 +82,12 @@ CREATE TABLE IF NOT EXISTS scorecard_programs (
     earnings_1yr_median INTEGER,
     earnings_2yr_median INTEGER,
 
-    -- Debt at graduation
-    debt_median         INTEGER,
-    debt_mean           INTEGER,
+    -- Debt at graduation — Stafford + Grad PLUS loans (current API field structure)
+    -- eval_inst = at this institution; all_inst = national median (benchmark)
+    -- Old fields debt.median_debt / debt.mean_debt removed from API; replaced by loan-type split.
+    debt_inst_median    INTEGER,            -- programs.cip_4_digit.debt.staff_grad_plus.all.eval_inst.median
+    debt_inst_avg       INTEGER,            -- programs.cip_4_digit.debt.staff_grad_plus.all.eval_inst.average
+    debt_natl_median    INTEGER,            -- programs.cip_4_digit.debt.staff_grad_plus.all.all_inst.median
 
     -- Count of students in cohort (for data suppression context)
     n_students          INTEGER,
