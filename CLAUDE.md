@@ -607,6 +607,14 @@ Document decisions here as they're made so they don't get relitigated.
   survey_year=2024. Retry `--component IC --year 2024 --force` when AY 2024-25
   data is published.
 
+**990 known gaps (carry forward):**
+- **MIT FY2013 missing from ProPublica structured dataset**: EIN 042103594,
+  fiscal_year_end=2013 (TAX_PERIOD=201306) is absent from `filings_with_data`
+  in the ProPublica Nonprofit Explorer API. No error — the year simply was not
+  structured by ProPublica. A PDF filing may exist but there is no machine-readable
+  source for this year. Total coverage for MIT: FY2012–FY2023 minus FY2013 = 11 rows.
+  Workaround: manual PDF extraction or accept the gap; not worth engineering for one row.
+
 ### Phase 2 Complete
 - [ ] GitHub repo public
 - [ ] PostgreSQL on Supabase, migrated from SQLite
