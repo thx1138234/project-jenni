@@ -220,7 +220,6 @@ higher-ed-db/
 │   │   ├── 990_xml/                 ← IRS XML filings
 │   │   └── eada_csv/
 │   ├── sample/                      ← Small committed reference files
-│   │   └── 990_Babson_2023_*.csv    ← Babson FY2023 990 CSVs
 │   └── databases/                   ← .db files (.gitignored)
 │       ├── 990_data.db
 │       ├── ipeds_data.db
@@ -416,13 +415,11 @@ Confirmed from IRSx-parsed XML, cross-verified against ProPublica (must match ex
 | FY2022 | 202206 | 2023 | **$397,619,450** |
 | FY2023 | 202306 | 2024 | **$344,014,371** |
 
+**Validation standard:** IRSx parse and ProPublica API must agree exactly. Agreement between
+both sources is the canonical confirmation — no CSV reference files are used or required.
+
 Note: An earlier session referenced $358,779,440 as a Babson ground truth — this value
 does not correspond to any Babson 990 filing and should be disregarded.
-
-The `data/sample/` CSVs (when present) represent **FY2023 (TAX_PERIOD=202306)**, the
-fiscal year ending June 2023. The FY2022 XML (TAX_PERIOD=202206) downloaded from the
-2023 TEOS index is a **different fiscal year** — both values are correct for their
-respective years. Do not compare FY2022 IRSx output against FY2023 sample CSVs.
 
 ### Private Nonprofit Universe for 990
 ~1,200 private nonprofit degree-granting 4-year institutions file full Form 990.
@@ -438,7 +435,6 @@ for Phase 2 when the database goes live for shared access.
 
 **All .db files are .gitignored.** Do not commit them.
 Large raw data files (`data/raw/`) are also .gitignored.
-The `data/sample/` directory contains small committed reference files only.
 
 When building databases from scratch:
 ```bash
