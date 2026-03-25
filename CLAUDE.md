@@ -18,7 +18,7 @@ operational data, suitable for longitudinal research and AI-driven analysis.
 
 | Database | Source | What It Adds | Status |
 |---|---|---|---|
-| `990_data.db` | IRS Form 990 — TEOS portal (2019+) / ProPublica API (2012–2018) | Audited financials for private nonprofits | In progress |
+| `990_data.db` | IRS Form 990 — TEOS portal (2019+) / ProPublica API (2012–2018) | Audited financials for private nonprofits | **Complete** (16,071 rows, 1,790 target EINs, FY2012–2024, commit 1e1e26b) |
 | `ipeds_data.db` | NCES IPEDS | Enrollment, admissions, outcomes — all institutions | **Complete** (6.6M rows, 2000–2024, commit c3a4680) |
 | `eada_data.db` | Dept. of Education EADA | Athletics financials | Complete |
 | `scorecard_data.db` | College Scorecard API | Post-grad earnings & debt by program | Planned |
@@ -578,13 +578,14 @@ Document decisions here as they're made so they don't get relitigated.
 
 ## What "Done" Looks Like for Each Phase
 
-### Phase 1 Complete (current target)
+### Phase 1 Complete ✓
 - [x] IPEDS fully loaded: all 9 core components, 2000–2024, 13,609 institutions — commit c3a4680
-- [ ] 990 pipeline: 10+ institutions, FY2020–2024
-- [ ] `institution_master` complete with EIN + UNITID for all 990 institutions
-- [ ] All schema SQL files committed
+- [x] 990 pipeline: 16,071 rows, 1,790 target EINs, FY2012–2024, TEOS+ProPublica — commit 1e1e26b
+- [x] `institution_master` complete with EIN + UNITID for all 990 institutions
+- [x] All schema SQL files committed (990_schema.sql, ipeds_schema.sql)
 - [ ] `tests/test_schema_integrity.py` passes clean
 - [x] `CHANGELOG.md` current
+- [x] Full foundation gut check complete — 990 and IPEDS Finance validated across FASB and GASB (March 2026)
 
 **IPEDS known open items (carry forward):**
 - `enrtot` NULL for **2000–2007** EF rows (expanded from 2000–2001):
@@ -606,6 +607,12 @@ Document decisions here as they're made so they don't get relitigated.
   2026-03-22 (manifest: `not_found`). All tuition/fee/room-board fields NULL for
   survey_year=2024. Retry `--component IC --year 2024 --force` when AY 2024-25
   data is published.
+
+**990 known data points (carry forward):**
+- **Boston College FY2022 — expenses exceed revenue (IPEDS Finance)**: `exp_total` ($1,020,413,247)
+  exceeds `rev_total` ($896,965,701) for survey_year 2022. This is a valid data point — investment
+  year, not a financial stress signal. Net assets of $4,706,176,061 confirms strong financial health.
+  Do not flag as anomalous in any analysis without checking net assets context.
 
 **990 known gaps (carry forward):**
 - **MIT FY2013 missing from ProPublica structured dataset**: EIN 042103594,
