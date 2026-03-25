@@ -18,7 +18,7 @@ operational data, suitable for longitudinal research and AI-driven analysis.
 
 | Database | Source | What It Adds | Status |
 |---|---|---|---|
-| `990_data.db` | IRS Form 990 via ProPublica | Audited financials for private nonprofits | In progress |
+| `990_data.db` | IRS Form 990 — TEOS portal (2019+) / ProPublica API (2012–2018) | Audited financials for private nonprofits | In progress |
 | `ipeds_data.db` | NCES IPEDS | Enrollment, admissions, outcomes — all institutions | **Complete** (6.6M rows, 2000–2024, commit c3a4680) |
 | `eada_data.db` | Dept. of Education EADA | Athletics financials | Complete |
 | `scorecard_data.db` | College Scorecard API | Post-grad earnings & debt by program | Planned |
@@ -377,17 +377,37 @@ We do NOT ingest:
 - Form 990-T (unrelated business income — already captured in aggregate on 990)
 - Form 990-PF (private foundations — separate use case, not yet in scope)
 
-### Source
-ProPublica Nonprofit Explorer API and IRS bulk XML downloads.
-XML e-filing is reliable from 2012 onward. Pre-2012 = PDFs only = different problem.
+### Source — Two-Mode Pipeline (confirmed March 2026)
+
+**Mode 1 — IRS TEOS Portal (2019–present):**
+The IRS Tax Exempt Organization Search (TEOS) portal at `apps.irs.gov` is the
+current authoritative source for 990 XML filings. No authentication required.
+
+- Index CSV: `https://apps.irs.gov/pub/epostcard/990/xml/{YEAR}/index_{YEAR}.csv`
+- XML ZIPs:  `https://apps.irs.gov/pub/epostcard/990/xml/{YEAR}/{YEAR}_TEOS_XML_{PART}.zip`
+- Coverage: tax years 2019–present. Each ZIP contains batches of XML files.
+  The index CSV maps EIN → object ID → ZIP filename for targeted extraction.
+
+**Mode 2 — ProPublica Nonprofit Explorer API (2012–2018):**
+For pre-2019 filings, the ProPublica API returns parsed JSON per EIN per year.
+Rate limit: ~1 req/sec. Covers our five validation institutions individually.
+Does not require bulk ZIP download; returns structured data directly.
+
+**⚠️ IRS Form 990 AWS S3 bucket (`s3://irs-form-990`) is DISCONTINUED.**
+The IRS announced on December 16, 2021 that it would discontinue updates to the
+`irs-form-990` AWS Open Data Registry bucket, effective December 31, 2021.
+The bucket exists in `us-east-1` but access policy has been revoked — all
+requests return `AccessDenied` regardless of IAM policy or requester-pays header.
+Do not attempt to use this bucket. Use TEOS portal (2019+) or ProPublica (2012–2018).
+
+XML e-filing is reliable from 2012 onward. Pre-2012 = PDFs only = out of scope.
 Effective 990 coverage: **FY2012–present** for most institutions.
 
 ### Current State
 - Babson College UNITID = **164580** (EIN 042103544) — primary spot-check institution
-- No sample data in `data/sample/` yet; 990 XML not yet ingested
-- XML parser not yet written; IRSx installed but IRS bulk XML downloads are
-  currently unavailable (see IRS 990 XML access issue below)
-- Target: 10+ institutions, FY2020–2024, before repo goes public
+- Ground truth CSV files in `data/sample/` — Babson FY2023 total revenue = **$358,779,440**
+- IRSx installed in .venv; TEOS downloader and IRSx parser not yet written
+- Target: five validation institutions, FY2019–2023 via TEOS + FY2012–2018 via ProPublica
 
 ### Private Nonprofit Universe for 990
 ~1,200 private nonprofit degree-granting 4-year institutions file full Form 990.
