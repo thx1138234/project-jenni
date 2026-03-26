@@ -233,6 +233,10 @@ INSERT INTO financial_stress_signals (
     composite_stress_score,
     enr_financial_combined,
     data_completeness_pct
+    -- narrative_flag intentionally omitted: populated post-build via UPDATE statements.
+    -- The builder always leaves narrative_flag as NULL; narratives are editorial and
+    -- must survive rebuilds. After running the builder, re-apply the narrative UPDATE
+    -- script to restore them.
 ) VALUES (
     :ein, :unitid, :institution_name, :state_abbr, :hbcu, :jesuit_institution, :carnegie_basic,
     :signal_year_range, :years_available,

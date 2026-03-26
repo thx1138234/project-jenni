@@ -469,15 +469,20 @@ distinguishable from single-year COVID noise. The primary output of the wedge us
    - `emerging`: fires in 2 of 3 years (when 3 years available)
    - `single`: fires in exactly 1 year — potential COVID distortion, lower weight
 
-**Score band definitions:**
+**Score band definitions (updated for expanded enrollment scale, max ~8.0):**
 | Score | Band | Interpretation |
 |---|---|---|
-| 4.0+ | CRITICAL | Sustained multi-signal distress; closure risk |
-| 3.0–3.9 | HIGH | Multiple confirmed stress trends |
-| 2.0–2.9 | Elevated | Confirmed stress in 1–2 signals + emerging others |
-| 1.0–1.9 | Baseline | Isolated or single-year signals |
-| 0.1–0.9 | Marginal | Minor signals, likely noise |
+| 6.5+ | CRITICAL | Confirmed multi-domain crisis: financial + severe enrollment decline co-occurring |
+| 5.0–6.4 | HIGH | Multiple confirmed stress trends; acute risk without intervention |
+| 3.5–4.9 | Elevated | Confirmed stress across multiple signals; monitoring required |
+| 2.0–3.4 | Baseline | Confirmed stress in 1–2 signals; emerging pattern |
+| 0.1–1.9 | Marginal | Isolated or single-year signals; likely noise or COVID artifact |
 | 0 | Clean | No signals fired across any year |
+
+The Critical threshold of 6.5 is meaningful: it requires confirmed multi-year financial
+distress (financial_stress_score ≥ 4.5) plus severe confirmed enrollment decline (enr
+score ≥ 2.0). A score of 6.5+ is not statistical noise — it is an institution in acute,
+multi-domain crisis.
 
 **Current results (FY2020–2022, 1,363 institutions scored):**
 - CRITICAL (4.0+): 30 institutions (2.2%)
@@ -502,6 +507,13 @@ the composite_stress_score identifies genuine at-risk institutions, not statisti
 Saint Augustine's Univ (NC, 3.50), Florida Memorial Univ (FL, 3.25), Knoxville College (TN, 3.25),
 Shaw University (NC, 2.75), Wilberforce (OH, 2.50), Miles College (AL, 2.50) are the top six.
 All show confirmed multi-year stress predating COVID.
+
+**narrative_flag column:** Plain-language stress pattern description for top stress cases.
+Populated via post-build UPDATE (not computed by the builder). The builder always leaves
+`narrative_flag` as NULL on rebuild — re-apply narrative UPDATEs after any full rebuild.
+26 institutions seeded as of March 2026. These are the seed of JENNI's stress signal language.
+Pattern vocabulary: "Structural financial distress", "Enrollment collapse", "Technically insolvent",
+"Business model stress, not demand problem", "Terminal financial distress".
 
 **Known limitations:**
 - **TEOS data only (FY2020–2022)**: ProPublica years (FY2012–2019) are not included in trend

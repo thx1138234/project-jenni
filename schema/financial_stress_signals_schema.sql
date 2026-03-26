@@ -92,6 +92,10 @@ CREATE TABLE IF NOT EXISTS financial_stress_signals (
     -- Cross-validation: strongest signal in database
     enr_financial_combined      INTEGER,    -- 1 if sig_enrollment_decline=1 AND financial_stress_score >= 2.0
 
+    -- Plain-language narrative for top stress cases (populated post-build via UPDATE)
+    -- Null for institutions not yet reviewed. Seed of JENNI's stress signal language.
+    narrative_flag              TEXT,
+
     data_completeness_pct       REAL,       -- financial years_available / 3 * 100
 
     loaded_at                   TEXT DEFAULT (datetime('now'))
