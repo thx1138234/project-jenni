@@ -420,6 +420,23 @@ data would require downloading pre-2019 TEOS XML (IRS has index years 2013–201
 
 **Jesuit institution presidents:** Jesuit priests serving as university presidents (e.g., Fr. William Leahy at BC) will NOT appear on Schedule J. Their compensation flows through their religious order (Society of Jesus), not through the institution. This is expected behavior — **not a data gap**. The institution's highest Schedule J earner is often a head coach or investment professional. Use `institution_master.jesuit_institution = 1` to identify these institutions before interpreting NULL or missing president comp.
 
+### Endowment Detail — form990_schedule_d (Schedule D Part V)
+
+`form990_schedule_d` stores annual endowment activity from Schedule D Part V.
+TEOS/IRSx rows only. One row per filing (PRIMARY KEY `object_id`).
+
+**Coverage:** 4,360 filings with endowment data (of 5,171 TEOS XML; 800 non-990 filers, 11 have Schedule D but no endowment fund)
+
+**Fields:**
+- Activity: `endowment_boy`, `contributions_endowment`, `investment_return_endowment`, `grants_from_endowment`, `other_endowment_changes`, `admin_expenses_endowment`, `endowment_eoy`
+- Breakdown percentages (lines 3a–3c): `board_designated_pct`, `perm_restricted_pct`, `temp_restricted_pct`
+- Calculated dollar breakdowns (pct × EOY): `endowment_board_designated`, `endowment_restricted_perm`, `endowment_restricted_temp`, `endowment_unrestricted`
+
+**Validation benchmarks (FY2022):**
+- Harvard: $49.4B EOY (25.6% board-designated, 21.6% perm restricted, 52.8% temp restricted)
+- MIT: $24.7B EOY (28.9% board-designated, 16.3% perm restricted, 54.8% temp restricted)
+- BC: $3.7B EOY; Babson: $662M EOY; Bentley: $333M EOY
+
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
 **Mode 1 — IRS TEOS Portal (2019–present):**
