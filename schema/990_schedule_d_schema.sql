@@ -51,6 +51,9 @@ CREATE TABLE IF NOT EXISTS form990_schedule_d (
     endowment_restricted_temp   INTEGER,
     endowment_unrestricted      INTEGER,  -- (1 - board - perm - temp) × eoy; residual
 
+    -- Derived ratio (computed at load from form990_filings for same ein+fiscal_year_end)
+    endowment_runway            REAL,   -- endowment_eoy / total_functional_expenses (years)
+
     -- Metadata
     data_source                 TEXT    DEFAULT 'irsx',
     loaded_at                   TEXT    DEFAULT (datetime('now'))

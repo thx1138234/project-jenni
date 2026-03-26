@@ -436,6 +436,10 @@ TEOS/IRSx rows only. One row per filing (PRIMARY KEY `object_id`).
 - Harvard: $49.4B EOY (25.6% board-designated, 21.6% perm restricted, 52.8% temp restricted)
 - MIT: $24.7B EOY (28.9% board-designated, 16.3% perm restricted, 54.8% temp restricted)
 - BC: $3.7B EOY; Babson: $662M EOY; Bentley: $333M EOY
+- `endowment_runway` = endowment_eoy / total_functional_expenses (years of operating runway).
+  FY2023: Harvard 7.89 yrs, MIT 4.82 yrs, BC 2.75 yrs, Babson 2.24 yrs. All 4,360 rows populated.
+- Endowment spending rate analysis: use `grants_from_endowment > 0` filter. Negative values
+  (reverse flows) and $0 values (routing artifacts like Penn) distort spending rate calculations.
 
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
@@ -707,6 +711,12 @@ Document decisions here as they're made so they don't get relitigated.
   (pre-standard format) — not loadable for sport-level analysis.
 
 **990 known data points (carry forward):**
+- **University of Pennsylvania endowment spending — expected $0 in grants_from_endowment**:
+  Penn routes endowment distributions through internal transfers, not as `GrantsOrScholarshipsAmt`
+  on Schedule D Part V. Their `grants_from_endowment = 0` is expected reporting behavior, not a
+  financial stress signal or data error. Penn has a $18B+ endowment and is financially sound.
+  The same pattern may apply to other large research universities. Filter `grants_from_endowment > 0`
+  for any endowment spending rate analysis to avoid false low-spend signals from routing artifacts.
 - **Boston College FY2022 — expenses exceed revenue (IPEDS Finance)**: `exp_total` ($1,020,413,247)
   exceeds `rev_total` ($896,965,701) for survey_year 2022. This is a valid data point — investment
   year, not a financial stress signal. Net assets of $4,706,176,061 confirms strong financial health.
