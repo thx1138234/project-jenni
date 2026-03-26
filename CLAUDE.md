@@ -664,6 +664,13 @@ Document decisions here as they're made so they don't get relitigated.
   spot check uses 2016 (most recent year all five institutions are present).
 - `ipeds_hr` starts at 2012: NCES does not publish `S{year}_SIS.zip` before 2012.
   No HR coverage for 2000–2011.
+- `ipeds_e12` starts at 2012: EFIA format (EFTEUG/EFTEGD/FTEDPP for FTE) begins with
+  EFIA2012.zip. Pre-2012 E12 files use EF12{year} naming and different column schemas.
+  Coverage: 80,628 rows, survey_year 2012–2023, **fte12 is 100% populated** (no NULLs).
+  `fte12` = ugfte12 + grfte12 + dpp_fte12; this is the per-student ratio denominator.
+  Note: headcount fields (ug12, gr12, total12) do NOT exist in EFIA format — only
+  credit-hour-based FTE and credit hour totals (ug_credit_hrs, gr_credit_hrs).
+  Validation (survey_year=2022): Harvard 27,869 FTE, BC 14,398, MIT 14,055, Babson 3,840.
 - `ipeds_ic` tuition NULL for 2024: `IC2024_AY.zip` not yet released by NCES as of
   2026-03-22 (manifest: `not_found`). All tuition/fee/room-board fields NULL for
   survey_year=2024. Retry `--component IC --year 2024 --force` when AY 2024-25
@@ -686,6 +693,18 @@ Document decisions here as they're made so they don't get relitigated.
   values for every institution. `pct_any_grant` is the broader "any grant" metric and
   should be mapped to a different field. Deferred; check IPEDS SFA data dictionary for
   the correct field name before using `pct_any_grant` in analysis.
+
+**EADA sports-level data (eada_sports):**
+- 349,581 rows loaded, 18 years (survey_year 2007–2024), 2,288 unique institutions
+- Fields: sport_code, sport_name, participants_men/women, total_revenue, total_expenses, rev/exp by gender
+- NO coaching salary dollars at sport level — per-sport salary is not collected by DOE.
+  Institutional totals (hdcoach_salary_men, hdcoach_salary_women) are in eada_instlevel.
+- EADA sport codes are institution-reported, NOT NCES standard: football=7, basketball=2
+  (not the codes listed in older NCES documentation). Use `sport_name` column for filtering.
+- 2019-2020 has 62,168 rows (vs ~17,000 other years) — expanded reporting scope, not an error.
+  No duplicate (unitid, sport_code) pairs; all loaded.
+- 2000-2004: no Schools file in ZIPs. 2005-2006: file uses generic `A3`...`A114` column names
+  (pre-standard format) — not loadable for sport-level analysis.
 
 **990 known data points (carry forward):**
 - **Boston College FY2022 — expenses exceed revenue (IPEDS Finance)**: `exp_total` ($1,020,413,247)

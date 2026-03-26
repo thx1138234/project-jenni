@@ -1883,5 +1883,85 @@
     "status": "not_found",
     "filename": null,
     "timestamp": "2026-03-20T03:03:24.539747"
+  },
+  "E12:2008": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-26T20:09:57.383531"
+  },
+  "E12:2009": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-26T20:09:59.294287"
+  },
+  "E12:2010": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-26T20:10:01.274840"
+  },
+  "E12:2011": {
+    "status": "not_found",
+    "filename": null,
+    "timestamp": "2026-03-26T20:10:03.175676"
+  },
+  "E12:2012": {
+    "status": "downloaded",
+    "filename": "EFIA2012.zip",
+    "timestamp": "2026-03-26T20:10:05.701939"
+  },
+  "E12:2013": {
+    "status": "downloaded",
+    "filename": "EFIA2013.zip",
+    "timestamp": "2026-03-26T20:10:08.269265"
+  },
+  "E12:2014": {
+    "status": "downloaded",
+    "filename": "EFIA2014.zip",
+    "timestamp": "2026-03-26T20:10:10.796657"
+  },
+  "E12:2015": {
+    "status": "downloaded",
+    "filename": "EFIA2015.zip",
+    "timestamp": "2026-03-26T20:10:13.501695"
+  },
+  "E12:2016": {
+    "status": "downloaded",
+    "filename": "EFIA2016.zip",
+    "timestamp": "2026-03-26T20:10:16.199190"
+  },
+  "E12:2017": {
+    "status": "downloaded",
+    "filename": "EFIA2017.zip",
+    "timestamp": "2026-03-26T20:10:18.657453"
+  },
+  "E12:2018": {
+    "status": "downloaded",
+    "filename": "EFIA2018.zip",
+    "timestamp": "2026-03-26T20:10:21.087225"
+  },
+  "E12:2019": {
+    "status": "downloaded",
+    "filename": "EFIA2019.zip",
+    "timestamp": "2026-03-26T20:10:23.955408"
+  },
+  "E12:2020": {
+    "status": "downloaded",
+    "filename": "EFIA2020.zip",
+    "timestamp": "2026-03-26T20:10:26.306044"
+  },
+  "E12:2021": {
+    "status": "downloaded",
+    "filename": "EFIA2021.zip",
+    "timestamp": "2026-03-26T20:10:29.230317"
+  },
+  "E12:2022": {
+    "status": "downloaded",
+    "filename": "EFIA2022.zip",
+    "timestamp": "2026-03-26T20:10:31.660283"
+  },
+  "E12:2023": {
+    "status": "downloaded",
+    "filename": "EFIA2023.zip",
+    "timestamp": "2026-03-26T20:10:34.277239"
   }
 }
