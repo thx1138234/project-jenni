@@ -715,8 +715,18 @@ Document decisions here as they're made so they don't get relitigated.
   Penn routes endowment distributions through internal transfers, not as `GrantsOrScholarshipsAmt`
   on Schedule D Part V. Their `grants_from_endowment = 0` is expected reporting behavior, not a
   financial stress signal or data error. Penn has a $18B+ endowment and is financially sound.
-  The same pattern may apply to other large research universities. Filter `grants_from_endowment > 0`
-  for any endowment spending rate analysis to avoid false low-spend signals from routing artifacts.
+  Filter `grants_from_endowment > 0` for any endowment spending rate analysis to avoid false
+  low-spend signals from routing artifacts.
+- **Yale, Washington University in St. Louis, Emory — endowment distribution routing artifacts**:
+  These institutions (and likely others among major research universities) route endowment
+  distributions through investment income or internal transfers rather than as
+  `GrantsOrScholarshipsAmt` on Schedule D Part V. Their `grants_from_endowment` is near zero
+  and `endowment_spending_rate` will be NULL or effectively zero even though they actively
+  spend from the endowment. This is an accounting/routing convention, not financial distress.
+  These institutions will appear as `stress_endowment = -1` (routing artifact flag) in the
+  database. Do NOT interpret a near-zero spending rate as endowment hoarding for these large
+  research universities. The `stress_endowment = -1` flag is designed to identify this exact
+  pattern: spending_rate < 0.03 with endowment > $100M.
 - **Boston College FY2022 — expenses exceed revenue (IPEDS Finance)**: `exp_total` ($1,020,413,247)
   exceeds `rev_total` ($896,965,701) for survey_year 2022. This is a valid data point — investment
   year, not a financial stress signal. Net assets of $4,706,176,061 confirms strong financial health.

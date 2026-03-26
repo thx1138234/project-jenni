@@ -54,6 +54,10 @@ CREATE TABLE IF NOT EXISTS form990_schedule_d (
     -- Derived ratio (computed at load from form990_filings for same ein+fiscal_year_end)
     endowment_runway            REAL,   -- endowment_eoy / total_functional_expenses (years)
 
+    -- Endowment spending analysis
+    endowment_spending_rate     REAL,   -- grants_from_endowment / NULLIF(endowment_boy,0); NULL if grants_from_endowment <= 0
+    stress_endowment            INTEGER, -- 1=spending_rate>0.07 (HIGH), 0=0.03-0.07 (normal), -1=<0.03 and endowment>$100M (likely routing artifact)
+
     -- Metadata
     data_source                 TEXT    DEFAULT 'irsx',
     loaded_at                   TEXT    DEFAULT (datetime('now'))
