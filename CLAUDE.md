@@ -195,6 +195,7 @@ higher-ed-db/
 ├── schema/
 │   ├── ipeds_schema.sql             ← All 12 IPEDS components + views + ref tables
 │   ├── 990_schema.sql               ← Form 990 Parts VIII/IX/X/XI
+│   ├── 990_part_ix_schema.sql       ← Part IX functional column breakdowns (Phase A)
 │   ├── eada_schema.sql              ← Athletics disclosure data
 │   ├── scorecard_schema.sql         ← College Scorecard (planned)
 │   └── institution_master.sql       ← Shared institution lookup table
@@ -375,6 +376,27 @@ We do NOT ingest:
 - Form 990-EZ (smaller orgs, less detail, not relevant for universities)
 - Form 990-T (unrelated business income — already captured in aggregate on 990)
 - Form 990-PF (private foundations — separate use case, not yet in scope)
+
+### Part IX Functional Breakdown — form990_part_ix (Phase A)
+
+`form990_part_ix` stores the Column B/C/D functional breakdowns from Part IX (Statement of
+Functional Expenses). TEOS/IRSx rows only — ProPublica rows are NULL by design (ProPublica
+API does not expose functional column splits).
+
+**Phase A fields (5,171 TEOS rows loaded):**
+- Line 25 totals: `total_prog_services` (col B), `total_mgmt_general` (col C), `total_fundraising_exp` (col D)
+- Line 12 advertising: all three columns
+- Line 14 IT expenses: all three columns
+- Line 11e professional fundraising fees (`FeesForServicesProfFundraising.TotalAmt`)
+- Line 11f investment management fees (`FeesForSrvcInvstMgmntFeesGrp.TotalAmt`)
+- Calculated at load: `prog_services_pct`, `overhead_ratio`, `fundraising_efficiency`
+
+**Validation benchmarks (FY2023):**
+- Boston College: 86.0% program services, 14.0% overhead, 14.2% fundraising efficiency
+- Harvard: 87.8% program services, 12.2% overhead
+- MIT: 78.2% program services, 21.8% overhead (research overhead is expected to be higher)
+
+**Phase B** (full line item detail, all Part IX lines) — deferred until after intelligence layer.
 
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
@@ -582,7 +604,7 @@ Document decisions here as they're made so they don't get relitigated.
 - [x] IPEDS fully loaded: all 9 core components, 2000–2024, 13,609 institutions — commit c3a4680
 - [x] 990 pipeline: 16,071 rows, 1,790 target EINs, FY2012–2024, TEOS+ProPublica — commit 1e1e26b
 - [x] `institution_master` complete with EIN + UNITID for all 990 institutions
-- [x] All schema SQL files committed (990_schema.sql, ipeds_schema.sql)
+- [x] All schema SQL files committed (990_schema.sql, 990_part_ix_schema.sql, ipeds_schema.sql)
 - [ ] `tests/test_schema_integrity.py` passes clean
 - [x] `CHANGELOG.md` current
 - [x] Full foundation gut check complete — 990 and IPEDS Finance validated across FASB and GASB (March 2026)
