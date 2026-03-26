@@ -155,6 +155,15 @@ def extract_filing(xml_path: Path) -> dict | None:
     other_changes           = _int(s.get("OtherChangesInNetAssetsAmt"))
     reconciliation_rev_exp  = _int(s.get("ReconcilationRevenueExpnssAmt"))
 
+    # ------------------------------------------------------------------
+    # Part I — Organizational Summary
+    # ------------------------------------------------------------------
+    # f.get_type() returns IRSx-prefixed values like 'IRS990', 'IRS990EZ', 'IRS990PF'.
+    # Normalize to plain form type strings for cross-source consistency.
+    _raw_type = f.get_type() or ""
+    form_type = _raw_type.replace("IRS", "") if _raw_type.startswith("IRS") else _raw_type
+    total_employee_count    = _int(s.get("TotalEmployeeCnt"))
+
     return {
         "object_id":              object_id,
         "ein":                    ein,
@@ -193,6 +202,9 @@ def extract_filing(xml_path: Path) -> dict | None:
         "net_unrealized_gains":   net_unrlzd_gains,
         "other_changes_net_assets":other_changes,
         "reconciliation_surplus": reconciliation_rev_exp,
+        # Part I — Organizational Summary
+        "form_type":              form_type,
+        "total_employee_count":   total_employee_count,
     }
 
 
@@ -270,7 +282,8 @@ INSERT INTO form990_filings (
     total_liabilities_boy, total_liabilities_eoy,
     net_assets_boy, net_assets_eoy,
     cash_and_equivalents, investments_securities, land_bldg_equip_net,
-    net_unrealized_gains, other_changes_net_assets, reconciliation_surplus
+    net_unrealized_gains, other_changes_net_assets, reconciliation_surplus,
+    form_type, total_employee_count
 ) VALUES (
     :object_id, :ein, :fiscal_year_end, :org_name,
     :total_revenue, :contributions_grants, :program_service_revenue,
@@ -283,7 +296,8 @@ INSERT INTO form990_filings (
     :total_liabilities_boy, :total_liabilities_eoy,
     :net_assets_boy, :net_assets_eoy,
     :cash_and_equivalents, :investments_securities, :land_bldg_equip_net,
-    :net_unrealized_gains, :other_changes_net_assets, :reconciliation_surplus
+    :net_unrealized_gains, :other_changes_net_assets, :reconciliation_surplus,
+    :form_type, :total_employee_count
 )
 ON CONFLICT(object_id) DO UPDATE SET
     ein=excluded.ein, fiscal_year_end=excluded.fiscal_year_end,
@@ -316,7 +330,9 @@ ON CONFLICT(object_id) DO UPDATE SET
     land_bldg_equip_net=excluded.land_bldg_equip_net,
     net_unrealized_gains=excluded.net_unrealized_gains,
     other_changes_net_assets=excluded.other_changes_net_assets,
-    reconciliation_surplus=excluded.reconciliation_surplus
+    reconciliation_surplus=excluded.reconciliation_surplus,
+    form_type=excluded.form_type,
+    total_employee_count=excluded.total_employee_count
 """
 
 

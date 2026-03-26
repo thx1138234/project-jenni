@@ -39,6 +39,8 @@ Our schema maps:
 # Composite fields (Grp) require _grp() helper: d.get(key) → int via TotalAmt or EOYAmt
 
 IRSX_DIRECT = {
+    # Part I — Organizational Summary (form_type extracted via f.get_type(), not a schedule key)
+    "TotalEmployeeCnt":                 "total_employee_count",
     # Part VIII
     "CYTotalRevenueAmt":                "total_revenue",
     "TotalContributionsAmt":            "contributions_grants",

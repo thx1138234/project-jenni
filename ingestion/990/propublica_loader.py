@@ -99,6 +99,7 @@ INSERT INTO form990_filings (
     net_assets_boy, net_assets_eoy,
     cash_and_equivalents, investments_securities, land_bldg_equip_net,
     net_unrealized_gains, other_changes_net_assets, reconciliation_surplus,
+    form_type, total_employee_count,
     data_source
 ) VALUES (
     :object_id, :ein, :fiscal_year_end, :org_name,
@@ -113,6 +114,7 @@ INSERT INTO form990_filings (
     :net_assets_boy, :net_assets_eoy,
     :cash_and_equivalents, :investments_securities, :land_bldg_equip_net,
     :net_unrealized_gains, :other_changes_net_assets, :reconciliation_surplus,
+    :form_type, :total_employee_count,
     :data_source
 )
 ON CONFLICT(object_id) DO UPDATE SET
@@ -147,6 +149,8 @@ ON CONFLICT(object_id) DO UPDATE SET
     net_unrealized_gains=excluded.net_unrealized_gains,
     other_changes_net_assets=excluded.other_changes_net_assets,
     reconciliation_surplus=excluded.reconciliation_surplus,
+    form_type=excluded.form_type,
+    total_employee_count=excluded.total_employee_count,
     data_source=excluded.data_source
 """
 
@@ -199,6 +203,9 @@ def map_filing(filing: dict, org_name: str, ein: str) -> dict:
         "fiscal_year_end":         tax_prd_yr,
         "org_name":                org_name,
         "data_source":             "propublica",
+        # Part I — form_type inferred: ProPublica loader only retains formtype==0 (full 990)
+        "form_type":               "990",
+        "total_employee_count":    None,  # not exposed by ProPublica API
         # NULL columns — not available from ProPublica
         "total_expenses":          None,
         "total_program_expenses":  None,

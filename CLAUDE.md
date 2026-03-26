@@ -21,7 +21,7 @@ operational data, suitable for longitudinal research and AI-driven analysis.
 | `990_data.db` | IRS Form 990 — TEOS portal (2019+) / ProPublica API (2012–2018) | Audited financials for private nonprofits | **Complete** (16,071 rows, 1,790 target EINs, FY2012–2024, commit 1e1e26b) |
 | `ipeds_data.db` | NCES IPEDS | Enrollment, admissions, outcomes — all institutions | **Complete** (6.6M rows, 2000–2024, commit c3a4680) |
 | `eada_data.db` | Dept. of Education EADA | Athletics financials | Complete |
-| `scorecard_data.db` | College Scorecard API | Post-grad earnings & debt by program | Planned |
+| `scorecard_data.db` | College Scorecard API | Post-grad earnings & debt by program | **Complete** (6,322 rows `scorecard_institution`, 217,530 rows `scorecard_programs`) |
 
 The join key across all four is **UNITID** (IPEDS 6-digit institution ID).
 Form 990 additionally uses **EIN**. Both live in `institution_master`.
@@ -570,7 +570,7 @@ Document decisions here as they're made so they don't get relitigated.
 **Open:**
 - Hugging Face dataset publication — when and how
 - NACUBO endowment study integration (licensed data, needs access)
-- College Scorecard schema and API ingestion (Phase 2)
+- College Scorecard additional years / refresh cadence (loaded: 6,322 institution rows, 217,530 program rows)
 - Whether to add program-level table for HF/UX/XD MS programs
   (CIP codes identified; actual program titles require scraping)
 
@@ -607,6 +607,24 @@ Document decisions here as they're made so they don't get relitigated.
   2026-03-22 (manifest: `not_found`). All tuition/fee/room-board fields NULL for
   survey_year=2024. Retry `--component IC --year 2024 --force` when AY 2024-25
   data is published.
+- `ipeds_sfa.netprice` NULL for wealthy private institutions: IPEDS suppresses the
+  `netprice` field (and all income-band net price fields) when fewer than 30 students
+  fall into the applicable aid category. Highly selective private schools — Babson,
+  Bentley, Boston College, Harvard, MIT — are systematically NULL in `netprice` and
+  `netprice_0_30k` through `netprice_over110k` for this reason. **Do not assume missing
+  data means the institution does not report net price.** Use `scorecard_institution.avg_net_price_priv`
+  (or income-band fields `np_priv_0_30k` through `np_priv_110k_plus`) as the preferred
+  net price source for wealthy private institutions. Scorecard reports these without the
+  30-student suppression threshold.
+- `ipeds_sfa.avg_pell` was incorrectly mapped to `grntwf2`/`pellofr` (a count/flag field,
+  values 0–36). **Corrected 2026-03-25** to map to `upgrnta` (average Pell grant for
+  full-time first-time undergraduates). All rows reloaded. Plausible values now present:
+  BC ranges $4,463–$5,587 across SY2015–2022. If querying earlier loader output, distrust
+  any `avg_pell` values in the 0–36 range.
+- `ipeds_sfa.pct_any_grant` and `pct_pell` both map to `upgrntp` — they return identical
+  values for every institution. `pct_any_grant` is the broader "any grant" metric and
+  should be mapped to a different field. Deferred; check IPEDS SFA data dictionary for
+  the correct field name before using `pct_any_grant` in analysis.
 
 **990 known data points (carry forward):**
 - **Boston College FY2022 — expenses exceed revenue (IPEDS Finance)**: `exp_total` ($1,020,413,247)
@@ -625,7 +643,7 @@ Document decisions here as they're made so they don't get relitigated.
 ### Phase 2 Complete
 - [ ] GitHub repo public
 - [ ] PostgreSQL on Supabase, migrated from SQLite
-- [ ] College Scorecard loaded
+- [x] College Scorecard loaded (scorecard_data.db: 6,322 institution rows, 217,530 program rows)
 - [ ] Read-only API endpoint live
 
 ---

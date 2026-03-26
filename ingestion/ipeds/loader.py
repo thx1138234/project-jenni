@@ -807,9 +807,10 @@ class SFALoader:
     COMPONENT = "SFA"
 
     def load(self, conn, year):
+        year1s = str(year)[-2:]
         year2 = str(year + 1)[-2:]
         csv_path = find_csv(self.COMPONENT, year, [
-            f"sfa{year}{year2}.csv", f"SFA{year}{year2}.csv"
+            f"sfa{year1s}{year2}.csv", f"SFA{year1s}{year2}.csv"
         ])
         if not csv_path:
             return 0
@@ -826,11 +827,11 @@ class SFALoader:
                 "unitid":       unitid,
                 "survey_year":  year,
                 "scugffn":      to_int(raw.get("scugffn")),
-                "pct_any_grant":  to_float(raw.get("upgrntp")),
+                "pct_any_grant":  to_float(raw.get("uagrntp")),
                 "pct_fed_grant":  to_float(raw.get("uagrntp")),
                 "pct_pell":       to_float(raw.get("upgrntp")),
                 "avg_any_grant":  to_int(raw.get("npgrn2") or raw.get("grntof2")),
-                "avg_pell":       to_int(raw.get("grntwf2") or raw.get("pellofr")),
+                "avg_pell":       to_int(raw.get("upgrnta") or raw.get("pgrnt_a")),
                 "pct_loan":       to_float(raw.get("ufloanp")),
                 "avg_loan":       to_int(raw.get("floanof2")),
                 "netprice":       to_int(raw.get("npis412") or raw.get("netprice")),

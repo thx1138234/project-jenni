@@ -53,6 +53,10 @@ CREATE TABLE IF NOT EXISTS form990_filings (
     other_changes_net_assets INTEGER,              -- OtherChangesInNetAssetsAmt
     reconciliation_surplus  INTEGER,               -- ReconcilationRevenueExpnssAmt (revenue - expenses)
 
+    -- Part I — Organizational Summary
+    form_type               TEXT,                  -- '990', '990EZ', '990PF' (ReturnTypeCd); NULL = unknown
+    total_employee_count    INTEGER,               -- TotalEmployeeCnt (Part I line 15); NULL for ProPublica rows
+
     -- Metadata
     data_source             TEXT    DEFAULT 'irsx', -- 'irsx' or 'propublica'
     loaded_at               TEXT    DEFAULT (datetime('now'))
