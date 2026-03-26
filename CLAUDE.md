@@ -398,6 +398,26 @@ API does not expose functional column splits).
 
 **Phase B** (full line item detail, all Part IX lines) — deferred until after intelligence layer.
 
+### Officer Compensation — form990_compensation (Schedule J)
+
+`form990_compensation` stores per-person compensation from Schedule J Part II, augmented by
+Part VII Section A role/hours fields. TEOS/IRSx source only — ProPublica API does not expose
+per-person Schedule J breakdowns (it only has aggregate `compnsatncurrofcr`). Pre-2019 per-person
+data would require downloading pre-2019 TEOS XML (IRS has index years 2013–2018); not yet loaded.
+
+**Coverage:** FY2020–2024 (TEOS), 4,383 filings, 40,352 person-rows
+
+**Key fields per officer:**
+- Schedule J Part II: `comp_base`, `comp_bonus`, `comp_other`, `comp_deferred`, `comp_nontaxable`, `comp_total`, `related_org_comp`
+- Part VII Section A (joined by name): `hours_per_week`, `former_officer`, `is_officer`, `is_key_employee`, `is_highest_comp`
+
+**Validation benchmarks (FY2023):**
+- Harvard — Lawrence S. Bacow (President): $1,757,109
+- MIT — L. Rafael Reif (President, outgoing): $1,845,810
+- BC — Fr. Leahy (S.J.) not on Schedule J; Jesuit priests receive stipends via religious order, not institutional salary. Highest-paid: Jeffrey Hafley (football coach) $3,835,259
+
+**PRIMARY KEY:** `(object_id, officer_name)` — one row per person per filing.
+
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
 **Mode 1 — IRS TEOS Portal (2019–present):**
