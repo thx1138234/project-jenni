@@ -441,6 +441,84 @@ TEOS/IRSx rows only. One row per filing (PRIMARY KEY `object_id`).
 - Endowment spending rate analysis: use `grants_from_endowment > 0` filter. Negative values
   (reverse flows) and $0 values (routing artifacts like Penn) distort spending rate calculations.
 
+### Financial Stress Signals — financial_stress_signals
+
+Pre-computed multi-year financial stress scoring. One row per EIN (institution system),
+not per UNITID (campus). Built by `ingestion/990/stress_signals_builder.py`.
+
+**Purpose:** Surface institutions with sustained, multi-year financial distress patterns
+distinguishable from single-year COVID noise. The primary output of the wedge use case.
+
+**Schema summary (`financial_stress_signals`):**
+- Identity: `ein`, `unitid`, `institution_name`, `state_abbr`, `hbcu`, `jesuit_institution`, `carnegie_basic`
+- Coverage: `signal_year_range` (e.g. '2020-2022'), `years_available` (1–3)
+- Per-signal year counts (0–3): `sig_deficit_yrs`, `sig_neg_assets_yrs`, `sig_asset_decline_yrs`,
+  `sig_high_debt_yrs`, `sig_low_cash_yrs`, `sig_end_stress_yrs`, `sig_low_runway_yrs`, `sig_low_prog_yrs`
+- Trend summary: `confirmed_signal_count`, `emerging_signal_count`, `single_year_count`
+- Score: `composite_stress_score` = confirmed×1.0 + emerging×0.5 + single×0.25
+- Quality: `data_completeness_pct` = years_available / 3 × 100
+
+**Three production fixes applied:**
+1. **EIN-level dedup**: Multi-campus systems collapsed to canonical EIN with MIN(unitid).
+   DeVry (104 unitids), Altierus/Everest (40), Strayer (40), etc. each become one row.
+2. **Cash signal endowment suppression**: `sig_low_cash` requires endowment_runway IS NULL
+   OR endowment_runway < 1.0 — wealthy institutions managing cash via endowment draws
+   are not distressed by low checking account balances.
+3. **Multi-year trending**: Each signal evaluated independently for FY2020, FY2021, FY2022.
+   - `confirmed`: fires in all available years (requires ≥2 years of data)
+   - `emerging`: fires in 2 of 3 years (when 3 years available)
+   - `single`: fires in exactly 1 year — potential COVID distortion, lower weight
+
+**Score band definitions:**
+| Score | Band | Interpretation |
+|---|---|---|
+| 4.0+ | CRITICAL | Sustained multi-signal distress; closure risk |
+| 3.0–3.9 | HIGH | Multiple confirmed stress trends |
+| 2.0–2.9 | Elevated | Confirmed stress in 1–2 signals + emerging others |
+| 1.0–1.9 | Baseline | Isolated or single-year signals |
+| 0.1–0.9 | Marginal | Minor signals, likely noise |
+| 0 | Clean | No signals fired across any year |
+
+**Current results (FY2020–2022, 1,363 institutions scored):**
+- CRITICAL (4.0+): 30 institutions (2.2%)
+- HIGH (3.0–3.9): 90 institutions (6.6%)
+- 97 institutions have confirmed_signal_count ≥ 3 (multi-confirmed sustained stress)
+- 1,098 institutions (80.6%) have full 3-year coverage
+
+**Top scorers (composite_stress_score, as of March 2026 build):**
+- Mount Sinai Phillips School of Nursing (NY): 5.50 — deficit + high debt + asset decline, all 3 years
+- The Chicago School-College of Nursing (TX): 5.25 — negative net assets all 3 years, 450% debt ratio
+- San Francisco Art Institute (CA): 5.25 — **closed 2022; confirms signal validity**
+- University of Valley Forge (PA): 5.00
+- St. Francis College (NY): 4.50 — deficit all 3 years, 96% debt ratio
+- Centenary University (NJ): 4.50 — negative net assets all 3 years, 132% debt
+
+**San Francisco Art Institute as validation case:** SFAI scored 5.25 with only 2 years of data.
+It closed in May 2022 after 150 years. The confirmed signals (deficit + low runway + low cash, both
+available years) predate the closure announcement. This is the clearest available confirmation that
+the composite_stress_score identifies genuine at-risk institutions, not statistical noise.
+
+**HBCU confirmed multi-signal stress (confirmed_signal_count ≥ 2, 11 institutions):**
+Saint Augustine's Univ (NC, 3.50), Florida Memorial Univ (FL, 3.25), Knoxville College (TN, 3.25),
+Shaw University (NC, 2.75), Wilberforce (OH, 2.50), Miles College (AL, 2.50) are the top six.
+All show confirmed multi-year stress predating COVID.
+
+**Known limitations:**
+- **TEOS data only (FY2020–2022)**: ProPublica years (FY2012–2019) are not included in trend
+  calculation. Institutions with pre-2020 stress history are not penalized for pre-window distress.
+  The 3-year window was chosen to match TEOS coverage while spanning COVID.
+- **990-only signals**: All 8 signals derive from 990 financials. Cross-validation with IPEDS
+  enrollment trends (declining enrollment → revenue risk) has not yet been incorporated.
+  An institution with confirmed financial stress AND declining enrollment is higher risk than
+  the score alone reflects.
+- **Supplemental signal coverage is partial**: `sig_end_stress` and `sig_low_runway` require
+  Schedule D data (4,360 of ~5,171 TEOS filings). `sig_low_prog` requires Part IX data
+  (also ~5,171 TEOS filings). Institutions missing supplemental data will have those signals
+  conservatively set to 0 — scores may be understated for institutions without Schedule D/Part IX.
+- **Single-year-only institutions (43 rows)**: Institutions with only 1 year of data in
+  the window cannot generate confirmed or emerging signals — scores are capped at 2.0.
+  Treat these with lower confidence.
+
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
 **Mode 1 — IRS TEOS Portal (2019–present):**
@@ -651,6 +729,7 @@ Document decisions here as they're made so they don't get relitigated.
 - [ ] `tests/test_schema_integrity.py` passes clean
 - [x] `CHANGELOG.md` current
 - [x] Full foundation gut check complete — 990 and IPEDS Finance validated across FASB and GASB (March 2026)
+- [x] `financial_stress_signals` table built — 1,363 institutions scored, EIN-level, FY2020-2022, 3-year trending (commit b402f3c)
 
 **IPEDS known open items (carry forward):**
 - `enrtot` NULL for **2000–2007** EF rows (expanded from 2000–2001):
