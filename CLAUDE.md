@@ -418,6 +418,8 @@ data would require downloading pre-2019 TEOS XML (IRS has index years 2013–201
 
 **PRIMARY KEY:** `(object_id, officer_name)` — one row per person per filing.
 
+**Jesuit institution presidents:** Jesuit priests serving as university presidents (e.g., Fr. William Leahy at BC) will NOT appear on Schedule J. Their compensation flows through their religious order (Society of Jesus), not through the institution. This is expected behavior — **not a data gap**. The institution's highest Schedule J earner is often a head coach or investment professional. Use `institution_master.jesuit_institution = 1` to identify these institutions before interpreting NULL or missing president comp.
+
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
 **Mode 1 — IRS TEOS Portal (2019–present):**

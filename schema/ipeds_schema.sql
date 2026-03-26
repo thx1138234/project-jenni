@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS institution_master (
     hospital            INTEGER,    -- 1=Yes, 0=No
     medical_degree      INTEGER,    -- 1=Yes, 0=No
     land_grant          INTEGER,    -- 1=Yes, 0=No
+    jesuit_institution  INTEGER DEFAULT 0,  -- 1=AJCU member (Society of Jesus); set manually, RELAFFIL dropped from NCES HD files
     iclevel             INTEGER,    -- 1=4-year, 2=2-year, 3=Less-than-2-year
     iclevel_label       TEXT,
     degree_granting     INTEGER,    -- 1=Yes, 0=No
