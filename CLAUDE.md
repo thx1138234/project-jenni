@@ -508,28 +508,50 @@ Saint Augustine's Univ (NC, 3.50), Florida Memorial Univ (FL, 3.25), Knoxville C
 Shaw University (NC, 2.75), Wilberforce (OH, 2.50), Miles College (AL, 2.50) are the top six.
 All show confirmed multi-year stress predating COVID.
 
-**narrative_flag column:** Plain-language stress pattern description for top stress cases.
-Populated via post-build UPDATE (not computed by the builder). The builder always leaves
-`narrative_flag` as NULL on rebuild — re-apply narrative UPDATEs after any full rebuild.
-26 institutions seeded as of March 2026. These are the seed of JENNI's stress signal language.
-Pattern vocabulary: "Structural financial distress", "Enrollment collapse", "Technically insolvent",
-"Business model stress, not demand problem", "Terminal financial distress".
+**narrative_flag column — ⚠️ REBUILD WARNING:**
+`narrative_flag` is manually seeded for 26 institutions and is **NOT** automatically
+recalculated on rebuild. Any full rebuild of `financial_stress_signals` (via
+`stress_signals_builder.py`) will set `narrative_flag` to NULL for all rows. Narratives
+must be re-applied manually after any rebuild.
+
+The 26 seeded institutions and their exact assigned narratives are documented in commit
+history at **eb4515d**. To restore after a rebuild, retrieve them from that commit and
+re-run as UPDATE statements against the live DB.
+
+Pattern vocabulary (use these exact phrases for consistency):
+- "Structural financial distress" — deficit + debt + negative assets, multi-year confirmed
+- "Enrollment collapse" — severe enrollment decline (>20%) driving combined stress
+- "Technically insolvent" — negative net assets confirmed across multiple years
+- "Business model stress, not demand problem" — financial distress with enrollment growth
+- "Terminal financial distress" — use only for confirmed closures or imminent closure risk
+
+These narratives are the seed of JENNI's stress signal language. Do not alter the pattern
+vocabulary without a deliberate decision — consistency of language matters for the intelligence layer.
+
+**Status — research artifact, not authoritative:**
+`financial_stress_signals` is a **research artifact** representing one interpretive framework
+applied at a single point in time (March 2026, FY2020–2022 window). It is useful for
+exploration, benchmarking signal logic, and seeding JENNI's language. It is **not** the
+authoritative quantitative signal layer for the product.
+
+The authoritative signal layer is **`institution_quant`**, currently being designed. When
+`institution_quant` is built, it will supersede `financial_stress_signals` as the primary
+stress scoring surface. Do not build downstream product features that hard-depend on
+`financial_stress_signals` column names or score bands — treat it as exploratory scaffolding.
 
 **Known limitations:**
 - **TEOS data only (FY2020–2022)**: ProPublica years (FY2012–2019) are not included in trend
   calculation. Institutions with pre-2020 stress history are not penalized for pre-window distress.
   The 3-year window was chosen to match TEOS coverage while spanning COVID.
-- **990-only signals**: All 8 signals derive from 990 financials. Cross-validation with IPEDS
-  enrollment trends (declining enrollment → revenue risk) has not yet been incorporated.
-  An institution with confirmed financial stress AND declining enrollment is higher risk than
-  the score alone reflects.
+- **990-only financial signals**: All 8 financial signals derive from 990 filings.
+  Enrollment cross-validation (ipeds_ef) is included as the 9th signal but IPEDS Finance,
+  graduation rates, and net price trends are not yet incorporated.
 - **Supplemental signal coverage is partial**: `sig_end_stress` and `sig_low_runway` require
-  Schedule D data (4,360 of ~5,171 TEOS filings). `sig_low_prog` requires Part IX data
-  (also ~5,171 TEOS filings). Institutions missing supplemental data will have those signals
-  conservatively set to 0 — scores may be understated for institutions without Schedule D/Part IX.
-- **Single-year-only institutions (43 rows)**: Institutions with only 1 year of data in
-  the window cannot generate confirmed or emerging signals — scores are capped at 2.0.
-  Treat these with lower confidence.
+  Schedule D data (4,360 of ~5,171 TEOS filings). `sig_low_prog` requires Part IX data.
+  Institutions missing supplemental data have those signals conservatively set to 0 —
+  scores may be understated.
+- **Single-year-only institutions (43 rows)**: Cannot generate confirmed or emerging signals;
+  scores capped at 2.0. Treat with lower confidence.
 
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
