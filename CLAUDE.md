@@ -599,6 +599,46 @@ Expected: 25,376 rows, Babson survey_year=2022 data_completeness_pct=96.2.
 - `athletics_to_expense_pct`: private nonprofits only (requires 990 functional expenses as denominator)
 - `formula_version = '1.0'`: bump this when metric formulas change; enables git isolation of formula changes
 
+### Related Organizations — form990_related_orgs + form990_related_transactions (Schedule R)
+
+`form990_related_orgs` stores all entities listed on Schedule R — disregarded entities,
+related tax-exempt orgs, taxable partnerships, and taxable corporations/trusts.
+`form990_related_transactions` stores dollar transactions with related orgs (Part V).
+TEOS/IRSx source only. One row per entity per filing; transactions can be many-per-filing.
+
+**Coverage:** TEOS FY2020–FY2024; extended to ~FY2015 by Zone 2 fill.
+**Scale varies dramatically**: Harvard reports 400+ related orgs per year; small institutions
+typically 1–10. The `relationship_type` column distinguishes the four Schedule R groups.
+
+**Key fields:**
+- `org_name`, `org_ein`: identity of related entity (org_ein NULL for foreign entities)
+- `relationship_type`: 'disregarded' | 'tax_exempt' | 'partnership' | 'corp_trust'
+- `direct_controlling_entity`: who controls the related org
+- `controlled_org_ind`: 1 if the filing organization controls this entity
+- `total_income`, `eoy_assets`, `share_of_total_income`, `share_of_eoy_assets`: financial summary
+- `transaction_type` (in transactions table): letter codes A–S per IRS Schedule R Part V
+
+### Governance — form990_governance (Part VI)
+
+`form990_governance` stores board composition and governance policy flags from Part VI.
+One row per filing (PRIMARY KEY `object_id`).
+
+**Coverage:** TEOS FY2020–FY2024; extended to ~FY2015 by Zone 2 fill.
+
+**Key fields:**
+- `voting_members_governing_body`, `voting_members_independent`: board size and independence
+- `total_employees`: W-2 headcount
+- `conflict_of_interest_policy`, `whistleblower_policy`, `document_retention_policy`: 0/1 flags
+- `financials_audited`, `audit_committee`: audit governance
+- `government_grants_amt`: federal/state grant revenue (Part VIII context)
+- `family_or_business_relationship`: 1 if officers/directors have family or business relationships
+
+**Validation (FY2022):**
+- Harvard: 13 board members, 10 independent; COI/whistleblower/doc retention all 1; 34,241 employees
+- BC: 52 board members, 50 independent; all three policies 1; 11,553 employees
+- MIT: 13 board members, 9 independent; all policies 1; 25,671 employees
+- Babson: 33 board members, 32 independent; all policies 1; 2,032 employees
+
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
 **Mode 1 — IRS TEOS Portal (2019–present):**
@@ -922,9 +962,123 @@ This database is maintained as a research repository.
 Data is sourced entirely from public federal sources (IRS, NCES, Dept. of Education).
 All source data is public domain. Code is MIT licensed.
 
-When adding new data years annually:
-1. Run `downloader.py` — it will skip already-downloaded files
-2. Run `loader.py --year {new_year}` for the new year only
-3. Update `CHANGELOG.md`
-4. Run integrity tests
-5. Commit schema and code changes only (not .db files)
+---
+
+## Annual Refresh Policy — Comprehensive Collection (Standing Policy)
+
+**The policy is: ingest everything available. No selective ingestion.**
+
+When NCES, IRS, EADA, or Scorecard releases new data, the default action is:
+download all new files and run all parsers and loaders. Do not filter by schedule,
+component, or field set. Comprehensive collection now costs nothing (compute is
+cheap, storage is cheap); selective ingestion costs research value that is hard
+to recover later.
+
+### 990 Annual Refresh (IRS TEOS — new index year released ~March each year)
+
+```bash
+# 1. Download new TEOS index year (e.g., year 2025 for FY2024 filings)
+.venv/bin/python3 ingestion/990/downloader.py \
+    --db   data/databases/ipeds_data.db \
+    --years 2025 \
+    --out  data/raw/990_xml
+
+# 2. Parse main form into form990_filings
+.venv/bin/python3 ingestion/990/parser.py \
+    --db data/databases/990_data.db
+
+# 3. Run ALL supplemental parsers in one pass
+.venv/bin/python3 ingestion/990/supplemental_runner.py \
+    --db  data/databases/990_data.db \
+    --xml data/raw/990_xml
+# Parsers: schedule_d, part_ix, compensation, schedule_r, governance
+# All are idempotent — safe to re-run; replaces rows for updated filings.
+
+# 4. Rebuild derived layers
+.venv/bin/python3 ingestion/990/stress_signals_builder.py \
+    --db data/databases/990_data.db
+.venv/bin/python3 ingestion/institution_quant_builder.py \
+    --db990 data/databases/990_data.db \
+    --ipeds data/databases/ipeds_data.db \
+    --eada  data/databases/eada_data.db \
+    --scorecard data/databases/scorecard_data.db \
+    --out   data/databases/institution_quant.db \
+    --stage all
+```
+
+### IPEDS Annual Refresh (NCES — released throughout the year by component)
+
+```bash
+# Download all new components for the new year
+python3 ingestion/ipeds/downloader.py --year {new_year}
+
+# Load all components — loader skips already-loaded rows
+python3 ingestion/ipeds/loader.py --db data/databases/ipeds_data.db --year {new_year}
+
+# Load E12 FTE (separate loader)
+python3 ingestion/ipeds/e12_loader.py --db data/databases/ipeds_data.db
+
+# Rebuild institution_quant for the new year
+python3 ingestion/institution_quant_builder.py ... --stage all
+```
+
+**Do not cherry-pick components.** If NCES releases ADM, EF, HR, Finance,
+Completions, and GR for the same year, load all of them. Skipping one now
+means a gap in longitudinal analysis that is painful to backfill.
+
+### EADA Annual Refresh (Dept. of Education — released ~January each year)
+
+```bash
+python3 ingestion/eada/downloader.py
+python3 ingestion/eada/loader.py     --db data/databases/eada_data.db
+python3 ingestion/eada/sports_loader.py --db data/databases/eada_data.db
+```
+
+### College Scorecard Refresh (annual — API pull)
+
+```bash
+python3 ingestion/scorecard/api_client.py
+python3 ingestion/scorecard/loader.py --db data/databases/scorecard_data.db
+```
+
+### After Any Refresh
+
+1. Verify row counts against previous build (should only increase)
+2. Run validation institution spot checks (5 MA private nonprofits)
+3. Update `CHANGELOG.md` with new year and row counts
+4. Commit schema and code changes only (.db files are .gitignored)
+5. Re-run `institution_quant_builder.py --stage all` to refresh the quant layer
+
+### 990 Zone Coverage and Supplemental Table Availability
+
+| Zone | TEOS index years | Approx fiscal years | form990_filings | Supplemental schedules |
+|---|---|---|---|---|
+| Zone 1 (historical) | n/a — ProPublica | FY2012–FY2019 | ✓ (propublica source) | ✗ — ProPublica JSON has no schedule detail |
+| Zone 2 (baseline) | 2017–2019 | FY2015–FY2018 | ✓ (irsx source, overlaps) | ✓ after Zone 2 fill |
+| Zone 3 (current) | 2021–2024 | FY2020–FY2024 | ✓ | ✓ |
+| Zone 3+ (refresh) | 2025+ | FY2024+ | ongoing | ongoing |
+
+**Zone 2 fill** (one-time, March 2026): TEOS index years 2017–2019 downloaded and
+all supplemental parsers run. This extends Schedule D, Part IX, Schedule J,
+Schedule R, and Part VI governance coverage back to ~FY2015.
+
+**Zone 1 gap is permanent**: ProPublica JSON does not include schedule-level detail.
+FY2012–FY2018 supplemental data (schedule_d, part_ix, compensation, etc.) is only
+available where Zone 2 TEOS XMLs overlap (i.e., filings in TEOS index years 2017–2019).
+
+**When to add a new Zone 2-style backfill**: If TEOS releases bulk XMLs for additional
+historical years (2011–2016), run the downloader for those years and re-run
+`supplemental_runner.py`. The runner is idempotent.
+
+---
+
+### Supplemental Table Summary
+
+| Table | Parser | Schedule / Part | TEOS coverage | Zone 2 fill |
+|---|---|---|---|---|
+| `form990_schedule_d` | schedule_d_parser.py | Schedule D Part V (endowment) | FY2020–FY2024 | extends to ~FY2015 |
+| `form990_part_ix` | part_ix_parser.py | Part IX (functional expenses) | FY2020–FY2024 | extends to ~FY2015 |
+| `form990_compensation` | compensation_parser.py | Schedule J (officer comp) | FY2020–FY2024 | extends to ~FY2015 |
+| `form990_related_orgs` | schedule_r_parser.py | Schedule R (related orgs) | FY2020–FY2024 | extends to ~FY2015 |
+| `form990_related_transactions` | schedule_r_parser.py | Schedule R Part V (transactions) | FY2020–FY2024 | extends to ~FY2015 |
+| `form990_governance` | governance_parser.py | Part VI (board/policy) | FY2020–FY2024 | extends to ~FY2015 |
