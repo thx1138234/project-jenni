@@ -1054,31 +1054,36 @@ python3 ingestion/scorecard/loader.py --db data/databases/scorecard_data.db
 | Zone | TEOS index years | Approx fiscal years | form990_filings | Supplemental schedules |
 |---|---|---|---|---|
 | Zone 1 (historical) | n/a — ProPublica | FY2012–FY2019 | ✓ (propublica source) | ✗ — ProPublica JSON has no schedule detail |
-| Zone 2 (baseline) | 2017–2019 | FY2015–FY2018 | ✓ (irsx source, overlaps) | ✓ after Zone 2 fill |
-| Zone 3 (current) | 2021–2024 | FY2020–FY2024 | ✓ | ✓ |
+| Zone 3 (current) | 2021–2024 | FY2019–FY2024 | ✓ (irsx source) | ✓ — all supplemental parsers run |
 | Zone 3+ (refresh) | 2025+ | FY2024+ | ongoing | ongoing |
 
-**Zone 2 fill** (one-time, March 2026): TEOS index years 2017–2019 downloaded and
-all supplemental parsers run. This extends Schedule D, Part IX, Schedule J,
-Schedule R, and Part VI governance coverage back to ~FY2015.
+**Zone 2 (TEOS index years 2017–2020) is inaccessible**: The IRS TEOS bulk ZIPs for
+index years 2017, 2018, 2019, and 2020 all return HTTP 302 redirecting to
+`https://www.irs.gov/404`. The index CSVs are accessible but the actual ZIP files
+are not downloadable. This was confirmed March 2026 by probing all 12 monthly ZIP
+patterns for each year. Only index years 2021+ have accessible bulk ZIPs.
 
-**Zone 1 gap is permanent**: ProPublica JSON does not include schedule-level detail.
-FY2012–FY2018 supplemental data (schedule_d, part_ix, compensation, etc.) is only
-available where Zone 2 TEOS XMLs overlap (i.e., filings in TEOS index years 2017–2019).
+**Practical result**: Supplemental schedule coverage (Schedule D, Part IX, Schedule J,
+Schedule R, Part VI governance) begins at FY2019/FY2020 and cannot be extended
+further back via TEOS bulk download. The Zone 1 supplemental gap (FY2012–FY2019) is
+permanent under the current architecture.
 
-**When to add a new Zone 2-style backfill**: If TEOS releases bulk XMLs for additional
-historical years (2011–2016), run the downloader for those years and re-run
-`supplemental_runner.py`. The runner is idempotent.
+**When to add backfill if TEOS changes**: If the IRS ever restores bulk ZIP access
+for pre-2021 index years, run the downloader for those years and re-run
+`supplemental_runner.py`. The runner is idempotent and will add new rows without
+disturbing existing data.
 
 ---
 
 ### Supplemental Table Summary
 
-| Table | Parser | Schedule / Part | TEOS coverage | Zone 2 fill |
+| Table | Parser | Schedule / Part | Rows | TEOS coverage |
 |---|---|---|---|---|
-| `form990_schedule_d` | schedule_d_parser.py | Schedule D Part V (endowment) | FY2020–FY2024 | extends to ~FY2015 |
-| `form990_part_ix` | part_ix_parser.py | Part IX (functional expenses) | FY2020–FY2024 | extends to ~FY2015 |
-| `form990_compensation` | compensation_parser.py | Schedule J (officer comp) | FY2020–FY2024 | extends to ~FY2015 |
-| `form990_related_orgs` | schedule_r_parser.py | Schedule R (related orgs) | FY2020–FY2024 | extends to ~FY2015 |
-| `form990_related_transactions` | schedule_r_parser.py | Schedule R Part V (transactions) | FY2020–FY2024 | extends to ~FY2015 |
-| `form990_governance` | governance_parser.py | Part VI (board/policy) | FY2020–FY2024 | extends to ~FY2015 |
+| `form990_schedule_d` | schedule_d_parser.py | Schedule D Part V (endowment) | 4,360 | FY2019–FY2024 |
+| `form990_part_ix` | part_ix_parser.py | Part IX (functional expenses) | 5,171 | FY2019–FY2024 |
+| `form990_compensation` | compensation_parser.py | Schedule J (officer comp) | 40,350 | FY2019–FY2024 |
+| `form990_related_orgs` | schedule_r_parser.py | Schedule R (related orgs) | 33,600 | FY2020–FY2024 |
+| `form990_related_transactions` | schedule_r_parser.py | Schedule R Part V (transactions) | 7,790 | FY2020–FY2024 |
+| `form990_governance` | governance_parser.py | Part VI (board/policy) | 5,171 | FY2019–FY2024 |
+
+All row counts as of March 2026. Zone 2 backfill not feasible (pre-2021 TEOS ZIPs inaccessible).
