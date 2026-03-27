@@ -534,10 +534,10 @@ applied at a single point in time (March 2026, FY2020–2022 window). It is usef
 exploration, benchmarking signal logic, and seeding JENNI's language. It is **not** the
 authoritative quantitative signal layer for the product.
 
-The authoritative signal layer is **`institution_quant`**, currently being designed. When
-`institution_quant` is built, it will supersede `financial_stress_signals` as the primary
-stress scoring surface. Do not build downstream product features that hard-depend on
-`financial_stress_signals` column names or score bands — treat it as exploratory scaffolding.
+The authoritative signal layer is **`institution_quant`** (v1.0, March 2026 — see section below).
+`institution_quant` supersedes `financial_stress_signals` as the primary stress scoring surface.
+Do not build downstream product features that hard-depend on `financial_stress_signals` column
+names or score bands — treat it as exploratory scaffolding.
 
 **Known limitations:**
 - **TEOS data only (FY2020–2022)**: ProPublica years (FY2012–2019) are not included in trend
@@ -552,6 +552,52 @@ stress scoring surface. Do not build downstream product features that hard-depen
   scores may be understated.
 - **Single-year-only institutions (43 rows)**: Cannot generate confirmed or emerging signals;
   scores capped at 2.0. Treat with lower confidence.
+
+### institution_quant — Authoritative Quant Layer
+
+`institution_quant` is the authoritative, fully rebuildable quantitative layer.
+One row per (unitid, survey_year). Pure math only — no thresholds, no composite scores,
+no judgments. Built by `ingestion/institution_quant_builder.py`.
+
+**Coverage by metric domain (by design — each uses best available source):**
+| Domain | Metric group | Coverage | Source |
+|---|---|---|---|
+| Financial | 12 metrics (margins, debt, endowment, etc.) | FY2019–2022 only | 990 TEOS window |
+| Demand | 8 metrics (enrollment, yield, admit rate, etc.) | survey_year 2016–2022 | IPEDS (full range) |
+| Value | 3 metrics (grad rate, earnings, net price) | survey_year 2022 only | College Scorecard |
+| Athletics | 3 metrics (net, per student, % of expense) | survey_year 2019–2022 | EADA |
+
+This asymmetry is by design — financial metrics are limited to the TEOS window (FY2019+),
+demand metrics use the full IPEDS longitudinal range, and value metrics reflect the single
+Scorecard year loaded. As additional years are loaded, coverage expands without schema changes.
+
+**Current build (v1.0, March 2026): 25,376 rows, survey_years 2019–2022**
+- Financial: 5,070 institution-years (private nonprofits with 990 filings)
+- Demand: 24,882 institution-years (all IPEDS institutions)
+- Value: 5,784 institutions (Scorecard 2022 only, mapped to survey_year=2022)
+- Athletics: 7,985 institution-years; 3,117 with `athletics_to_expense_pct`
+- Peers: Carnegie peer group stats (min 5 peers); 3,911 with peer data in 2022
+- Trends: 1yr, 3yr, direction for all metrics where ≥2 years available
+
+**Rebuild path:**
+```bash
+rm data/databases/institution_quant.db
+.venv/bin/python3 ingestion/institution_quant_builder.py \
+    --db990   data/databases/990_data.db \
+    --ipeds   data/databases/ipeds_data.db \
+    --eada    data/databases/eada_data.db \
+    --scorecard data/databases/scorecard_data.db \
+    --out     data/databases/institution_quant.db \
+    --stage   all
+```
+Expected: 25,376 rows, Babson survey_year=2022 data_completeness_pct=96.2.
+
+**Known gaps (carry forward):**
+- `retention_rate`: EF Part D not loaded → always NULL
+- `grad_rate_150`: uses Scorecard `completion_rate_4yr` (single year 2022 only); ipeds_gr.gba_cohort always NULL
+- `net_price`, `earnings_to_debt_ratio`, `net_price_to_earnings`: Scorecard single year only
+- `athletics_to_expense_pct`: private nonprofits only (requires 990 functional expenses as denominator)
+- `formula_version = '1.0'`: bump this when metric formulas change; enables git isolation of formula changes
 
 ### Source — Two-Mode Pipeline (confirmed March 2026)
 
