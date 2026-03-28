@@ -112,12 +112,12 @@ def _metrics_table(institution_name: str, q: dict, survey_year: int) -> Table:
         trend_dir  = q.get(f"{suffix}_trend_dir")
 
         peer_str   = _fmt(fmt, peer_med) if peer_med is not None else "—"
-        pctile_str = f"{peer_pct:.0f}" if peer_pct is not None else "—"
+        pctile_str = f"{peer_pct*100:.0f}" if peer_pct is not None else "—"
         trend_str  = _DIR_SYMBOLS.get(trend_dir or "", "")
 
-        # Color value by peer percentile position
+        # Color value by peer percentile position (peer_pct stored as 0–1 fraction)
         if peer_pct is not None:
-            good_pct = peer_pct if higher_better else (100 - peer_pct)
+            good_pct = peer_pct * 100 if higher_better else (100 - peer_pct * 100)
             if good_pct >= 75:
                 val_markup = f"[green]{val_str}[/green]"
             elif good_pct >= 25:
