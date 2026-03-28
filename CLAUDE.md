@@ -1033,14 +1033,19 @@ Document decisions here as they're made so they don't get relitigated.
   source for this year. Total coverage for MIT: FY2012–FY2023 minus FY2013 = 11 rows.
   Workaround: manual PDF extraction or accept the gap; not worth engineering for one row.
 
-### JENNI Intelligence Layer — Production-Ready ✓ (2026-03-28)
+### JENNI v1.0 — Production-Ready ✓ (2026-03-28)
 
-The intelligence layer (jenni/) has been validated against all five core MA private nonprofit
-institutions and is production-ready as of 2026-03-28.
+The JENNI intelligence layer has been validated against all five core MA private nonprofit
+institutions and is declared production-ready as of 2026-03-28. All five outputs rendered
+completely with no truncation after the token budget fix. The felt moment — the sense that
+the model is genuinely reasoning about institutions rather than summarizing data — was
+confirmed across the full validation set.
 
 **What was built (commits in order):**
-- `institution_narratives` table + hybrid seeder (21,962 rows: identity, stress_signal, financial_profile, hand-crafted for 5 validation institutions)
-- `jenni/` package: config, system prompt (accordion epistemic rules, domain conventions), query_resolver, synthesizer, delivery, CLI
+- `institution_narratives` table + hybrid seeder (21,962 rows: identity, stress_signal,
+  financial_profile, hand-crafted for 5 validation institutions)
+- `jenni/` package: config, system prompt (accordion epistemic rules, domain conventions),
+  query_resolver, synthesizer, delivery, CLI
 - `institution_quant` v1.0: 25,376 rows, 25 metrics, peer percentiles, Carnegie peer groups
 - pell_pct storage bug fixed (was 0–100, corrected to 0–1 fraction; 22,952 rows patched)
 - retention_rate populated from EF Part D `ret_pcf` (65.6% coverage, 2000–2023)
@@ -1049,7 +1054,8 @@ institutions and is production-ready as of 2026-03-28.
 - Partial-year warning in CLI (fires when completeness < 50% and no --year flag)
 - retention_rate added to `_METRICS` and `_DISPLAY_METRICS`
 - max_tokens raised to 3,072 (standard) / 4,096 (R1/R2 Carnegie or peer_n > 20)
-- Stress band refined: "Baseline — no confirmed signals" for score 0.1–1.9 with zero confirmed signals
+- Stress band refined: "Baseline — no confirmed signals" for score 0.1–1.9 with zero
+  confirmed signals (Harvard, MIT, BC, Bentley now render green, not amber)
 
 **Five-institution validation results (survey_year 2022, 2026-03-28):**
 
@@ -1061,33 +1067,61 @@ institutions and is production-ready as of 2026-03-28.
 | Harvard University | R1 | 36 | Baseline — no confirmed signals (0.50) | 96.2% | 2,390 | ✓ Complete |
 | MIT | R1 | 36 | Baseline — no confirmed signals (0.50) | 96.2% | 1,700 | ✓ Complete |
 
-**BC confirmed as richest cross-source output.** All four data sources (990, IPEDS, EADA,
-Scorecard) present at 96.2% completeness. Model surfaced Jesuit presidency compensation
-convention, ACC athletics structural commitment, and revenue productivity gap unprompted.
-Operating margin story (normalization vs. deterioration) rendered fully at 2,133 tokens.
-Previously truncated at 2,048 before Fix 1.
+**Key validation findings:**
 
-**Known gaps remaining (carry forward to Phase 2):**
-- Scorecard historical data: single vintage (2022) only. Historical bulk download from
-  data.ed.gov required for trend data on net_price, earnings_to_debt_ratio, net_price_to_earnings.
-- retention_rate NULL for ~34% of institutions: not in EF Part D for non-degree-granting
-  and specialized institutions. No alternative source identified.
-- `grad_rate_150` single vintage (2022 Scorecard only). `ipeds_gr.gba_cohort` always NULL.
+**BC — confirmed as richest cross-source output.** All four data sources (990, IPEDS, EADA,
+Scorecard) at 96.2% completeness. Model surfaced Jesuit presidency compensation convention
+(Father Leahy not on Schedule J per Society of Jesus convention), ACC athletics as structural
+commitment rather than variable cost, and revenue productivity gap (22nd pctile revenue/FTE
+despite top-quartile selectivity) — all unprompted. Operating margin story (normalization
+from pandemic peaks, not deterioration) rendered fully at 2,133 tokens; previously truncated
+mid-sentence at 2,048 before the token budget fix.
+
+**Harvard — correctly handled Ivy Plus tier limitation and endowment spending rate anomaly.**
+Model opened with the peer group caveat unprompted — R1 Carnegie (n=36) is not an appropriate
+financial benchmark for Harvard, named the correct peer set (MIT, Stanford, Yale, Princeton,
+Penn, Columbia, Duke), and called the R1 percentile "sector-relative positioning, not meaningful
+peer comparison." Endowment spending rate anomaly (0.7% reported vs. ~5% policy) explained
+correctly: the ratio reflects ending endowment denominator size, not actual payout policy.
+Recommended cross-referencing published financial statements before citing in board materials.
+This was not prompted; the model derived it from context.
+
+**MIT — surfaced asset vs. revenue leverage distinction unprompted.** Debt-to-assets (14th
+pctile — low) and debt-to-revenue (75th pctile — elevated) were correctly identified as
+measuring different things: asset-base conservatism vs. revenue-service coverage. The model
+stated: "This is not a stress signal, but it is not the same as being low-leverage on both
+dimensions." Overhead ratio (97th pctile) and program services (0th pctile) inversion
+explained from pre-encoded narrative as indirect cost recovery convention, not inefficiency.
+
+**Bentley — inner terminus correctly placed for strategic questions data cannot answer.**
+The model explicitly placed Bentley's enrollment contraction story at the inner terminus:
+"Whether Bentley's enrollment contraction reflects a structural market shift or a cyclical
+correction is a strategic judgment the data alone cannot make." The endowment deployment
+question ("Is Bentley deliberately building the endowment, or simply not drawing on it?")
+was correctly identified as unanswerable from financial data alone. Monitoring cadence
+recommendation ("net tuition revenue weekly, not annually") was a practical deliverable
+that goes beyond what the data says into how to act on it.
+
+**Three pre-production fixes applied and confirmed:**
+1. retention_rate populated from EF Part D `ret_pcf` — 65.6% coverage, Babson 95%
+2. Stress band "Baseline — no confirmed signals" — zero-confirmed institutions render green
+3. Partial-year warning active — fires when completeness < 50% with no `--year` flag set
+
+**Known gaps carried forward to Phase 2:**
+- Scorecard historical data: single vintage (2022) only. Bulk download from data.ed.gov
+  required for trend direction on net_price, earnings_to_debt_ratio, net_price_to_earnings,
+  grad_rate_150. No trend data should be inferred from these metrics until resolved.
+- retention_rate NULL for ~34% of institutions (not in EF Part D for non-degree-granting
+  and specialized institutions). No alternative source identified.
 - Peer group for Harvard/MIT is R1 Carnegie (n=36) — includes public flagships that are
-  not true financial peers. A named-peer comparison tier (endowment >$10B) requires
-  a separate peer list table not yet built.
-- No `--compare` multi-institution output validated; `jenni compare` command exists but
-  not included in the five-institution validation run.
-
-**Model behavior validated:**
-- Accordion epistemic posture (center/authority) fires correctly for 2022 data
-- Inner terminus invoked unprompted in all five outputs
-- Scorecard single-year caveat present in all five data quality footers
-- Harvard peer group framing caveat (R1 ≠ true financial peers) surfaced in both runs
-- MIT overhead ratio convention (research indirect cost recovery) explained correctly
-  from pre-encoded identity narrative
-- Jesuit presidency compensation convention (BC, Father Leahy) surfaced correctly from
-  pre-encoded identity narrative
+  not financially comparable. Named-peer comparison tier (endowment >$10B) requires a
+  separate peer list table not yet built.
+- Model narrative label inconsistency: in one Harvard run the model used "Marginal/Clean"
+  rather than "Baseline — no confirmed signals." This is acceptable — the terminal header
+  is the authoritative display and renders correctly. Model narrative language is
+  interpretive and the framing was still accurate.
+- `jenni compare` multi-institution command exists but was not included in validation run.
+  Validate before using for named-peer side-by-side outputs.
 
 ### Phase 2 Complete
 - [ ] GitHub repo public
