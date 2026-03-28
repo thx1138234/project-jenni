@@ -1033,6 +1033,62 @@ Document decisions here as they're made so they don't get relitigated.
   source for this year. Total coverage for MIT: FY2012–FY2023 minus FY2013 = 11 rows.
   Workaround: manual PDF extraction or accept the gap; not worth engineering for one row.
 
+### JENNI Intelligence Layer — Production-Ready ✓ (2026-03-28)
+
+The intelligence layer (jenni/) has been validated against all five core MA private nonprofit
+institutions and is production-ready as of 2026-03-28.
+
+**What was built (commits in order):**
+- `institution_narratives` table + hybrid seeder (21,962 rows: identity, stress_signal, financial_profile, hand-crafted for 5 validation institutions)
+- `jenni/` package: config, system prompt (accordion epistemic rules, domain conventions), query_resolver, synthesizer, delivery, CLI
+- `institution_quant` v1.0: 25,376 rows, 25 metrics, peer percentiles, Carnegie peer groups
+- pell_pct storage bug fixed (was 0–100, corrected to 0–1 fraction; 22,952 rows patched)
+- retention_rate populated from EF Part D `ret_pcf` (65.6% coverage, 2000–2023)
+- All peer_pct display bugs fixed (synthesizer + delivery: `pct*100`)
+- Scorecard single-year caveat in context package and model prompt
+- Partial-year warning in CLI (fires when completeness < 50% and no --year flag)
+- retention_rate added to `_METRICS` and `_DISPLAY_METRICS`
+- max_tokens raised to 3,072 (standard) / 4,096 (R1/R2 Carnegie or peer_n > 20)
+- Stress band refined: "Baseline — no confirmed signals" for score 0.1–1.9 with zero confirmed signals
+
+**Five-institution validation results (survey_year 2022, 2026-03-28):**
+
+| Institution | Carnegie | Peer n | Stress Band | Completeness | Tokens out | Status |
+|---|---|---|---|---|---|---|
+| Babson College | M3 | 13 | Clean (0.00) | 96.2% | 1,976 | ✓ Complete |
+| Bentley University | M1 | 144 | Baseline — no confirmed signals (0.25) | 96.2% | 1,851 | ✓ Complete |
+| Boston College | R1 | 36 | Baseline — no confirmed signals (0.50) | 96.2% | 2,133 | ✓ Complete |
+| Harvard University | R1 | 36 | Baseline — no confirmed signals (0.50) | 96.2% | 2,390 | ✓ Complete |
+| MIT | R1 | 36 | Baseline — no confirmed signals (0.50) | 96.2% | 1,700 | ✓ Complete |
+
+**BC confirmed as richest cross-source output.** All four data sources (990, IPEDS, EADA,
+Scorecard) present at 96.2% completeness. Model surfaced Jesuit presidency compensation
+convention, ACC athletics structural commitment, and revenue productivity gap unprompted.
+Operating margin story (normalization vs. deterioration) rendered fully at 2,133 tokens.
+Previously truncated at 2,048 before Fix 1.
+
+**Known gaps remaining (carry forward to Phase 2):**
+- Scorecard historical data: single vintage (2022) only. Historical bulk download from
+  data.ed.gov required for trend data on net_price, earnings_to_debt_ratio, net_price_to_earnings.
+- retention_rate NULL for ~34% of institutions: not in EF Part D for non-degree-granting
+  and specialized institutions. No alternative source identified.
+- `grad_rate_150` single vintage (2022 Scorecard only). `ipeds_gr.gba_cohort` always NULL.
+- Peer group for Harvard/MIT is R1 Carnegie (n=36) — includes public flagships that are
+  not true financial peers. A named-peer comparison tier (endowment >$10B) requires
+  a separate peer list table not yet built.
+- No `--compare` multi-institution output validated; `jenni compare` command exists but
+  not included in the five-institution validation run.
+
+**Model behavior validated:**
+- Accordion epistemic posture (center/authority) fires correctly for 2022 data
+- Inner terminus invoked unprompted in all five outputs
+- Scorecard single-year caveat present in all five data quality footers
+- Harvard peer group framing caveat (R1 ≠ true financial peers) surfaced in both runs
+- MIT overhead ratio convention (research indirect cost recovery) explained correctly
+  from pre-encoded identity narrative
+- Jesuit presidency compensation convention (BC, Father Leahy) surfaced correctly from
+  pre-encoded identity narrative
+
 ### Phase 2 Complete
 - [ ] GitHub repo public
 - [ ] PostgreSQL on Supabase, migrated from SQLite
