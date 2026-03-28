@@ -156,6 +156,97 @@ The direct report provides the recommendation. The C-suite makes the decision.
 
 ---
 
+## The Accordion of Time — Permanent Architectural Principle
+
+The database is not a snapshot. It is a temporal instrument. Understanding its
+boundaries — in both directions — is essential to using it honestly.
+
+### The Termini
+
+**Backward terminus — structured quantitative data: approximately 1960.**
+Systematic federal data collection at scale begins roughly here. IPEDS components
+reach back to 2000 in machine-readable form; 990 XML filings to 2012; EADA to 2003.
+These are our operational limits. But institutional history extends further, and
+*narrative context* — founding story, mission evolution, major strategic pivots,
+accreditation history, closures and mergers — can and should reach back to
+institutional founding. A college founded in 1863 carries that context even when
+the structured data only goes back 25 years. The backward terminus is not where
+knowledge ends; it is where the character of knowledge changes.
+
+**Forward terminus — defensible projection: 3–5 years.**
+Trend extrapolation grounded in multi-year data is legitimate analysis. Enrollment
+CAGR, revenue trajectory, demographic exposure — these project forward with
+defensible confidence over a planning horizon. Beyond 5 years, the honest posture
+is scenario-building, not prediction. The forward terminus is not a wall; it is
+where conditionals replace indicatives.
+
+**Inner terminus — what financial data cannot see.**
+This is the most important terminus. The database captures what institutions
+*report*. It does not capture:
+- Leadership quality: whether the president has the confidence of the board
+- Mission authenticity: whether the institution actually does what it says
+- Community vitality: faculty morale, student belonging, alumni loyalty
+- Strategic execution: whether a turnaround plan is real or a press release
+- Accreditor relationships: the tone of the last site visit, the unsent letter
+
+These are the things that make institutions great — or that determine whether
+a distressed institution survives or closes. A school can score clean on every
+financial signal and be hollowing out. Another can carry a high stress score
+and be executing a genuine recovery. Financial data is a necessary but not
+sufficient lens. The inner terminus is the boundary of what numbers can know.
+
+**The music lives between the termini.** JENNI's value is in the space that
+structured data can actually illuminate: longitudinal financial trends, peer
+benchmarking, enrollment dynamics, demographic exposure, the pre-distress signals
+that emerge years before a closure announcement. That space is large and largely
+unoccupied by existing tools. Stay in it.
+
+### Intelligence Layer Epistemic Rules
+
+These rules govern how JENNI speaks. They are not stylistic preferences — they
+are epistemic commitments that protect the product's credibility.
+
+**Near the center of the data window — speak with authority.**
+When referencing well-covered years with multiple confirming sources:
+> "Boston College's tuition dependency increased 6 points between 2016 and 2022,
+> from 48% to 54% of total revenue."
+
+**Approaching the backward terminus — speak with humility.**
+As data thins toward the early years of coverage:
+> "The data suggests enrollment growth beginning around 2008, though evidence thins
+> before 2012 when XML filings begin."
+
+Do not fabricate continuity. If a metric is NULL before a certain year, say so.
+Silence about a data gap is a form of misrepresentation.
+
+**Approaching the forward terminus — speak in conditionals.**
+> "If current enrollment trends continue, Babson would cross 4,000 undergraduates
+> by 2027 — though demographic headwinds in the Northeast create meaningful downside risk."
+
+The conditional is not hedging. It is precision.
+
+**Beyond either terminus — acknowledge the boundary explicitly.**
+> "I don't have structured data on Babson's founding period. What I can tell you
+> is that their financial model as of 2022..."
+
+Never confabulate. The boundary is not a failure — it is the shape of honest knowledge.
+
+### The 2023 Refresh as Accordion in Practice
+
+The survey_year=2023 data illustrates how the accordion works in the forward direction:
+- **Demand and athletics** extended cleanly to 2023 — these sources release on
+  predictable schedules aligned with the academic year
+- **Financial rows** are pending — FY2024 990 filings require the TEOS 2025 index
+  release (~March 2026); only 95 early filers are present of ~1,200 expected
+- **INSERT OR IGNORE** ensures the accordion expands non-destructively — partial
+  rows coexist with complete rows; financial data fills in when filings arrive
+
+This is the correct behavior. A 2023 row with demand data and NULL financial data
+is honest. A row that refuses to exist until all fields are populated would be
+epistemically convenient but practically useless.
+
+---
+
 ## Schema Implications of the Product Vision
 
 The use cases above should inform every schema and data decision:
@@ -973,6 +1064,27 @@ download all new files and run all parsers and loaders. Do not filter by schedul
 component, or field set. Comprehensive collection now costs nothing (compute is
 cheap, storage is cheap); selective ingestion costs research value that is hard
 to recover later.
+
+### The Rhythms of the Forward Hand — Annual Release Cadence
+
+These are the rhythms by which the accordion's forward terminus advances.
+Check these dates when assessing whether new data is available.
+
+| Source | Typical release | What it adds | Notes |
+|---|---|---|---|
+| **IRS TEOS** | ~March each year | New index year (prior calendar year's filings) | TEOS 2025 (~March 2026) = FY2024 filings. Financial metrics for survey_year N require FY(N+1) filings. |
+| **NCES IPEDS** | Rolling, ~18 months after AY end | All 12 components for completed academic year | AY 2023–24 (survey_year=2023) final release ~early 2026. Provisional data available sooner. HD, IC, EF released first; Finance, GR, completions released later. |
+| **Dept. of Education EADA** | ~January each year | Athletics financials for prior academic year | EADA 2024 (survey_year=2024) released ~January 2025. Usually the earliest of the four sources. |
+| **College Scorecard** | ~October each year | Earnings, debt, completion by program | Scorecard 2024 (~October 2024) = earnings data for students who entered ~2017–2018. Lags enrollment by ~6 years. |
+
+**Practical implication for the accordion:**
+- **January**: Check for new EADA data. Run athletics refresh if available.
+- **March**: Watch for new TEOS index year. When it drops, run full 990 pipeline + supplemental runner + institution_quant refresh.
+- **October**: Check for new Scorecard. Run scorecard loader + institution_quant value refresh.
+- **Rolling (check quarterly)**: IPEDS components release on different schedules. HD and EF often arrive before Finance and GR. Do not wait for all components — load each as it appears.
+
+The INSERT OR IGNORE architecture means partial refreshes are always safe.
+A new EADA year can be loaded without touching 990 or IPEDS rows.
 
 ### 990 Annual Refresh (IRS TEOS — new index year released ~March each year)
 
