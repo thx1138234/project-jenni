@@ -324,7 +324,7 @@ def build_demand(conn_out: sqlite3.Connection,
                 "app_3yr_cagr":        cagr(app_3yr, app_now, 3),
                 "retention_rate":      None,   # EF Part D not loaded — known gap
                 "grad_enrollment_pct": safe_div(ef_now.get("enrgrad"), enr_now),
-                "pell_pct":            sfa_now.get("pct_pell"),
+                "pell_pct":            safe_div(sfa_now.get("pct_pell"), 100),  # ipeds_sfa stores as 0–100; convert to fraction
             }
 
             if enr_now is None and all(v is None for v in vals.values()):
