@@ -2,6 +2,11 @@
 irsx==0.3.3
 requests==2.32.5
 
+# JENNI intelligence layer
+anthropic>=0.86.0
+rich>=14.0.0
+click>=8.1.0
+
 # Pinned transitive dependencies
 certifi==2026.2.25
 charset-normalizer==3.4.6
