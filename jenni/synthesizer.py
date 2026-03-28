@@ -29,6 +29,26 @@ _MODEL_ROUTING: dict[str, str] = {
     "sector":     MODEL_OPUS,
 }
 
+# Carnegie Basic Classification codes for research-intensive tiers
+# (c18basic / c21basic: 15=R1, 16=R2).  These produce denser context
+# and require a larger token budget.
+_RESEARCH_CARNEGIE = {15, 16}
+
+_MAX_TOKENS_STANDARD = 3072   # sonnet; single institution, M1/M3 peer group
+_MAX_TOKENS_COMPLEX  = 4096   # sonnet with large peer group or R1/R2 Carnegie
+_MAX_TOKENS_OPUS     = 4096   # opus sector queries
+
+
+def _is_complex_context(context: dict) -> bool:
+    """Return True when the context warrants an expanded token budget."""
+    peer_n = (context.get("peer_data") or {}).get("carnegie_peer_group_size") or 0
+    if peer_n > 20:
+        return True
+    for entity in context.get("entities", []):
+        if entity.get("carnegie_basic") in _RESEARCH_CARNEGIE:
+            return True
+    return False
+
 # Display labels for the footer
 _MODEL_LABELS: dict[str, str] = {
     MODEL_HAIKU:  "Haiku 4.5 (fast lookup)",
@@ -174,10 +194,11 @@ def _format_context_for_model(context: dict) -> str:
 
         # Stress
         if stress:
-            score = stress.get("composite_stress_score") or 0
-            band  = stress.get("narrative_flag") or _score_band(score)
+            score    = stress.get("composite_stress_score") or 0
+            conf     = stress.get("confirmed_signal_count") or 0
+            band     = stress.get("narrative_flag") or _score_band(score, conf)
             parts.append(f"STRESS SCORE: {score:.2f} ({band}) | "
-                         f"Confirmed signals: {stress.get('confirmed_signal_count', 0)} | "
+                         f"Confirmed signals: {conf} | "
                          f"Years: {stress.get('years_available', 0)}")
             parts.append("")
 
@@ -218,12 +239,13 @@ def _format_context_for_model(context: dict) -> str:
     return "\n".join(parts)
 
 
-def _score_band(score: float) -> str:
+def _score_band(score: float, confirmed: int = 0) -> str:
     if score >= 6.5: return "CRITICAL"
     if score >= 5.0: return "HIGH"
     if score >= 3.5: return "Elevated"
     if score >= 2.0: return "Baseline"
-    if score >= 0.1: return "Marginal"
+    if score >= 0.1:
+        return "Marginal" if confirmed > 0 else "Baseline — no confirmed signals"
     return "Clean"
 
 
@@ -242,13 +264,20 @@ def synthesize(context: dict) -> dict:
     """
     model = _MODEL_ROUTING.get(context["query_type"], MODEL_SONNET)
 
+    if model == MODEL_OPUS:
+        max_tokens = _MAX_TOKENS_OPUS
+    elif _is_complex_context(context):
+        max_tokens = _MAX_TOKENS_COMPLEX
+    else:
+        max_tokens = _MAX_TOKENS_STANDARD
+
     api_key   = get_api_key()
     client    = anthropic.Anthropic(api_key=api_key)
     user_turn = _format_context_for_model(context)
 
     response = client.messages.create(
         model=model,
-        max_tokens=2048,
+        max_tokens=max_tokens,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_turn}],
     )
