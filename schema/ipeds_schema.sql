@@ -152,6 +152,7 @@ CREATE TABLE IF NOT EXISTS ipeds_ef (
     enrft           INTEGER,    -- Full-time
     enrpt           INTEGER,    -- Part-time
     stufacr         REAL,       -- Student-to-faculty ratio
+    ret_pcf         REAL,       -- First-time full-time retention rate (0–100)
 
     -- Race/Ethnicity Breakdown (Part A — totals across all levels)
     enr_white       INTEGER,

@@ -336,6 +336,7 @@ class EFLoader:
                 "enrft":        to_int(raw.get("efyftlt") or raw.get("efftlt")),
                 "enrpt":        to_int(raw.get("efyptlt") or raw.get("efptlt")),
                 "stufacr":      to_float(raw.get("stufacr")),
+                "ret_pcf":      to_float(raw.get("ret_pcf")),
             }
             if row["unitid"]:
                 out_rows.append(row)

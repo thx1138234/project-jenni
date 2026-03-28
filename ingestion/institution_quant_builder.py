@@ -278,7 +278,7 @@ def build_demand(conn_out: sqlite3.Connection,
     # ipeds_ef enrollment
     ef = {}
     for row in conn_ipeds.execute(f"""
-        SELECT unitid, survey_year, enrtot, enrgrad, enrugrd
+        SELECT unitid, survey_year, enrtot, enrgrad, enrugrd, ret_pcf
         FROM ipeds_ef WHERE survey_year IN ({sy_ph})
     """, SURVEY_YEARS):
         ef[(row["unitid"], row["survey_year"])] = dict(row)
@@ -322,7 +322,7 @@ def build_demand(conn_out: sqlite3.Connection,
                 "yield_rate":          adm_now.get("yield_rate"),
                 "admit_rate":          adm_now.get("admit_rate"),
                 "app_3yr_cagr":        cagr(app_3yr, app_now, 3),
-                "retention_rate":      None,   # EF Part D not loaded — known gap
+                "retention_rate":      safe_div(ef_now.get("ret_pcf"), 100),  # EF Part D ret_pcf (0–100) → fraction
                 "grad_enrollment_pct": safe_div(ef_now.get("enrgrad"), enr_now),
                 "pell_pct":            safe_div(sfa_now.get("pct_pell"), 100),  # ipeds_sfa stores as 0–100; convert to fraction
             }
