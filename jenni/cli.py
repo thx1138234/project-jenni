@@ -46,7 +46,13 @@ console = Console()
 # Shared helpers
 # ---------------------------------------------------------------------------
 
-def _run(query: str, year: int | None, json_output: bool, verbose: bool) -> None:
+def _run(
+    query: str,
+    year: int | None,
+    json_output: bool,
+    verbose: bool,
+    context_only: bool = False,
+) -> None:
     """Core pipeline: resolve → synthesize → deliver."""
     with console.status("[cyan]Assembling context…[/cyan]", spinner="dots"):
         ctx = assemble_context(query, year=year)
@@ -60,6 +66,11 @@ def _run(query: str, year: int | None, json_output: bool, verbose: bool) -> None
         )
         return
 
+    # --context-only: show assembled context without calling the API
+    if context_only:
+        _render_context_debug(ctx)
+        return
+
     with console.status(
         f"[cyan]Synthesizing with {ctx['query_type']} model…[/cyan]",
         spinner="dots",
@@ -70,6 +81,73 @@ def _run(query: str, year: int | None, json_output: bool, verbose: bool) -> None
         click.echo(json.dumps(to_json(ctx, syn), indent=2))
     else:
         render_response(ctx, syn, verbose=verbose)
+
+
+def _render_context_debug(ctx: dict) -> None:
+    """Show the context package that would be sent to the model — without calling the API."""
+    from jenni.synthesizer import _MODEL_ROUTING
+
+    acc     = ctx["accordion"]
+    entities = ctx["entities"]
+
+    console.print(Panel(
+        f"[bold cyan]Query:[/bold cyan] {ctx['query']}\n"
+        f"[bold]Type:[/bold] {ctx['query_type'].upper()}  "
+        f"[bold]Accordion:[/bold] {acc['zone'].upper()} "
+        f"({acc['epistemic_posture']})\n"
+        f"[bold]Primary year:[/bold] {acc['primary_year']}  "
+        f"[bold]Years in DB:[/bold] "
+        f"{acc['years_in_db'][0] if acc['years_in_db'] else '—'}–"
+        f"{acc['years_in_db'][-1] if acc['years_in_db'] else '—'} "
+        f"({len(acc['years_in_db'])} years)",
+        title="[bold]JENNI Context Package[/bold]",
+        title_align="left",
+        border_style="cyan",
+    ))
+
+    # Metrics tables for each institution
+    from jenni.delivery import _metrics_table
+    for uid, data in ctx["institution_data"].items():
+        m  = data.get("master", {})
+        q  = data.get("quant_latest", {})
+        sy = q.get("survey_year", acc["primary_year"])
+        name = m.get("institution_name", f"UNITID {uid}")
+
+        console.print(f"\n[bold cyan]{name}[/bold cyan]  [dim]{m.get('state_abbr')} | "
+                      f"{m.get('control_label')} | Carnegie {m.get('carnegie_basic')}[/dim]")
+
+        stress = data.get("stress")
+        if stress:
+            score = stress.get("composite_stress_score") or 0
+            console.print(f"  Stress: score={score:.2f}  "
+                          f"confirmed={stress.get('confirmed_signal_count', 0)}  "
+                          f"window={stress.get('signal_year_range', '—')}")
+
+        if q:
+            console.print(_metrics_table(name, q, sy))
+
+        narrs = data.get("narratives", {})
+        for t, content in narrs.items():
+            console.print(Panel(
+                content[:300] + ("…" if len(content) > 300 else ""),
+                title=f"[pre-encoded] {t}",
+                title_align="left",
+                border_style="dim",
+                expand=False,
+            ))
+
+    dq = ctx["data_quality"]
+    model = _MODEL_ROUTING.get(ctx["query_type"], "claude-sonnet-4-6")
+    console.print(
+        f"\n[dim]Would call: [bold]{model}[/bold]  "
+        f"| primary_year={dq.get('primary_year')}  "
+        f"| completeness={dq.get('completeness_pct')}%  "
+        f"| sources={', '.join(dq.get('sources', []))}[/dim]"
+    )
+    console.print(
+        "\n[yellow]Context assembled successfully. "
+        "Add ANTHROPIC_API_KEY to .env to run live synthesis.[/yellow]"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -97,15 +175,18 @@ def jenni():
               help="Output raw JSON instead of Rich terminal rendering")
 @click.option("--verbose", "-v", is_flag=True, default=False,
               help="Show pre-encoded narrative panels")
-def analyze(query, year, json_output, verbose):
+@click.option("--context-only", is_flag=True, default=False,
+              help="Show assembled context package without calling the API (debug/demo)")
+def analyze(query, year, json_output, verbose, context_only):
     """Analyze an institution or topic.
 
     Examples:\n
         jenni analyze "Tell me about Babson financial health compared to peers"\n
         jenni analyze "MIT endowment and research funding"\n
-        jenni analyze "Boston College vs Boston University" --year 2021
+        jenni analyze "Boston College vs Boston University" --year 2021\n
+        jenni analyze "Babson financial health" --context-only  # no API key needed
     """
-    _run(query, year, json_output, verbose)
+    _run(query, year, json_output, verbose, context_only)
 
 
 # ---------------------------------------------------------------------------
@@ -250,7 +331,7 @@ def stress(threshold, state, carnegie, limit, json_output):
 
     for row in rows:
         score = row.get("composite_stress_score") or 0.0
-        band  = row.get("narrative_flag") or _band(score)
+        band  = _band(score)
         color = _BAND_COLORS.get(band, "white")
         t.add_row(
             row.get("institution_name", "—")[:36],
