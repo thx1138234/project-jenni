@@ -29,12 +29,13 @@ console = Console()
 
 # Stress band colors
 _BAND_COLORS = {
-    "CRITICAL": "bold red",
-    "HIGH":     "red",
-    "Elevated": "yellow",
-    "Baseline": "dark_orange",
-    "Marginal": "cyan",
-    "Clean":    "green",
+    "CRITICAL":                    "bold red",
+    "HIGH":                        "red",
+    "Elevated":                    "yellow",
+    "Baseline":                    "dark_orange",
+    "Marginal":                    "cyan",
+    "Baseline — no confirmed signals": "green",
+    "Clean":                       "green",
 }
 
 # Metric display spec: (label, column_suffix, format_str, higher_is_better)
@@ -78,12 +79,16 @@ def _fmt(fmt_str: str, value) -> str:
         return "—"
 
 
-def _score_band(score: float) -> str:
+def _score_band(score: float, confirmed: int = 0) -> str:
     if score >= 6.5: return "CRITICAL"
     if score >= 5.0: return "HIGH"
     if score >= 3.5: return "Elevated"
     if score >= 2.0: return "Baseline"
-    if score >= 0.1: return "Marginal"
+    if score >= 0.1:
+        # Distinguish noise-level scores with zero confirmed signals from
+        # genuine single-year signals.  Marginal requires at least one
+        # confirmed multi-year signal to warrant the "watch" connotation.
+        return "Marginal" if confirmed > 0 else "Baseline — no confirmed signals"
     return "Clean"
 
 
@@ -137,9 +142,9 @@ def _stress_badge(stress: dict | None) -> str:
     if not stress:
         return ""
     score = stress.get("composite_stress_score") or 0.0
-    band  = stress.get("narrative_flag") or _score_band(score)
-    color = _BAND_COLORS.get(band, "white")
     conf  = stress.get("confirmed_signal_count") or 0
+    band  = stress.get("narrative_flag") or _score_band(score, conf)
+    color = _BAND_COLORS.get(band, "white")
     yrs   = stress.get("signal_year_range") or "FY2020–2022"
     return (
         f"[{color}]STRESS: {band}[/{color}]  "

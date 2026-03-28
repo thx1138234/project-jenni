@@ -561,14 +561,17 @@ distinguishable from single-year COVID noise. The primary output of the wedge us
    - `single`: fires in exactly 1 year — potential COVID distortion, lower weight
 
 **Score band definitions (updated for expanded enrollment scale, max ~8.0):**
-| Score | Band | Interpretation |
-|---|---|---|
-| 6.5+ | CRITICAL | Confirmed multi-domain crisis: financial + severe enrollment decline co-occurring |
-| 5.0–6.4 | HIGH | Multiple confirmed stress trends; acute risk without intervention |
-| 3.5–4.9 | Elevated | Confirmed stress across multiple signals; monitoring required |
-| 2.0–3.4 | Baseline | Confirmed stress in 1–2 signals; emerging pattern |
-| 0.1–1.9 | Marginal | Isolated or single-year signals; likely noise or COVID artifact |
-| 0 | Clean | No signals fired across any year |
+| Score | Band | Confirmed signals | Interpretation |
+|---|---|---|---|
+| 6.5+ | CRITICAL | ≥1 | Confirmed multi-domain crisis: financial + severe enrollment decline co-occurring |
+| 5.0–6.4 | HIGH | ≥1 | Multiple confirmed stress trends; acute risk without intervention |
+| 3.5–4.9 | Elevated | ≥1 | Confirmed stress across multiple signals; monitoring required |
+| 2.0–3.4 | Baseline | ≥1 | Confirmed stress in 1–2 signals; emerging pattern |
+| 0.1–1.9 | Marginal | ≥1 | Single-year signals that recur; genuine but limited pattern |
+| 0.1–1.9 | Baseline — no confirmed signals | 0 | Isolated single-year noise; likely COVID artifact. Financially clean institutions with minor scoring artifacts land here. |
+| 0 | Clean | 0 | No signals fired across any year |
+
+The "Baseline — no confirmed signals" band matters for interpretation: research-intensive institutions (Harvard, MIT, BC) with score ~0.50 and zero confirmed signals are in this band. The score reflects isolated single-year signal artifacts, not a genuine watch-list indicator. Do not conflate with "Marginal" which requires at least one confirmed multi-year signal.
 
 The Critical threshold of 6.5 is meaningful: it requires confirmed multi-year financial
 distress (financial_stress_score ≥ 4.5) plus severe confirmed enrollment decline (enr
