@@ -66,6 +66,23 @@ def _run(
         )
         return
 
+    # Partial-year warning: when no --year was specified and the resolved
+    # primary year has low completeness, warn before output so the user
+    # knows to pin to a better year.
+    if year is None:
+        dq = ctx.get("data_quality", {})
+        completeness = dq.get("completeness_pct")
+        primary_year = ctx["accordion"]["primary_year"]
+        if completeness is not None and completeness < 50:
+            console.print(
+                f"\n[bold yellow]⚠  Note:[/bold yellow] Using survey_year "
+                f"[bold]{primary_year}[/bold] "
+                f"({completeness:.1f}% complete — financial data pending "
+                f"FY{primary_year + 1} filings). "
+                f"Use [bold]--year {primary_year - 1}[/bold] for full "
+                f"financial analysis.\n"
+            )
+
     # --context-only: show assembled context without calling the API
     if context_only:
         _render_context_debug(ctx)

@@ -445,14 +445,25 @@ def assemble_context(
 
     dq = _data_quality(institution_data, primary_year)
 
+    # Scorecard single-year caveat — surfaces in synthesizer when net price /
+    # earnings metrics are present.  Update vintage year when new Scorecard
+    # data is loaded (see Annual Refresh Policy in CLAUDE.md).
+    scorecard_note = (
+        "Scorecard metrics (net_price, earnings_to_debt_ratio, "
+        "net_price_to_earnings, grad_rate_150) reflect a single data vintage "
+        "(2022). Trend data unavailable pending historical bulk download from "
+        "data.ed.gov. Do not extrapolate direction from these values."
+    )
+
     return {
-        "query":            query,
-        "query_type":       query_type,
-        "entities":         entities,
-        "accordion":        accordion,
-        "institution_data": institution_data,
-        "peer_data":        peer_data,
-        "data_quality":     dq,
+        "query":                   query,
+        "query_type":              query_type,
+        "entities":                entities,
+        "accordion":               accordion,
+        "institution_data":        institution_data,
+        "peer_data":               peer_data,
+        "data_quality":            dq,
+        "scorecard_single_year_note": scorecard_note,
     }
 
 

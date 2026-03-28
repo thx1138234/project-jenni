@@ -194,6 +194,15 @@ def _format_context_for_model(context: dict) -> str:
             parts.append(_format_history_summary(hist))
             parts.append("")
 
+    # Scorecard single-year caveat — always present; model must cite when
+    # referencing net_price, earnings_to_debt_ratio, net_price_to_earnings,
+    # or grad_rate_150.
+    sc_note = context.get("scorecard_single_year_note")
+    if sc_note:
+        parts.append("SCORECARD DATA CAVEAT:")
+        parts.append(f"  {sc_note}")
+        parts.append("")
+
     # Data quality footer
     dq = context.get("data_quality", {})
     parts.append("─" * 60)
