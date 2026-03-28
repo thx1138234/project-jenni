@@ -55,6 +55,7 @@ _METRICS: list[tuple[str, str, str, bool]] = [
     ("Admit Rate",            "admit_rate",             "{:.1%}",  False),
     ("App. CAGR 3yr",         "app_3yr_cagr",           "{:+.1%}", True),
     ("Grad Rate 150%",        "grad_rate_150",          "{:.1%}",  True),
+    ("Retention Rate",        "retention_rate",         "{:.1%}",  True),
     ("Grad Enrollment %",     "grad_enrollment_pct",    "{:.1%}",  True),
     ("Pell % Students",       "pell_pct",               "{:.1%}",  True),
     ("Net Price",             "net_price",              "${:,.0f}", False),

@@ -55,6 +55,7 @@ _DISPLAY_METRICS: list[tuple[str, str, str]] = [
     ("Admit Rate",              "admit_rate",              "{:.1%}"),
     ("Application CAGR 3yr",    "app_3yr_cagr",            "{:+.1%}"),
     ("Grad Rate (150%)",        "grad_rate_150",           "{:.1%}"),
+    ("Retention Rate",          "retention_rate",          "{:.1%}"),
     ("Grad Enrollment %",       "grad_enrollment_pct",     "{:.1%}"),
     ("Pell % Students",         "pell_pct",                "{:.1%}"),
     ("Net Price",               "net_price",               "${:,.0f}"),
@@ -83,7 +84,7 @@ def _format_quant_block(q: dict) -> str:
         val_str  = _fmt(fmt, val)
         pct      = q.get(f"{suffix}_peer_pct")
         trend    = q.get(f"{suffix}_trend_dir") or ""
-        pct_str  = f" | {pct:.0f}th pctile" if pct is not None else ""
+        pct_str  = f" | {pct*100:.0f}th pctile" if pct is not None else ""
         trend_str = f" | {trend}" if trend else ""
         lines.append(f"  {label:<28} {val_str:<14}{pct_str}{trend_str}")
 
