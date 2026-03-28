@@ -742,7 +742,15 @@ def validation_report(conn_out: sqlite3.Connection, survey_year: int = 2022) -> 
 # ---------------------------------------------------------------------------
 
 def run(db_990: str, ipeds: str, eada: str, scorecard: str,
-        out: str, stages: list[str]) -> None:
+        out: str, stages: list[str],
+        target_years: list[int] | None = None) -> None:
+    global SURVEY_YEARS, TARGET_YEARS
+    if target_years:
+        TARGET_YEARS = sorted(target_years)
+        # Extend SURVEY_YEARS to include lookback window for new target years
+        min_lookback = min(TARGET_YEARS) - 3
+        SURVEY_YEARS = list(range(min_lookback, max(TARGET_YEARS) + 1))
+        logger.info(f"Target years override: {TARGET_YEARS}  (survey window: {SURVEY_YEARS[0]}-{SURVEY_YEARS[-1]})")
 
     conn_out  = init_db(out)
     conn_990  = sqlite3.connect(db_990);  conn_990.row_factory  = sqlite3.Row
@@ -781,10 +789,12 @@ def run(db_990: str, ipeds: str, eada: str, scorecard: str,
     validation_report(conn_out)
 
     total = conn_out.execute("SELECT COUNT(*) FROM institution_quant").fetchone()[0]
-    target = conn_out.execute(
-        "SELECT COUNT(*) FROM institution_quant WHERE survey_year IN (2019,2020,2021,2022)"
+    ty_ph = ",".join("?" * len(TARGET_YEARS))
+    in_target = conn_out.execute(
+        f"SELECT COUNT(*) FROM institution_quant WHERE survey_year IN ({ty_ph})", TARGET_YEARS
     ).fetchone()[0]
-    logger.info(f"Done — {total:,} total rows, {target:,} in target years 2019-2022")
+    yr_str = "-".join([str(TARGET_YEARS[0]), str(TARGET_YEARS[-1])]) if len(TARGET_YEARS) > 1 else str(TARGET_YEARS[0])
+    logger.info(f"Done — {total:,} total rows, {in_target:,} in target years {yr_str}")
 
 
 def main() -> None:
@@ -799,11 +809,15 @@ def main() -> None:
     parser.add_argument("--eada",      required=True)
     parser.add_argument("--scorecard", required=True)
     parser.add_argument("--out",       required=True)
+    parser.add_argument("--target-years", type=int, nargs="+",
+                        help="Override target years (e.g. --target-years 2023). "
+                             "Existing year rows are not rebuilt. Default: 2019-2022.")
     parser.add_argument("--stage",     nargs="+",
                         default=["all"],
                         choices=["all","financial","demand","value","peers","trends","completeness"])
     args = parser.parse_args()
-    run(args.db990, args.ipeds, args.eada, args.scorecard, args.out, args.stage)
+    run(args.db990, args.ipeds, args.eada, args.scorecard, args.out, args.stage,
+        target_years=args.target_years)
 
 
 if __name__ == "__main__":
