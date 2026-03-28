@@ -684,9 +684,9 @@ rm data/databases/institution_quant.db
 Expected: 25,376 rows, Babson survey_year=2022 data_completeness_pct=96.2.
 
 **Known gaps (carry forward):**
-- `retention_rate`: EF Part D not loaded → always NULL
+- `retention_rate`: populated from EF Part D `ret_pcf` (first-time full-time, 0–100 → stored as fraction). Coverage 65.6% (117,970 of 160,861 ipeds_ef rows). Institutions not in EF Part D (typically non-degree-granting or specialized) are NULL.
 - `grad_rate_150`: uses Scorecard `completion_rate_4yr` (single year 2022 only); ipeds_gr.gba_cohort always NULL
-- `net_price`, `earnings_to_debt_ratio`, `net_price_to_earnings`: Scorecard single year only
+- `net_price`, `earnings_to_debt_ratio`, `net_price_to_earnings`: Scorecard single year only — confirmed: scorecard_institution has only data_year=2023 (6,322 rows). Historical Scorecard data requires separate bulk download from data.ed.gov (institution-level files available back to ~2010). Add to roadmap as Scorecard historical backfill.
 - `athletics_to_expense_pct`: private nonprofits only (requires 990 functional expenses as denominator)
 - `formula_version = '1.0'`: bump this when metric formulas change; enables git isolation of formula changes
 
