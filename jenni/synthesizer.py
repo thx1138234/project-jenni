@@ -224,6 +224,25 @@ def _format_context_for_model(context: dict) -> str:
         parts.append(f"  {sc_note}")
         parts.append("")
 
+    # Current web context — present only when search layer activated
+    search_results = context.get("search_results") or []
+    web_results = [r for r in search_results if r.domain in ("web", "news")]
+    if web_results:
+        parts.append("CURRENT WEB CONTEXT:")
+        parts.append(
+            "  (Retrieved via live web search — external sources, not structured database."
+            " Treat as supplemental current-events context; verify before citing.)"
+        )
+        parts.append("")
+        for result in web_results:
+            for doc in result.documents[:8]:
+                if not doc.content.strip():
+                    continue
+                parts.append(f"  [external:web] {doc.content.strip()}")
+                if doc.url:
+                    parts.append(f"    Source: {doc.url}")
+        parts.append("")
+
     # Data quality footer
     dq = context.get("data_quality", {})
     parts.append("─" * 60)

@@ -455,6 +455,22 @@ def assemble_context(
         "data.ed.gov. Do not extrapolate direction from these values."
     )
 
+    # ── Search layer ──────────────────────────────────────────────────────
+    # Activates when the query has a current-events or recent-news dimension.
+    # Lazy import avoids circular dependency (retrieval.sql_retriever imports
+    # extract_entities from this module).
+    search_results: list = []
+    try:
+        from jenni.retrieval.search_layer import JENNISearchLayer, needs_web_search  # noqa: PLC0415
+        if needs_web_search(query):
+            search_layer = JENNISearchLayer()
+            search_results = search_layer.search(
+                query, entities=entities, run_web=True
+            )
+    except Exception:
+        # Search layer failures are non-fatal — SQL context is always complete
+        pass
+
     return {
         "query":                   query,
         "query_type":              query_type,
@@ -464,6 +480,7 @@ def assemble_context(
         "peer_data":               peer_data,
         "data_quality":            dq,
         "scorecard_single_year_note": scorecard_note,
+        "search_results":          search_results,
     }
 
 

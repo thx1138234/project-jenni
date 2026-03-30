@@ -11,6 +11,7 @@ DB_990       = PROJECT_ROOT / "data" / "databases" / "990_data.db"
 DB_QUANT     = PROJECT_ROOT / "data" / "databases" / "institution_quant.db"
 DB_EADA      = PROJECT_ROOT / "data" / "databases" / "eada_data.db"
 DB_SCORECARD = PROJECT_ROOT / "data" / "databases" / "scorecard_data.db"
+DB_DOCUMENTS = PROJECT_ROOT / "data" / "databases" / "jenni_documents.db"
 
 
 def load_env() -> None:
