@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import difflib
 import sqlite3
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -71,14 +72,24 @@ _COMPARISON_WORDS = {"compare", "vs", "versus", "against", "relative to", "bench
                      "compared", "comparison", "peer", "peers", "rank", "ranking"}
 _TREND_WORDS      = {"trend", "over time", "history", "trajectory", "changed",
                      "growth", "decline", "years", "trajectory", "longitudinal", "cagr"}
-_STRESS_WORDS     = {"stress", "risk", "distress", "closure", "closing", "bankrupt",
-                     "financial health", "warning", "struggling", "troubled", "at risk",
-                     "in danger", "vulnerable"}
+# Stress requires unambiguous distress language — "financial health" and "risk"
+# are too broad and misclassify general analysis queries.
+_STRESS_WORDS     = {"stress", "distress", "closure", "closing", "bankrupt",
+                     "warning", "struggling", "troubled", "vulnerable", "insolvent",
+                     "at risk", "in danger", "warning signs", "going under"}
 _SECTOR_WORDS     = {"sector", "all", "which schools", "which institutions", "across",
                      "industry", "landscape", "list", "most", "least", "highest", "lowest",
                      "nationally", "nationwide", "how many"}
 _DATA_WORDS       = {"what is", "how much", "show me", "give me", "what was",
                      "what are", "show", "display", "table", "numbers", "data"}
+# institution_profile: "tell me about", "financial health", "overview" queries
+# without explicit stress language — general institutional portrait requests.
+_PROFILE_PHRASES  = (
+    "tell me about", "what do you know about", "overview of", "profile of",
+    "financial health", "give me an overview", "who is", "what is",
+)
+_PROFILE_WORDS    = {"overview", "profile", "health", "about", "portrait",
+                     "summary", "introduction", "background"}
 
 
 def classify_query(query: str) -> str:
@@ -93,6 +104,8 @@ def classify_query(query: str) -> str:
         return "stress"
     if _SECTOR_WORDS & tokens or any(p in q for p in ("which schools", "which institutions")):
         return "sector"
+    if any(p in q for p in _PROFILE_PHRASES) or _PROFILE_WORDS & tokens:
+        return "institution_profile"
     if any(p in q for p in _DATA_WORDS):
         return "data"
     return "analysis"
@@ -386,8 +399,12 @@ def assemble_context(
     dict with keys: query, query_type, entities, accordion, institution_data,
                     data_quality, peer_data
     """
+    _t0 = time.monotonic()
+
     query_type = classify_query(query)
     entities   = extract_entities(query)
+
+    _t_db_start = time.monotonic()
 
     quant_conn = sqlite3.connect(str(DB_QUANT))
     db990_conn = sqlite3.connect(str(DB_990))
@@ -421,6 +438,8 @@ def assemble_context(
     quant_conn.close()
     db990_conn.close()
     ipeds_conn.close()
+
+    _t_db_end = time.monotonic()
 
     # Peer data: extract from quant_latest peer_* columns of the primary entity
     peer_data: dict = {}
@@ -471,6 +490,8 @@ def assemble_context(
         # Search layer failures are non-fatal — SQL context is always complete
         pass
 
+    _t_end = time.monotonic()
+
     return {
         "query":                   query,
         "query_type":              query_type,
@@ -481,6 +502,10 @@ def assemble_context(
         "data_quality":            dq,
         "scorecard_single_year_note": scorecard_note,
         "search_results":          search_results,
+        "_timing": {
+            "resolver_ms": int((_t_end  - _t0)        * 1000),
+            "db_query_ms": int((_t_db_end - _t_db_start) * 1000),
+        },
     }
 
 

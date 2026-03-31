@@ -20,16 +20,16 @@ import time
 import anthropic
 
 from jenni.config import get_api_key, MODEL_HAIKU, MODEL_SONNET, MODEL_OPUS
-from jenni.log import log_query
 from jenni.prompts.system import SYSTEM_PROMPT
 
 _MODEL_ROUTING: dict[str, str] = {
-    "data":       MODEL_HAIKU,
-    "analysis":   MODEL_SONNET,
-    "comparison": MODEL_SONNET,
-    "trend":      MODEL_SONNET,
-    "stress":     MODEL_SONNET,
-    "sector":     MODEL_OPUS,
+    "data":               MODEL_HAIKU,
+    "analysis":           MODEL_SONNET,
+    "institution_profile":MODEL_SONNET,
+    "comparison":         MODEL_SONNET,
+    "trend":              MODEL_SONNET,
+    "stress":             MODEL_SONNET,
+    "sector":             MODEL_OPUS,
 }
 
 # Carnegie Basic Classification codes for research-intensive tiers
@@ -298,38 +298,19 @@ def synthesize(context: dict) -> dict:
     user_turn = _format_context_for_model(context)
 
     t0 = time.monotonic()
-    try:
-        response = client.messages.create(
-            model=model,
-            max_tokens=max_tokens,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_turn}],
-        )
-    except Exception as exc:
-        latency_ms = int((time.monotonic() - t0) * 1000)
-        log_query(
-            context=context,
-            model_used=model,
-            tokens_in=0,
-            tokens_out=0,
-            latency_ms=latency_ms,
-            error=str(exc),
-        )
-        raise
-
-    latency_ms = int((time.monotonic() - t0) * 1000)
-    log_query(
-        context=context,
-        model_used=model,
-        tokens_in=response.usage.input_tokens,
-        tokens_out=response.usage.output_tokens,
-        latency_ms=latency_ms,
+    response = client.messages.create(
+        model=model,
+        max_tokens=max_tokens,
+        system=SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_turn}],
     )
+    synthesizer_ms = int((time.monotonic() - t0) * 1000)
 
     return {
-        "text":         response.content[0].text,
-        "model":        model,
-        "model_label":  _MODEL_LABELS.get(model, model),
-        "input_tokens": response.usage.input_tokens,
-        "output_tokens":response.usage.output_tokens,
+        "text":           response.content[0].text,
+        "model":          model,
+        "model_label":    _MODEL_LABELS.get(model, model),
+        "input_tokens":   response.usage.input_tokens,
+        "output_tokens":  response.usage.output_tokens,
+        "synthesizer_ms": synthesizer_ms,
     }

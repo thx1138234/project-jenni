@@ -41,6 +41,10 @@ CREATE TABLE IF NOT EXISTS jenni_query_log (
     tokens_in          INTEGER,
     tokens_out         INTEGER,
     latency_ms         INTEGER,
+    resolver_ms        INTEGER,
+    db_query_ms        INTEGER,
+    synthesizer_ms     INTEGER,
+    delivery_ms        INTEGER,
     completeness       REAL,
     accordion_position TEXT,
     error              TEXT,
@@ -50,10 +54,24 @@ CREATE INDEX IF NOT EXISTS idx_qlog_timestamp ON jenni_query_log(timestamp);
 CREATE INDEX IF NOT EXISTS idx_qlog_query_type ON jenni_query_log(query_type);
 """
 
+# Columns added after initial schema — applied idempotently via ALTER TABLE
+_MIGRATIONS = [
+    "ALTER TABLE jenni_query_log ADD COLUMN resolver_ms    INTEGER",
+    "ALTER TABLE jenni_query_log ADD COLUMN db_query_ms    INTEGER",
+    "ALTER TABLE jenni_query_log ADD COLUMN synthesizer_ms INTEGER",
+    "ALTER TABLE jenni_query_log ADD COLUMN delivery_ms    INTEGER",
+]
+
 
 def _ensure_table() -> None:
     conn = sqlite3.connect(str(DB_DOCUMENTS))
     conn.executescript(_DDL)
+    # Apply any migrations that haven't landed yet (idempotent)
+    for stmt in _MIGRATIONS:
+        try:
+            conn.execute(stmt)
+        except Exception:
+            pass  # column already exists
     conn.commit()
     conn.close()
 
@@ -76,6 +94,10 @@ def log_query(
     tokens_in: int,
     tokens_out: int,
     latency_ms: int,
+    resolver_ms: int = 0,
+    db_query_ms: int = 0,
+    synthesizer_ms: int = 0,
+    delivery_ms: int = 0,
     error: str | None = None,
 ) -> str:
     """
@@ -83,12 +105,16 @@ def log_query(
 
     Parameters
     ----------
-    context     : full context package from query_resolver (or partial on error)
-    model_used  : model ID string
-    tokens_in   : input tokens billed
-    tokens_out  : output tokens billed
-    latency_ms  : wall-clock latency of the API call
-    error       : None on success; exception message on failure
+    context        : full context package from query_resolver
+    model_used     : model ID string
+    tokens_in      : input tokens billed
+    tokens_out     : output tokens billed
+    latency_ms     : total wall-clock latency (resolver + synthesizer + delivery)
+    resolver_ms    : time in assemble_context() (entity match + DB queries)
+    db_query_ms    : time for SQLite queries specifically within assemble_context()
+    synthesizer_ms : time for the Claude API call
+    delivery_ms    : time for render_response() or to_json()
+    error          : None on success; exception message on failure
 
     Returns
     -------
@@ -112,9 +138,10 @@ def log_query(
         conn.execute("""
             INSERT INTO jenni_query_log
                 (query_id, query_text, query_type, institutions, model_used,
-                 tokens_in, tokens_out, latency_ms, completeness,
-                 accordion_position, error)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 tokens_in, tokens_out, latency_ms,
+                 resolver_ms, db_query_ms, synthesizer_ms, delivery_ms,
+                 completeness, accordion_position, error)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             query_id,
             context.get("query", ""),
@@ -124,6 +151,10 @@ def log_query(
             tokens_in,
             tokens_out,
             latency_ms,
+            resolver_ms,
+            db_query_ms,
+            synthesizer_ms,
+            delivery_ms,
             completeness,
             accordion_position,
             error,

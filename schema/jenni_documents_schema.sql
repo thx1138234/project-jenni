@@ -8,6 +8,29 @@
 -- One row per unique document (doc_id = MD5 of source:unitid:suffix or url).
 -- INSERT OR REPLACE semantics — safe to re-insert on duplicate retrieval.
 
+-- jenni_query_log: every synthesize() call, success or failure
+CREATE TABLE IF NOT EXISTS jenni_query_log (
+    query_id           TEXT PRIMARY KEY,
+    query_text         TEXT,
+    query_type         TEXT,
+    institutions       TEXT,
+    model_used         TEXT,
+    tokens_in          INTEGER,
+    tokens_out         INTEGER,
+    latency_ms         INTEGER,
+    resolver_ms        INTEGER,
+    db_query_ms        INTEGER,
+    synthesizer_ms     INTEGER,
+    delivery_ms        INTEGER,
+    completeness       REAL,
+    accordion_position TEXT,
+    error              TEXT,
+    timestamp          TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_qlog_timestamp  ON jenni_query_log(timestamp);
+CREATE INDEX IF NOT EXISTS idx_qlog_query_type ON jenni_query_log(query_type);
+
+-- jenni_documents: retrieved documents from all retrieval backends
 CREATE TABLE IF NOT EXISTS jenni_documents (
     doc_id              TEXT PRIMARY KEY,
     source              TEXT NOT NULL,       -- 'sql' | 'web' | 'news' | 'narrative'

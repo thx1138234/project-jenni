@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 
 import click
 from rich.console import Console
@@ -54,8 +55,14 @@ def _run(
     context_only: bool = False,
 ) -> None:
     """Core pipeline: resolve → synthesize → deliver."""
+    from jenni.log import log_query
+
+    t_run_start = time.monotonic()
+
     with console.status("[cyan]Assembling context…[/cyan]", spinner="dots"):
         ctx = assemble_context(query, year=year)
+
+    t_resolver_end = time.monotonic()
 
     if not ctx["entities"]:
         console.print(
@@ -92,12 +99,46 @@ def _run(
         f"[cyan]Synthesizing with {ctx['query_type']} model…[/cyan]",
         spinner="dots",
     ):
-        syn = synthesize(ctx)
+        try:
+            syn = synthesize(ctx)
+        except Exception as exc:
+            log_query(
+                context=ctx,
+                model_used="unknown",
+                tokens_in=0,
+                tokens_out=0,
+                latency_ms=int((time.monotonic() - t_run_start) * 1000),
+                resolver_ms=int((t_resolver_end - t_run_start) * 1000),
+                db_query_ms=ctx.get("_timing", {}).get("db_query_ms", 0),
+                error=str(exc),
+            )
+            raise
+
+    t_synth_end = time.monotonic()
 
     if json_output:
         click.echo(json.dumps(to_json(ctx, syn), indent=2))
     else:
         render_response(ctx, syn, verbose=verbose)
+
+    t_deliver_end = time.monotonic()
+
+    resolver_ms    = int((t_resolver_end - t_run_start) * 1000)
+    synthesizer_ms = syn.get("synthesizer_ms", int((t_synth_end - t_resolver_end) * 1000))
+    delivery_ms    = int((t_deliver_end - t_synth_end) * 1000)
+    total_ms       = int((t_deliver_end - t_run_start) * 1000)
+
+    log_query(
+        context=ctx,
+        model_used=syn["model"],
+        tokens_in=syn["input_tokens"],
+        tokens_out=syn["output_tokens"],
+        latency_ms=total_ms,
+        resolver_ms=resolver_ms,
+        db_query_ms=ctx.get("_timing", {}).get("db_query_ms", 0),
+        synthesizer_ms=synthesizer_ms,
+        delivery_ms=delivery_ms,
+    )
 
 
 def _render_context_debug(ctx: dict) -> None:
