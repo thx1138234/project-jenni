@@ -137,39 +137,43 @@ def extract_entities(query: str, max_results: int = 3) -> list[dict]:
     """
     Fuzzy-match institution names mentioned in the query.
     Returns list of institution_master records (with added match_score).
+
+    All three phases run and merge results — early return from alias phase
+    was dropped because it silently dropped the second institution in
+    comparison queries where one matched by alias and the other by substring.
     """
     index = _load_name_index()
     query_lower = query.lower()
+    candidates: dict[int, dict] = {}
 
     # Phase 1: exact alias lookup
-    matched_by_alias: dict[int, dict] = {}
     for alias, uid in KNOWN_ALIASES.items():
         if alias in query_lower:
             for rec in index:
                 if rec["unitid"] == uid:
-                    matched_by_alias[uid] = {**rec, "match_score": 1.0, "match_method": "alias"}
+                    candidates[uid] = {**rec, "match_score": 1.0, "match_method": "alias"}
                     break
 
-    if matched_by_alias:
-        return sorted(matched_by_alias.values(), key=lambda x: -x["match_score"])[:max_results]
-
-    # Phase 2: substring match against institution_name
+    # Phase 2: substring match against institution_name — merges with alias results
+    # so both institutions resolve in queries like "Compare BC and Georgetown …"
     name_map = {rec["institution_name"].lower(): rec for rec in index}
     names_lower = list(name_map.keys())
 
-    direct: dict[int, dict] = {}
     for name_lower, rec in name_map.items():
         if name_lower in query_lower:
             uid = rec["unitid"]
-            direct[uid] = {**rec, "match_score": 1.0, "match_method": "exact_substring"}
+            if uid not in candidates:
+                candidates[uid] = {**rec, "match_score": 1.0, "match_method": "exact_substring"}
 
-    if direct:
-        return sorted(direct.values(), key=lambda x: -x["match_score"])[:max_results]
+    # Return immediately if any clean match was found — Phase 3 is a fallback
+    # only for queries where neither alias nor substring matched anything.
+    # Running fuzzy after clean matches produces noise (e.g. "Oakton College"
+    # from the token "College" in "Boston College").
+    if candidates:
+        return sorted(candidates.values(), key=lambda x: -x["match_score"])[:max_results]
 
-    # Phase 3: token-window fuzzy match
+    # Phase 3: token-window fuzzy match (fallback — no clean matches above)
     tokens = query.split()
-    candidates: dict[int, dict] = {}
-
     for window_size in range(1, 5):
         for i in range(len(tokens) - window_size + 1):
             window = " ".join(tokens[i : i + window_size]).lower()
@@ -403,6 +407,13 @@ def assemble_context(
 
     query_type = classify_query(query)
     entities   = extract_entities(query)
+
+    # Comparison and profile queries default to PRIMARY_YEAR when no year is
+    # specified.  max(years_in_db) would return 2023 (26.9% completeness —
+    # financial data pending FY2024 990 filings), producing a half-populated
+    # comparison.  Trend and sector queries intentionally use the latest year.
+    if year is None and query_type in ("comparison", "institution_profile"):
+        year = PRIMARY_YEAR
 
     _t_db_start = time.monotonic()
 
