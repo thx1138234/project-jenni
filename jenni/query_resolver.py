@@ -329,12 +329,29 @@ def _load_institution_data(
         if t not in narratives:
             narratives[t] = nr["content"]
 
+    # form990_part_ix — TEOS/irsx years only (FY2020+)
+    # Loaded for all institutions with an EIN; synthesizer decides when to include.
+    part_ix_history: list[dict] = []
+    if ein:
+        part_ix_history = _dict_rows(db990_conn, """
+            SELECT ix.fiscal_year_end,
+                   ix.advertising_prog, ix.advertising_mgmt, ix.advertising_fundraising,
+                   ix.it_prog, ix.it_mgmt, ix.it_fundraising,
+                   ix.prof_fundraising_fees, ix.invest_mgmt_fees,
+                   ix.total_prog_services, ix.total_mgmt_general, ix.total_fundraising_exp,
+                   ix.prog_services_pct, ix.overhead_ratio, ix.fundraising_efficiency
+            FROM form990_part_ix ix
+            WHERE ix.ein = ?
+            ORDER BY ix.fiscal_year_end
+        """, (ein,))
+
     return {
-        "master":        master,
-        "quant_latest":  quant_latest,
-        "quant_history": quant_history,
-        "stress":        stress,
-        "narratives":    narratives,
+        "master":         master,
+        "quant_latest":   quant_latest,
+        "quant_history":  quant_history,
+        "stress":         stress,
+        "narratives":     narratives,
+        "part_ix_history": part_ix_history,
     }
 
 

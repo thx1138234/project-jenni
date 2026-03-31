@@ -218,6 +218,14 @@ def _format_context_for_model(context: dict) -> str:
             parts.append(_format_history_summary(hist))
             parts.append("")
 
+        # Part IX functional expense detail — included when query involves expense
+        # analysis or for comparison/profile queries with TEOS data available.
+        part_ix = data.get("part_ix_history", [])
+        if part_ix and _needs_part_ix(context["query"], context["query_type"]):
+            parts.append(f"PART IX — FUNCTIONAL EXPENSES (form990_part_ix, TEOS/irsx, {len(part_ix)} years):")
+            parts.append(_format_part_ix_block(part_ix))
+            parts.append("")
+
     # Scorecard single-year caveat — always present; model must cite when
     # referencing net_price, earnings_to_debt_ratio, net_price_to_earnings,
     # or grad_rate_150.
@@ -259,6 +267,64 @@ def _format_context_for_model(context: dict) -> str:
     parts.append("─" * 60)
 
     return "\n".join(parts)
+
+
+# Words that trigger inclusion of Part IX functional expense detail in the prompt
+_EXPENSE_WORDS = {
+    "advertising", "marketing", "spend", "spending", "budget",
+    "promotion", "promotional", "expense", "expenses", "expenditure",
+    "expenditures", "cost", "costs",
+}
+
+
+def _needs_part_ix(query: str, query_type: str) -> bool:
+    """Return True when Part IX functional expense detail should be included."""
+    if query_type in ("comparison", "institution_profile"):
+        return True
+    q_tokens = set(query.lower().split())
+    return bool(q_tokens & _EXPENSE_WORDS)
+
+
+def _format_part_ix_block(history: list[dict]) -> str:
+    """Format form990_part_ix rows into a readable expense block."""
+    if not history:
+        return "  (No Part IX data available)"
+    lines = []
+    for row in history:
+        fy  = row.get("fiscal_year_end", "?")
+        adv_prog = row.get("advertising_prog") or 0
+        adv_mgmt = row.get("advertising_mgmt") or 0
+        adv_fund = row.get("advertising_fundraising") or 0
+        adv_total = adv_prog + adv_mgmt + adv_fund
+        it_prog   = row.get("it_prog") or 0
+        pf_fees   = row.get("prof_fundraising_fees") or 0
+        inv_fees  = row.get("invest_mgmt_fees") or 0
+        tot_exp   = (
+            (row.get("total_prog_services") or 0)
+            + (row.get("total_mgmt_general") or 0)
+            + (row.get("total_fundraising_exp") or 0)
+        )
+        adv_pct = adv_total / tot_exp if tot_exp else None
+
+        lines.append(f"  FY{fy}:")
+        lines.append(
+            f"    Advertising & Promo (Ln 12)  ${adv_total:>12,.0f}"
+            f"  (prog: ${adv_prog:,.0f} | mgmt: ${adv_mgmt:,.0f}"
+            f" | fundraising: ${adv_fund:,.0f})"
+        )
+        if adv_pct is not None:
+            lines.append(f"    Advertising % total exp      {adv_pct:.2%}")
+        if it_prog:
+            lines.append(f"    IT expenses — prog svc (Ln14) ${it_prog:>11,.0f}")
+        if pf_fees:
+            lines.append(f"    Prof fundraising fees (Ln11e) ${pf_fees:>11,.0f}")
+        if inv_fees:
+            lines.append(f"    Investment mgmt fees (Ln11f)  ${inv_fees:>11,.0f}")
+        lines.append(
+            f"    Program services %           {(row.get('prog_services_pct') or 0):.1%}"
+            f"   Overhead: {(row.get('overhead_ratio') or 0):.1%}"
+        )
+    return "\n".join(lines)
 
 
 def _score_band(score: float, confirmed: int = 0) -> str:
