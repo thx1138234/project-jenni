@@ -1183,6 +1183,65 @@ Measured against: `jenni analyze "Tell me about Harvard University financial hea
 - `render_stream_footer(ctx, syn)` — data quality footer after stream completes
 - JSON path still uses `synthesize()` (non-streaming) since the full text is needed before serialisation
 
+### Supplemental Context Trigger Audit ✓ (2026-03-31)
+
+**Trigger condition:** A supplemental table is only useful to the model if it is (a) loaded
+into `institution_data` by `_load_institution_data()` in `query_resolver.py` AND (b) formatted
+into the prompt by `_format_context_for_model()` in `synthesizer.py`, subject to an optional
+trigger condition (query type or keyword match).
+
+**Audit results — as of 2026-03-31:**
+
+| Supplemental Table | Loaded? | Formatted? | Trigger Condition | Status |
+|---|---|---|---|---|
+| `form990_part_ix` | ✅ | ✅ | `query_type in (comparison, institution_profile)` OR `_EXPENSE_WORDS` in query | **Wired** (2026-03-31) |
+| `form990_schedule_d` | ❌ | ❌ | None | **Silent gap** |
+| `form990_compensation` | ❌ | ❌ | None | **Silent gap** |
+| `eada_instlevel` | ❌ | ❌ | None | **Silent gap** |
+| `eada_sports` | ❌ | ❌ | None | **Silent gap** |
+| `form990_governance` | ❌ | ❌ | None | **Silent gap** |
+| `form990_related_orgs` | ❌ | ❌ | None | Out of scope for now |
+
+**What each silent gap means for the model:**
+
+- **schedule_d**: Model gets `endowment_runway` and `endowment_per_student` from `institution_quant`
+  (derived values), but NOT the raw year-by-year endowment flows: BOY balance, investment return,
+  new contributions, grants from endowment, EOY balance, spending rate, corpus breakdown
+  (board-designated / perm-restricted / temp-restricted). A query like "Tell me about Harvard
+  endowment management" gets only the derived summary — the underlying 4-year Schedule D
+  detail ($49B EOY, $1.3B investment return FY2023, 7.89yr runway) never reaches the model.
+
+- **compensation**: Model gets nothing about officer pay from live data. Pre-encoded narratives
+  (auto_seeded) may contain some officer comp text, but no Schedule J data is formatted into
+  the prompt. "What does the Harvard president earn" produces a response from institutional
+  knowledge only — the 104 Harvard compensation rows ($1.3M Bacow FY2022, etc.) are invisible.
+
+- **eada_instlevel / eada_sports**: Model gets `athletics_net`, `athletics_to_expense_pct`,
+  `athletics_per_student` from `institution_quant` (derived from EADA), plus a pre-encoded
+  `athletics` narrative. But sport-by-sport detail (football: $47.2M revenue / $38.1M expense
+  at BC FY2024; basketball, ice hockey) never reaches the model. "Tell me about BC athletics
+  economics" gets the aggregate summary — the sport-level P&L is a silent gap.
+
+**Test queries run (2026-03-31):**
+- `jenni analyze 'Tell me about Harvard endowment management'` → no schedule_d block in context
+- `jenni analyze 'What does the Harvard president earn'` → no compensation block in context
+- `jenni analyze 'Tell me about Boston College athletics economics'` → no eada_sports block in context
+
+**Wiring priority (next session):**
+1. `form990_schedule_d` — high value; endowment management is a common analytical question.
+   Trigger: `query_type in (comparison, institution_profile)` OR `_ENDOWMENT_WORDS` in query
+   (endowment, runway, distribution, spending, corpus, investment return).
+2. `form990_compensation` — high value; compensation questions are common and specific.
+   Trigger: `_COMP_WORDS` in query (earn, salary, compensation, paid, president, coach, officer).
+3. `eada_sports` — medium value; sport-level detail needed for athletics economics questions.
+   Trigger: `_ATHLETICS_WORDS` in query (athletics, sport, football, basketball, coaching).
+   Note: eada_data.db requires a fourth DB connection in `_load_institution_data()`.
+4. `form990_governance` — lower priority; governance questions are less frequent.
+
+**Data availability confirmed:**
+- Harvard: schedule_d 4 rows (FY2020-2023), compensation 104 rows, eada_instlevel 18 rows, eada_sports 367 rows
+- BC: schedule_d 4 rows (FY2020-2023), compensation 74 rows (incl. Hafley $3.8M FY2023), eada_instlevel 19 rows, eada_sports 327 rows
+
 ### Phase 2 Complete
 - [x] GitHub repo public — https://github.com/thx1138234/project-jenni
 - [ ] PostgreSQL on Supabase, migrated from SQLite
