@@ -15,9 +15,12 @@ It is NEVER logged, printed, or included in any output.
 
 from __future__ import annotations
 
+import time
+
 import anthropic
 
 from jenni.config import get_api_key, MODEL_HAIKU, MODEL_SONNET, MODEL_OPUS
+from jenni.log import log_query
 from jenni.prompts.system import SYSTEM_PROMPT
 
 _MODEL_ROUTING: dict[str, str] = {
@@ -294,11 +297,33 @@ def synthesize(context: dict) -> dict:
     client    = anthropic.Anthropic(api_key=api_key)
     user_turn = _format_context_for_model(context)
 
-    response = client.messages.create(
-        model=model,
-        max_tokens=max_tokens,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_turn}],
+    t0 = time.monotonic()
+    try:
+        response = client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": user_turn}],
+        )
+    except Exception as exc:
+        latency_ms = int((time.monotonic() - t0) * 1000)
+        log_query(
+            context=context,
+            model_used=model,
+            tokens_in=0,
+            tokens_out=0,
+            latency_ms=latency_ms,
+            error=str(exc),
+        )
+        raise
+
+    latency_ms = int((time.monotonic() - t0) * 1000)
+    log_query(
+        context=context,
+        model_used=model,
+        tokens_in=response.usage.input_tokens,
+        tokens_out=response.usage.output_tokens,
+        latency_ms=latency_ms,
     )
 
     return {
