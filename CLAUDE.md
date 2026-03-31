@@ -1123,8 +1123,68 @@ that goes beyond what the data says into how to act on it.
 - `jenni compare` multi-institution command exists but was not included in validation run.
   Validate before using for named-peer side-by-side outputs.
 
+### JENNI Search Layer + Observability ✓ (2026-03-31)
+
+**Search layer (vector-compatible architecture):**
+- `jenni/retrieval/` package: `InstitutionRetriever` abstract base, `JENNIDocument` (embedding=None
+  until vector layer enabled), `RetrievalResult` envelope, `SQLRetriever`, `WebRetriever`
+- `JENNISearchLayer` orchestrates institution/web/news/narrative domains — each independently swappable
+- Web search via Anthropic `web_search_20250305` tool activates only on explicit current-awareness
+  terms (`recent`, `news`, `appointed`, `merger`, `accreditation`, etc.)
+- Retrieved documents persisted to `jenni_documents` table in `jenni_documents.db`
+- Vector-ready: `embedding BLOB` column pre-wired; activate by populating at save time
+
+**Observability:**
+- `jenni_query_log` table in `jenni_documents.db`: every API call logged on success and failure
+- Fields: query_id, query_text, query_type, institutions (JSON), model_used, tokens_in, tokens_out,
+  latency_ms, resolver_ms, db_query_ms, synthesizer_ms, delivery_ms, completeness, accordion_position, error
+- System backup events logged with `query_type='system_backup'`, `model_used='system'`
+
+**Query classifier — new type:**
+- `institution_profile`: catches "tell me about / overview / financial health / profile" queries
+  that were previously misrouted to `stress`. Routes to Sonnet, same token budget as `analysis`.
+- Stress classification tightened: requires unambiguous distress language (stress, distress,
+  closure, bankrupt, struggling, troubled, vulnerable). "financial health" and "risk" removed.
+
+**GitHub + S3:**
+- Remote: https://github.com/thx1138234/project-jenni (public)
+- S3 backup: `aws s3 sync data/databases/ s3://project-jenni-data/databases/` — all 6 databases
+- Weekly cron: `0 2 * * 0` runs `scripts/s3_backup.sh` → dated path `backups/YYYY-MM-DD/`
+
+### Performance Benchmarks ✓ (2026-03-31)
+
+Measured against: `jenni analyze "Tell me about Harvard University financial health" --year 2022`
+
+| Stage | Latency | Notes |
+|---|---|---|
+| `resolver_ms` | **<100ms** | Entity match (difflib) + context assembly + 3 SQLite connections |
+| `db_query_ms` | **<10ms** | Pure SQLite query time — effectively free |
+| `synthesizer_ms` | **~40,000ms total** | Claude Sonnet API; streaming so first token ~2–3s |
+| `delivery_ms` | **<10ms** | Rich terminal rendering — effectively free |
+| **perceived latency** | **~2s to first output** | Metrics table renders before API call; synthesis streams |
+
+**Architecture decisions behind the numbers:**
+- Resolver was 15,822ms before web search gating fix (2026-03-31). Tightening `needs_web_search()`
+  to require explicit current-awareness signals dropped it to <100ms for all standard queries.
+  Web search only fires on queries containing: `recent`, `news`, `latest`, `appointed`, `merger`,
+  `accreditation`, `closure`, `layoffs`, `strike`, and year patterns ≥2024.
+- SQLite is not the bottleneck. 4ms for full institution_quant + 990 + IPEDS joins. Do not
+  migrate to PostgreSQL for performance reasons — the motivation is shared access, not speed.
+- Claude API is 99.6% of total latency and is non-negotiable. The only mitigation is streaming:
+  `synthesize_stream()` in `jenni/synthesizer.py` yields str chunks via `client.messages.stream()`.
+- Metrics table renders immediately from `context` (before API call) via `render_before_stream()`
+  in `jenni/delivery.py`. User sees quantitative data within 100ms; synthesis arrives in stream.
+
+**Streaming implementation notes:**
+- `synthesize_stream(context)` — generator; yields `str` chunks then one final `dict`
+- `synthesize(context)` — non-streaming, used for `--json` output path only
+- `render_before_stream(ctx)` — header + metrics table, called before API round-trip
+- `render_stream_header()` — rule separator before streaming text begins
+- `render_stream_footer(ctx, syn)` — data quality footer after stream completes
+- JSON path still uses `synthesize()` (non-streaming) since the full text is needed before serialisation
+
 ### Phase 2 Complete
-- [ ] GitHub repo public
+- [x] GitHub repo public — https://github.com/thx1138234/project-jenni
 - [ ] PostgreSQL on Supabase, migrated from SQLite
 - [x] College Scorecard loaded (scorecard_data.db: 6,322 institution rows, 217,530 program rows)
 - [ ] Read-only API endpoint live
