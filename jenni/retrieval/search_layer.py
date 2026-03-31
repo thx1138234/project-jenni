@@ -33,24 +33,27 @@ from jenni.retrieval.sql_retriever import SQLRetriever
 from jenni.retrieval.web_retriever import WebRetriever
 
 # ── Current-events trigger ─────────────────────────────────────────────────
+# Only explicit current-awareness signals activate web search.
+# General analytical terms (enrollment, tuition, financial health, budget,
+# president, ranking, deficit) live in the database — they must NOT trigger
+# a web round-trip on every standard query.
 _CURRENT_EVENTS_WORDS = {
-    "recent", "recently", "news", "latest", "current", "today",
-    "announced", "announcement", "appointment", "appointed", "launched",
-    "new", "closed", "closing", "merger", "acquired", "acquisition",
-    "accreditation", "leadership", "president", "chancellor", "provost",
-    "ranking", "tuition", "enrollment", "budget", "deficit", "layoffs",
-    "program", "campus", "strike", "protest",
+    "recent", "recently", "news", "latest", "today",
+    "announced", "appointed", "resigned", "fired", "hired",
+    "merger", "acquired", "acquisition",
+    "accreditation", "closure", "closing", "layoffs", "strike",
 }
 _CURRENT_EVENTS_PHRASES = (
-    "what happened",
-    "what's new",
-    "tell me about",
     "recent news",
     "latest news",
     "in the news",
     "this year",
-    "last year",
-    "financial health",    # often implies wanting current picture
+    "breaking",
+    "just announced",
+    "was appointed",
+    "new president",
+    "new provost",
+    "new chancellor",
 )
 # Year patterns forward of the database window: 2024, 2025, 2026, …
 _YEAR_PATTERN = re.compile(r"\b20(2[4-9]|[3-9]\d)\b")
@@ -58,8 +61,10 @@ _YEAR_PATTERN = re.compile(r"\b20(2[4-9]|[3-9]\d)\b")
 
 def needs_web_search(query: str) -> bool:
     """
-    Return True when the query has a current-events or recent-news dimension
-    that warrants activating the web retriever alongside SQL retrieval.
+    Return True only when the query contains an explicit current-awareness
+    signal.  General institutional analysis queries (financial health,
+    overview, trends, sector) rely entirely on the database and must return
+    False to avoid the web search latency penalty.
     """
     q = query.lower()
     tokens = set(q.split())

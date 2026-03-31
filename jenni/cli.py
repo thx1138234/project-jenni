@@ -28,6 +28,7 @@ from __future__ import annotations
 import json
 import sys
 import time
+from typing import Iterator
 
 import click
 from rich.console import Console
@@ -36,8 +37,8 @@ from rich.table import Table
 from rich import box
 
 from jenni.query_resolver import assemble_context, extract_entities
-from jenni.synthesizer import synthesize
-from jenni.delivery import render_response, to_json
+from jenni.synthesizer import synthesize, synthesize_stream
+from jenni.delivery import render_response, render_before_stream, render_stream_header, render_stream_footer, to_json
 from jenni.config import DB_990, DB_IPEDS, DB_QUANT
 
 console = Console()
@@ -95,49 +96,68 @@ def _run(
         _render_context_debug(ctx)
         return
 
-    with console.status(
-        f"[cyan]Synthesizing with {ctx['query_type']} model…[/cyan]",
-        spinner="dots",
-    ):
+    resolver_ms = int((t_resolver_end - t_run_start) * 1000)
+    db_query_ms = ctx.get("_timing", {}).get("db_query_ms", 0)
+
+    if json_output:
+        # ── Non-streaming path: need full text before serialising ─────────
+        with console.status("[cyan]Synthesizing…[/cyan]", spinner="dots"):
+            try:
+                syn = synthesize(ctx)
+            except Exception as exc:
+                log_query(
+                    context=ctx, model_used="unknown",
+                    tokens_in=0, tokens_out=0,
+                    latency_ms=int((time.monotonic() - t_run_start) * 1000),
+                    resolver_ms=resolver_ms, db_query_ms=db_query_ms,
+                    error=str(exc),
+                )
+                raise
+
+        t_synth_end = time.monotonic()
+        click.echo(json.dumps(to_json(ctx, syn), indent=2))
+        t_deliver_end = time.monotonic()
+
+    else:
+        # ── Streaming path: render metrics immediately, stream synthesis ───
+        render_before_stream(ctx, verbose=verbose)
+        render_stream_header()
+
+        syn = None
         try:
-            syn = synthesize(ctx)
+            for item in synthesize_stream(ctx):
+                if isinstance(item, str):
+                    sys.stdout.write(item)
+                    sys.stdout.flush()
+                else:
+                    syn = item
         except Exception as exc:
+            sys.stdout.write("\n")
             log_query(
-                context=ctx,
-                model_used="unknown",
-                tokens_in=0,
-                tokens_out=0,
+                context=ctx, model_used="unknown",
+                tokens_in=0, tokens_out=0,
                 latency_ms=int((time.monotonic() - t_run_start) * 1000),
-                resolver_ms=int((t_resolver_end - t_run_start) * 1000),
-                db_query_ms=ctx.get("_timing", {}).get("db_query_ms", 0),
+                resolver_ms=resolver_ms, db_query_ms=db_query_ms,
                 error=str(exc),
             )
             raise
 
-    t_synth_end = time.monotonic()
+        sys.stdout.write("\n")
+        t_synth_end = time.monotonic()
 
-    if json_output:
-        click.echo(json.dumps(to_json(ctx, syn), indent=2))
-    else:
-        render_response(ctx, syn, verbose=verbose)
-
-    t_deliver_end = time.monotonic()
-
-    resolver_ms    = int((t_resolver_end - t_run_start) * 1000)
-    synthesizer_ms = syn.get("synthesizer_ms", int((t_synth_end - t_resolver_end) * 1000))
-    delivery_ms    = int((t_deliver_end - t_synth_end) * 1000)
-    total_ms       = int((t_deliver_end - t_run_start) * 1000)
+        render_stream_footer(ctx, syn)
+        t_deliver_end = time.monotonic()
 
     log_query(
         context=ctx,
         model_used=syn["model"],
         tokens_in=syn["input_tokens"],
         tokens_out=syn["output_tokens"],
-        latency_ms=total_ms,
+        latency_ms=int((t_deliver_end - t_run_start) * 1000),
         resolver_ms=resolver_ms,
-        db_query_ms=ctx.get("_timing", {}).get("db_query_ms", 0),
-        synthesizer_ms=synthesizer_ms,
-        delivery_ms=delivery_ms,
+        db_query_ms=db_query_ms,
+        synthesizer_ms=syn.get("synthesizer_ms", int((t_synth_end - t_resolver_end) * 1000)),
+        delivery_ms=int((t_deliver_end - t_synth_end) * 1000),
     )
 
 

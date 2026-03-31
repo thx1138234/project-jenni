@@ -153,12 +153,70 @@ def _stress_badge(stress: dict | None) -> str:
     )
 
 
+def render_before_stream(context: dict, verbose: bool = False) -> None:
+    """
+    Render the pre-synthesis panels immediately — before the API call starts.
+    Includes institution header(s), stress badge, and metrics table(s) so the
+    user sees data while synthesis is streaming.
+    """
+    for uid, data in context["institution_data"].items():
+        m      = data.get("master", {})
+        q      = data.get("quant_latest", {})
+        stress = data.get("stress")
+        narrs  = data.get("narratives", {})
+
+        name  = m.get("institution_name", f"UNITID {uid}")
+        state = m.get("state_abbr", "")
+        ctrl  = m.get("control_label", "")
+
+        header_lines = [f"[bold cyan]{name}[/bold cyan]  {state}  |  {ctrl}"]
+        badge = _stress_badge(stress)
+        if badge:
+            header_lines.append(badge)
+        console.print(Panel("\n".join(header_lines), expand=False))
+
+        if q:
+            sy = q.get("survey_year", context["accordion"]["primary_year"])
+            console.print(_metrics_table(name, q, sy))
+        elif data.get("quant_history"):
+            console.print("[dim]  institution_quant data available — use --year to specify.[/dim]")
+        else:
+            console.print("[dim]  No quantitative data for this institution.[/dim]")
+
+        if verbose:
+            for narr_type, content in narrs.items():
+                console.print(Panel(
+                    content,
+                    title=f"[pre-encoded] {narr_type}",
+                    title_align="left",
+                    border_style="dim",
+                    expand=False,
+                ))
+
+
+def render_stream_header() -> None:
+    """Print the synthesis section header just before streaming begins."""
+    console.print()
+    console.rule("[bold cyan]JENNI Analysis[/bold cyan]", style="cyan")
+    console.print()
+
+
+def render_stream_footer(context: dict, synthesis: dict) -> None:
+    """
+    Render the data quality footer after streaming completes.
+    synthesis must be the final result dict from synthesize_stream().
+    """
+    console.print()
+    console.rule(style="dim")
+    _render_footer(context, synthesis)
+
+
 def render_response(
     context: dict,
     synthesis: dict,
     verbose: bool = False,
 ) -> None:
-    """Render the full JENNI response to the terminal."""
+    """Render the full JENNI response to the terminal (non-streaming path)."""
 
     # ── Institution header(s) ─────────────────────────────────────────────
     for uid, data in context["institution_data"].items():
@@ -210,6 +268,11 @@ def render_response(
     ))
 
     # ── Data quality footer ───────────────────────────────────────────────
+    _render_footer(context, synthesis)
+
+
+def _render_footer(context: dict, synthesis: dict) -> None:
+    """Shared footer renderer used by both streaming and non-streaming paths."""
     dq  = context.get("data_quality", {})
     acc = context.get("accordion", {})
 

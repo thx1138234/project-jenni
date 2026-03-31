@@ -271,31 +271,29 @@ def _score_band(score: float, confirmed: int = 0) -> str:
     return "Clean"
 
 
-def synthesize(context: dict) -> dict:
-    """
-    Call Claude API with the assembled context package.
-
-    Returns
-    -------
-    dict with keys:
-        text      : str   — synthesized narrative from the model
-        model     : str   — model ID used
-        model_label: str  — human-readable model label
-        input_tokens : int
-        output_tokens: int
-    """
+def _build_request_params(context: dict) -> tuple[str, int, str]:
+    """Return (model, max_tokens, user_turn) for the given context."""
     model = _MODEL_ROUTING.get(context["query_type"], MODEL_SONNET)
-
     if model == MODEL_OPUS:
         max_tokens = _MAX_TOKENS_OPUS
     elif _is_complex_context(context):
         max_tokens = _MAX_TOKENS_COMPLEX
     else:
         max_tokens = _MAX_TOKENS_STANDARD
-
-    api_key   = get_api_key()
-    client    = anthropic.Anthropic(api_key=api_key)
     user_turn = _format_context_for_model(context)
+    return model, max_tokens, user_turn
+
+
+def synthesize(context: dict) -> dict:
+    """
+    Non-streaming API call.  Used for --json output where the full response
+    is needed before any rendering begins.
+
+    Returns dict with keys:
+        text, model, model_label, input_tokens, output_tokens, synthesizer_ms
+    """
+    model, max_tokens, user_turn = _build_request_params(context)
+    client = anthropic.Anthropic(api_key=get_api_key())
 
     t0 = time.monotonic()
     response = client.messages.create(
@@ -304,13 +302,53 @@ def synthesize(context: dict) -> dict:
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_turn}],
     )
-    synthesizer_ms = int((time.monotonic() - t0) * 1000)
-
     return {
         "text":           response.content[0].text,
         "model":          model,
         "model_label":    _MODEL_LABELS.get(model, model),
         "input_tokens":   response.usage.input_tokens,
         "output_tokens":  response.usage.output_tokens,
-        "synthesizer_ms": synthesizer_ms,
+        "synthesizer_ms": int((time.monotonic() - t0) * 1000),
+    }
+
+
+def synthesize_stream(context: dict):
+    """
+    Streaming API call.  Yields str text chunks as the model generates them,
+    then yields one final dict (same shape as synthesize() return value) when
+    the stream is exhausted.
+
+    Usage:
+        syn = None
+        for item in synthesize_stream(ctx):
+            if isinstance(item, str):
+                sys.stdout.write(item)
+                sys.stdout.flush()
+            else:
+                syn = item   # final result dict
+    """
+    model, max_tokens, user_turn = _build_request_params(context)
+    client = anthropic.Anthropic(api_key=get_api_key())
+
+    t0 = time.monotonic()
+    collected: list[str] = []
+
+    with client.messages.stream(
+        model=model,
+        max_tokens=max_tokens,
+        system=SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_turn}],
+    ) as stream:
+        for chunk in stream.text_stream:
+            collected.append(chunk)
+            yield chunk
+        final = stream.get_final_message()
+
+    yield {
+        "text":           "".join(collected),
+        "model":          model,
+        "model_label":    _MODEL_LABELS.get(model, model),
+        "input_tokens":   final.usage.input_tokens,
+        "output_tokens":  final.usage.output_tokens,
+        "synthesizer_ms": int((time.monotonic() - t0) * 1000),
     }
