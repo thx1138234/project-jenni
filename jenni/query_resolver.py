@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 from jenni.config import (
-    DB_IPEDS, DB_990, DB_QUANT,
+    DB_IPEDS, DB_990, DB_QUANT, DB_EADA,
     PRIMARY_YEAR, BACKWARD_TERMINUS_990, BACKWARD_TERMINUS_IPEDS,
     FORWARD_TERMINUS_DEFENSIBLE, MIN_PEER_COUNT,
 )
@@ -271,8 +271,9 @@ def _load_institution_data(
     db990_conn: sqlite3.Connection,
     ipeds_conn: sqlite3.Connection,
     primary_year: int | None = None,
+    eada_conn: sqlite3.Connection | None = None,
 ) -> dict:
-    """Pull all data for one institution from the three databases."""
+    """Pull all data for one institution from the available databases."""
 
     # institution_master
     masters = _dict_rows(ipeds_conn,
@@ -345,13 +346,92 @@ def _load_institution_data(
             ORDER BY ix.fiscal_year_end
         """, (ein,))
 
+    # form990_schedule_d — endowment detail, all TEOS years
+    schedule_d_history: list[dict] = []
+    if ein:
+        schedule_d_history = _dict_rows(db990_conn, """
+            SELECT fiscal_year_end, endowment_boy, endowment_eoy,
+                   contributions_endowment, investment_return_endowment,
+                   grants_from_endowment, other_endowment_changes,
+                   endowment_restricted_perm, endowment_restricted_temp,
+                   endowment_unrestricted, endowment_board_designated,
+                   endowment_spending_rate, endowment_runway
+            FROM form990_schedule_d
+            WHERE ein = ?
+            ORDER BY fiscal_year_end
+        """, (ein,))
+
+    # form990_compensation — top 10 earners, most recent TEOS year
+    compensation_rows: list[dict] = []
+    if ein:
+        compensation_rows = _dict_rows(db990_conn, """
+            SELECT officer_name, officer_title, comp_total, comp_base,
+                   comp_bonus, comp_deferred, comp_nontaxable, related_org_comp,
+                   hours_per_week, former_officer, fiscal_year_end
+            FROM form990_compensation
+            WHERE ein = ?
+              AND fiscal_year_end = (
+                  SELECT MAX(fiscal_year_end) FROM form990_compensation WHERE ein = ?
+              )
+            ORDER BY comp_total DESC
+            LIMIT 10
+        """, (ein, ein))
+
+    # form990_governance — most recent TEOS year
+    governance_row: dict | None = None
+    if ein:
+        rows = _dict_rows(db990_conn, """
+            SELECT fiscal_year_end, voting_members_governing_body,
+                   voting_members_independent, total_employees,
+                   conflict_of_interest_policy, whistleblower_policy,
+                   document_retention_policy, financials_audited, audit_committee,
+                   family_or_business_relationship, government_grants_amt
+            FROM form990_governance
+            WHERE ein = ?
+            ORDER BY fiscal_year_end DESC
+            LIMIT 1
+        """, (ein,))
+        governance_row = rows[0] if rows else None
+
+    # eada_instlevel — most recent 3 years (unitid-keyed, eada_data.db)
+    eada_instlevel_history: list[dict] = []
+    if eada_conn is not None:
+        eada_instlevel_history = list(reversed(_dict_rows(eada_conn, """
+            SELECT survey_year, grnd_total_revenue, grnd_total_expense,
+                   studentaid_total, recruitexp_total,
+                   hdcoach_salary_men, hdcoach_salary_women,
+                   partic_men, partic_women, ef_total_count
+            FROM eada_instlevel
+            WHERE unitid = ?
+            ORDER BY survey_year DESC
+            LIMIT 3
+        """, (unitid,))))
+
+    # eada_sports — most recent year, all sports ordered by expenses (unitid-keyed)
+    eada_sports_rows: list[dict] = []
+    if eada_conn is not None:
+        eada_sports_rows = _dict_rows(eada_conn, """
+            SELECT sport_name, total_revenue, total_expenses, survey_year
+            FROM eada_sports
+            WHERE unitid = ?
+              AND survey_year = (
+                  SELECT MAX(survey_year) FROM eada_sports WHERE unitid = ?
+              )
+            ORDER BY total_expenses DESC
+        """, (unitid, unitid))
+
     return {
-        "master":         master,
-        "quant_latest":   quant_latest,
-        "quant_history":  quant_history,
-        "stress":         stress,
-        "narratives":     narratives,
-        "part_ix_history": part_ix_history,
+        "master":                master,
+        "quant_latest":          quant_latest,
+        "quant_history":         quant_history,
+        "stress":                stress,
+        "narratives":            narratives,
+        "part_ix_history":       part_ix_history,
+        "schedule_d_history":    schedule_d_history,
+        "compensation_rows":     compensation_rows,
+        "governance_row":        governance_row,
+        "eada_instlevel_history": eada_instlevel_history,
+        "eada_sports_rows":      eada_sports_rows,
     }
 
 
@@ -437,6 +517,7 @@ def assemble_context(
     quant_conn = sqlite3.connect(str(DB_QUANT))
     db990_conn = sqlite3.connect(str(DB_990))
     ipeds_conn = sqlite3.connect(str(DB_IPEDS))
+    eada_conn  = sqlite3.connect(str(DB_EADA))
 
     # Pre-pass: collect available years to determine accordion + primary_year
     all_years: list[int] = []
@@ -460,12 +541,13 @@ def assemble_context(
     institution_data: dict[int, dict] = {}
     for entity in entities:
         uid  = entity["unitid"]
-        data = _load_institution_data(uid, quant_conn, db990_conn, ipeds_conn, primary_year)
+        data = _load_institution_data(uid, quant_conn, db990_conn, ipeds_conn, primary_year, eada_conn)
         institution_data[uid] = data
 
     quant_conn.close()
     db990_conn.close()
     ipeds_conn.close()
+    eada_conn.close()
 
     _t_db_end = time.monotonic()
 

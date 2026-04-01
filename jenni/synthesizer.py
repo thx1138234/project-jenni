@@ -218,12 +218,47 @@ def _format_context_for_model(context: dict) -> str:
             parts.append(_format_history_summary(hist))
             parts.append("")
 
-        # Part IX functional expense detail — included when query involves expense
-        # analysis or for comparison/profile queries with TEOS data available.
+        # Part IX functional expense detail
         part_ix = data.get("part_ix_history", [])
         if part_ix and _needs_part_ix(context["query"], context["query_type"]):
             parts.append(f"PART IX — FUNCTIONAL EXPENSES (form990_part_ix, TEOS/irsx, {len(part_ix)} years):")
             parts.append(_format_part_ix_block(part_ix))
+            parts.append("")
+
+        # Schedule D — endowment detail
+        sched_d = data.get("schedule_d_history", [])
+        if sched_d and _needs_schedule_d(context["query"], context["query_type"]):
+            parts.append(f"SCHEDULE D — ENDOWMENT DETAIL (form990_schedule_d, {len(sched_d)} years):")
+            parts.append(_format_schedule_d_block(sched_d))
+            parts.append("")
+
+        # Schedule J — officer compensation
+        comp_rows = data.get("compensation_rows", [])
+        if comp_rows and _needs_compensation(context["query"]):
+            jesuit = bool(m.get("jesuit_institution"))
+            parts.append("SCHEDULE J — OFFICER COMPENSATION (form990_compensation):")
+            parts.append(_format_compensation_block(comp_rows, jesuit=jesuit))
+            parts.append("")
+
+        # EADA institutional-level athletics
+        eada_inst = data.get("eada_instlevel_history", [])
+        if eada_inst and _needs_athletics(context["query"]):
+            parts.append(f"EADA INSTITUTIONAL ATHLETICS ({len(eada_inst)} years):")
+            parts.append(_format_eada_instlevel_block(eada_inst))
+            parts.append("")
+
+        # EADA sport-by-sport P&L
+        eada_sports = data.get("eada_sports_rows", [])
+        if eada_sports and _needs_athletics(context["query"]):
+            parts.append("EADA SPORT-BY-SPORT:")
+            parts.append(_format_eada_sports_block(eada_sports))
+            parts.append("")
+
+        # Governance
+        gov = data.get("governance_row")
+        if gov and _needs_governance(context["query"]):
+            parts.append("GOVERNANCE (form990_governance):")
+            parts.append(_format_governance_block(gov))
             parts.append("")
 
     # Scorecard single-year caveat — always present; model must cite when
@@ -279,10 +314,49 @@ _EXPENSE_WORDS = {
 
 def _needs_part_ix(query: str, query_type: str) -> bool:
     """Return True when Part IX functional expense detail should be included."""
-    if query_type in ("comparison", "institution_profile"):
-        return True
     q_tokens = set(query.lower().split())
     return bool(q_tokens & _EXPENSE_WORDS)
+
+
+_ENDOWMENT_WORDS = {
+    "endowment", "corpus", "draw", "drawdown", "distribution",
+    "payout", "spending", "investment", "perpetual", "restricted",
+}
+
+_COMP_WORDS = {
+    "compensation", "salary", "salaries", "earn", "earns", "earned",
+    "pay", "paid", "president", "coach", "officer", "executive",
+}
+
+_ATHLETICS_WORDS = {
+    "athletics", "athletic", "sports", "sport", "football", "basketball",
+    "soccer", "hockey", "lacrosse", "rowing", "tennis", "swimming",
+    "acc", "ncaa", "conference", "coaching",
+}
+
+_GOVERNANCE_WORDS = {
+    "board", "governance", "trustees", "directors", "independent",
+    "conflict", "audit", "oversight", "fiduciary", "policy",
+}
+
+
+def _needs_schedule_d(query: str, query_type: str) -> bool:
+    q = query.lower()
+    return bool(set(q.split()) & _ENDOWMENT_WORDS) or \
+           "spending rate" in q or "investment return" in q
+
+
+def _needs_compensation(query: str) -> bool:
+    q = query.lower()
+    return bool(set(q.split()) & _COMP_WORDS) or "highest paid" in q
+
+
+def _needs_athletics(query: str) -> bool:
+    return bool(set(query.lower().split()) & _ATHLETICS_WORDS)
+
+
+def _needs_governance(query: str) -> bool:
+    return bool(set(query.lower().split()) & _GOVERNANCE_WORDS)
 
 
 def _format_part_ix_block(history: list[dict]) -> str:
@@ -324,6 +398,160 @@ def _format_part_ix_block(history: list[dict]) -> str:
             f"    Program services %           {(row.get('prog_services_pct') or 0):.1%}"
             f"   Overhead: {(row.get('overhead_ratio') or 0):.1%}"
         )
+    return "\n".join(lines)
+
+
+def _format_schedule_d_block(history: list[dict]) -> str:
+    """Format form990_schedule_d endowment rows."""
+    if not history:
+        return "  (No Schedule D endowment data available)"
+    lines = []
+    for row in history:
+        fy  = row.get("fiscal_year_end", "?")
+        boy = row.get("endowment_boy") or 0
+        eoy = row.get("endowment_eoy") or 0
+        inv = row.get("investment_return_endowment") or 0
+        con = row.get("contributions_endowment") or 0
+        grt = row.get("grants_from_endowment") or 0
+        oth = row.get("other_endowment_changes") or 0
+        spr = row.get("endowment_spending_rate")
+        rwy = row.get("endowment_runway")
+        perm = row.get("endowment_restricted_perm")
+        temp = row.get("endowment_restricted_temp")
+        unre = row.get("endowment_unrestricted")
+        bdes = row.get("endowment_board_designated")
+
+        lines.append(f"  FY{fy}:")
+        lines.append(f"    BOY balance:              ${boy/1e9:,.2f}B" if boy > 1e8 else f"    BOY balance:              ${boy:,.0f}")
+        lines.append(f"    Investment return:         ${inv/1e9:,.2f}B  ({inv/boy:.1%})" if boy else f"    Investment return:         ${inv:,.0f}")
+        lines.append(f"    New contributions:        ${con:,.0f}")
+        if grt:
+            spr_str = f"  (spending rate: {spr:.2%})" if spr else ""
+            lines.append(f"    Grants from endowment:    ${grt:,.0f}{spr_str}")
+        if oth:
+            lines.append(f"    Other changes:            ${oth:,.0f}")
+        lines.append(f"    EOY balance:              ${eoy/1e9:,.2f}B" if eoy > 1e8 else f"    EOY balance:              ${eoy:,.0f}")
+        if rwy is not None:
+            lines.append(f"    Endowment runway:         {rwy:.2f} yrs")
+        # Corpus breakdown (only if we have data)
+        if any(v is not None for v in [perm, temp, unre, bdes]):
+            parts_str = []
+            if bdes is not None:
+                parts_str.append(f"board-designated ${bdes:,.0f}")
+            if perm is not None:
+                parts_str.append(f"perm-restricted ${perm:,.0f}")
+            if temp is not None:
+                parts_str.append(f"temp-restricted ${temp:,.0f}")
+            if unre is not None:
+                parts_str.append(f"unrestricted ${unre:,.0f}")
+            lines.append(f"    Corpus: {' | '.join(parts_str)}")
+    return "\n".join(lines)
+
+
+def _format_compensation_block(rows: list[dict], jesuit: bool = False) -> str:
+    """Format form990_compensation Schedule J rows."""
+    if not rows:
+        return "  (No Schedule J compensation data available for this institution)"
+    fy = rows[0].get("fiscal_year_end", "?") if rows else "?"
+    lines = [f"  OFFICER COMPENSATION — Schedule J, FY{fy} (top {len(rows)} by total comp):"]
+    if jesuit:
+        lines.append(
+            "  ⚠ Jesuit institution: president may not appear on Schedule J — "
+            "compensation flows through Society of Jesus, not institutional payroll."
+        )
+    for i, r in enumerate(rows, 1):
+        name   = r.get("officer_name", "—")
+        title  = r.get("officer_title", "—")
+        total  = r.get("comp_total") or 0
+        base   = r.get("comp_base") or 0
+        bonus  = r.get("comp_bonus") or 0
+        defer  = r.get("comp_deferred") or 0
+        related = r.get("related_org_comp") or 0
+        former = r.get("former_officer", 0)
+        tag    = " [former]" if former else ""
+        lines.append(
+            f"  {i:>2}. {name}{tag}  ({title})"
+        )
+        lines.append(
+            f"      Total: ${total:>12,.0f}  "
+            f"Base: ${base:,.0f}  Bonus: ${bonus:,.0f}  Deferred: ${defer:,.0f}"
+            + (f"  Related org: ${related:,.0f}" if related else "")
+        )
+    return "\n".join(lines)
+
+
+def _format_eada_instlevel_block(history: list[dict]) -> str:
+    """Format eada_instlevel institutional athletics rows."""
+    if not history:
+        return "  (No EADA institutional data available)"
+    lines = ["  EADA INSTITUTIONAL TOTALS (survey_year):"]
+    for row in history:
+        sy  = row.get("survey_year", "?")
+        rev = row.get("grnd_total_revenue") or 0
+        exp = row.get("grnd_total_expense") or 0
+        net = rev - exp
+        aid = row.get("studentaid_total") or 0
+        rec = row.get("recruitexp_total") or 0
+        cm  = row.get("hdcoach_salary_men") or 0
+        cw  = row.get("hdcoach_salary_women") or 0
+        pm  = row.get("partic_men") or 0
+        pw  = row.get("partic_women") or 0
+        lines.append(
+            f"  SY{sy}: Revenue ${rev:,.0f} | Expenses ${exp:,.0f} | "
+            f"Net ${net:+,.0f}"
+        )
+        lines.append(
+            f"        Student aid ${aid:,.0f} | Recruiting ${rec:,.0f} | "
+            f"Head coach salaries M ${cm:,.0f} W ${cw:,.0f}"
+        )
+        lines.append(f"        Participants: {pm} men / {pw} women")
+    return "\n".join(lines)
+
+
+def _format_eada_sports_block(rows: list[dict]) -> str:
+    """Format eada_sports sport-by-sport P&L for most recent year."""
+    if not rows:
+        return "  (No EADA sport-level data available)"
+    sy = rows[0].get("survey_year", "?")
+    lines = [f"  SPORT-BY-SPORT P&L (EADA, survey_year {sy}, ordered by expenses):"]
+    for row in rows:
+        sport = row.get("sport_name", "—")
+        rev   = row.get("total_revenue") or 0
+        exp   = row.get("total_expenses") or 0
+        net   = rev - exp
+        lines.append(
+            f"    {sport:<22} Rev ${rev:>12,.0f} | Exp ${exp:>12,.0f} | Net ${net:>+12,.0f}"
+        )
+    return "\n".join(lines)
+
+
+def _format_governance_block(row: dict) -> str:
+    """Format form990_governance Part VI row."""
+    fy   = row.get("fiscal_year_end", "?")
+    total = row.get("voting_members_governing_body") or 0
+    indep = row.get("voting_members_independent") or 0
+    emp   = row.get("total_employees") or 0
+    indep_pct = f" ({indep/total:.0%} independent)" if total else ""
+
+    def yn(v):
+        return "✓" if v else "✗"
+
+    lines = [
+        f"  GOVERNANCE (form990_governance, FY{fy}):",
+        f"    Board:       {total} voting members, {indep} independent{indep_pct}",
+        f"    Employees:   {emp:,}",
+        f"    Policies:    COI {yn(row.get('conflict_of_interest_policy'))}  "
+        f"Whistleblower {yn(row.get('whistleblower_policy'))}  "
+        f"Doc retention {yn(row.get('document_retention_policy'))}",
+        f"    Audit:       Audited {yn(row.get('financials_audited'))}  "
+        f"Audit committee {yn(row.get('audit_committee'))}",
+    ]
+    fam = row.get("family_or_business_relationship")
+    if fam:
+        lines.append("    Family/business relationships among board members: Yes")
+    govt = row.get("government_grants_amt")
+    if govt:
+        lines.append(f"    Gov't grants received: ${govt:,.0f}")
     return "\n".join(lines)
 
 
