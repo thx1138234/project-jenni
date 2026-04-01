@@ -82,6 +82,68 @@ a higher ed professional needs answered.
 
 ---
 
+## Building Principles
+
+These are not implementation guidelines. They are the principles that govern architectural
+decisions, prioritization, and long-term direction. Read them when facing a tradeoff.
+
+### Low Time Preference
+
+JENNI is built for permanence, not speed. Every architectural decision should be evaluated
+against the question: *will this still make sense in ten years?*
+
+Implementation details are replaceable. The model will improve. The interface will change.
+The hosting infrastructure will evolve. None of that matters. What matters is that the data
+layer accumulates correctly, the schema captures the right things, and the analytical
+principles are sound. A decision that saves a week of implementation time but creates a
+structural debt that distorts analysis five years from now is a bad decision. A decision
+that takes longer now but leaves a cleaner foundation is always preferred.
+
+Build slowly. Build right. The urgency is usually an illusion.
+
+### The Compounding Principle
+
+The data layer, the learning layer, and the narrative layer all compound in value over time.
+Every year of new data, every validated insight, every promoted pattern makes JENNI's next
+analysis richer than the last.
+
+This compounding is the core value of the system — not any individual analysis, not the
+current model capability, not this year's feature set. A database that has faithfully
+accumulated 25 years of institutional data is worth more than one that has 5 years of data
+with a better query interface. A pattern library that has been validated against real
+institutional outcomes is worth more than one that has been cleverly engineered but never
+stress-tested.
+
+Decisions that protect compounding are always preferred over decisions that optimize for
+immediate performance at the cost of long-term accumulation. Specifically:
+- Never delete historical data to improve query performance.
+- Never simplify the schema in ways that lose precision, even if the precision isn't used yet.
+- Never skip a supplemental table because it's not needed for the current use case.
+- Always build the INSERT OR IGNORE path so partial refreshes are safe and non-destructive.
+
+The compounding is the product.
+
+### Mission Over Mechanism
+
+JENNI's mission is understanding civilization's knowledge institutions at a depth and
+historical scale previously impossible. Not just American higher education. Not just the
+institutions that file 990s. The full scope — the universities, libraries, museums, research
+institutions, and learned societies that carry and transmit what humanity knows.
+
+The current model, the current interface, the current architecture are expressions of that
+mission — not the mission itself. Claude Sonnet is an expression. SQLite is an expression.
+The terminal CLI is an expression. When a better model emerges, adopt it. When a better
+architecture becomes available, migrate to it. When the interface that best serves the
+mission turns out to be something other than what exists today, build that instead.
+
+The mission doesn't change. The mechanisms are always provisional.
+
+This principle has a corollary: never mistake attachment to a mechanism for fidelity to the
+mission. The measure of a good architectural decision is not whether it preserves the current
+system — it is whether it makes the mission more achievable.
+
+---
+
 ## Use Cases — Who Uses This and What They Do With It
 
 ### The Primary User Is Not the C-Suite
