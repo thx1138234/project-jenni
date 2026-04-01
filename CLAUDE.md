@@ -1220,7 +1220,7 @@ Measured against: `jenni analyze "Tell me about Harvard University financial hea
 
 | Stage | Latency | Notes |
 |---|---|---|
-| `resolver_ms` | **<100ms** | Entity match (difflib) + context assembly + 3 SQLite connections |
+| `resolver_ms` | **<100ms** | Entity match (difflib) + context assembly + 4 SQLite connections |
 | `db_query_ms` | **<10ms** | Pure SQLite query time — effectively free |
 | `synthesizer_ms` | **~40,000ms total** | Claude Sonnet API; streaming so first token ~2–3s |
 | `delivery_ms` | **<10ms** | Rich terminal rendering — effectively free |
@@ -1246,78 +1246,144 @@ Measured against: `jenni analyze "Tell me about Harvard University financial hea
 - `render_stream_footer(ctx, syn)` — data quality footer after stream completes
 - JSON path still uses `synthesize()` (non-streaming) since the full text is needed before serialisation
 
-### Supplemental Context Trigger Audit ✓ (2026-03-31)
+### Query Resolver Fixes ✓ (2026-04-01)
 
-**Trigger condition:** A supplemental table is only useful to the model if it is (a) loaded
-into `institution_data` by `_load_institution_data()` in `query_resolver.py` AND (b) formatted
-into the prompt by `_format_context_for_model()` in `synthesizer.py`, subject to an optional
-trigger condition (query type or keyword match).
+Three bugs fixed in `jenni/query_resolver.py` (commits 95d62c8, 9ee8450):
 
-**Audit results — as of 2026-03-31:**
+**1. Entity resolver early-exit bug (comparison queries)**
 
-| Supplemental Table | Loaded? | Formatted? | Trigger Condition | Status |
-|---|---|---|---|---|
-| `form990_part_ix` | ✅ | ✅ | `query_type in (comparison, institution_profile)` OR `_EXPENSE_WORDS` in query | **Wired** (2026-03-31) |
-| `form990_schedule_d` | ❌ | ❌ | None | **Silent gap** |
-| `form990_compensation` | ❌ | ❌ | None | **Silent gap** |
-| `eada_instlevel` | ❌ | ❌ | None | **Silent gap** |
-| `eada_sports` | ❌ | ❌ | None | **Silent gap** |
-| `form990_governance` | ❌ | ❌ | None | **Silent gap** |
-| `form990_related_orgs` | ❌ | ❌ | None | Out of scope for now |
+`extract_entities()` previously returned after the alias phase found any match, silently
+dropping the second institution in comparison queries where one matched by alias and the other
+by substring (e.g., "Compare BC and Georgetown" — BC matched alias, Georgetown dropped).
 
-**What each silent gap means for the model:**
+Fix: three-phase extraction now merges results before returning. Phase 3 (fuzzy) is the only
+early-exit gate: if Phase 1 (alias) or Phase 2 (substring) found anything clean, fuzzy is
+skipped entirely to prevent noise (e.g., "Oakton College" fuzzily matching "College" token).
 
-- **schedule_d**: Model gets `endowment_runway` and `endowment_per_student` from `institution_quant`
-  (derived values), but NOT the raw year-by-year endowment flows: BOY balance, investment return,
-  new contributions, grants from endowment, EOY balance, spending rate, corpus breakdown
-  (board-designated / perm-restricted / temp-restricted). A query like "Tell me about Harvard
-  endowment management" gets only the derived summary — the underlying 4-year Schedule D
-  detail ($49B EOY, $1.3B investment return FY2023, 7.89yr runway) never reaches the model.
+```python
+candidates: dict[int, dict] = {}
+# Phase 1: alias → add to candidates
+# Phase 2: substring → add to candidates if uid not already present
+if candidates:
+    return sorted(candidates.values(), key=lambda x: -x["match_score"])[:max_results]
+# Phase 3: fuzzy (fallback — only runs when Phases 1+2 found nothing)
+```
 
-- **compensation**: Model gets nothing about officer pay from live data. Pre-encoded narratives
-  (auto_seeded) may contain some officer comp text, but no Schedule J data is formatted into
-  the prompt. "What does the Harvard president earn" produces a response from institutional
-  knowledge only — the 104 Harvard compensation rows ($1.3M Bacow FY2022, etc.) are invisible.
+**2. Default year for comparison and institution_profile queries**
 
-- **eada_instlevel / eada_sports**: Model gets `athletics_net`, `athletics_to_expense_pct`,
-  `athletics_per_student` from `institution_quant` (derived from EADA), plus a pre-encoded
-  `athletics` narrative. But sport-by-sport detail (football: $47.2M revenue / $38.1M expense
-  at BC FY2024; basketball, ice hockey) never reaches the model. "Tell me about BC athletics
-  economics" gets the aggregate summary — the sport-level P&L is a silent gap.
+`assemble_context()` was defaulting to `max(years_in_db)` = 2023 when no `--year` was
+specified. For 2023, financial data completeness is 26.9% (FY2024 990 filings pending TEOS
+2025 release ~March 2026). Comparison and profile queries now default to `PRIMARY_YEAR = 2022`
+(96.2% completeness) when no explicit year is provided:
 
-**Test queries run (2026-03-31):**
-- `jenni analyze 'Tell me about Harvard endowment management'` → no schedule_d block in context
-- `jenni analyze 'What does the Harvard president earn'` → no compensation block in context
-- `jenni analyze 'Tell me about Boston College athletics economics'` → no eada_sports block in context
+```python
+if year is None and query_type in ("comparison", "institution_profile"):
+    year = PRIMARY_YEAR
+```
 
-**Wiring priority (next session):**
-1. `form990_schedule_d` — high value; endowment management is a common analytical question.
-   Trigger: `query_type in (comparison, institution_profile)` OR `_ENDOWMENT_WORDS` in query
-   (endowment, runway, distribution, spending, corpus, investment return).
-2. `form990_compensation` — high value; compensation questions are common and specific.
-   Trigger: `_COMP_WORDS` in query (earn, salary, compensation, paid, president, coach, officer).
-3. `eada_sports` — medium value; sport-level detail needed for athletics economics questions.
-   Trigger: `_ATHLETICS_WORDS` in query (athletics, sport, football, basketball, coaching).
-   Note: eada_data.db requires a fourth DB connection in `_load_institution_data()`.
-4. `form990_governance` — lower priority; governance questions are less frequent.
+Trend and sector queries intentionally use the latest year (they need the full range).
 
-**Data availability confirmed:**
+**3. eada_data.db fourth DB connection**
+
+`_load_institution_data()` signature extended with `eada_conn: sqlite3.Connection | None = None`.
+`assemble_context()` opens `eada_conn = sqlite3.connect(str(DB_EADA))` before the main
+institution loop and closes it after. EADA tables (`eada_instlevel`, `eada_sports`) are
+UNITID-keyed (not EIN-keyed) and live in a separate database from `990_data.db`.
+
+---
+
+### Supplemental Context Trigger Architecture ✓ (2026-04-01)
+
+All silent gaps eliminated. Commits 8e50861 and 9ee8450.
+
+**Architecture:** A supplemental table reaches the model only if it is (a) loaded into
+`institution_data` by `_load_institution_data()` in `query_resolver.py` AND (b) included
+by `_format_context_for_model()` in `synthesizer.py` when its trigger fires. Triggers are
+keyword-only — no `query_type` catch-alls (those caused over-firing: schedule_d appearing
+in advertising comparisons, part_ix firing on all profile queries).
+
+**Complete wired state (as of 2026-04-01):**
+
+| Supplemental Table | Loaded? | Trigger Function | Status |
+|---|---|---|---|
+| `form990_part_ix` | ✅ EIN-keyed | `_needs_part_ix()` — expense keyword set | ✅ Wired |
+| `form990_schedule_d` | ✅ EIN-keyed | `_needs_schedule_d()` — endowment keyword set | ✅ Wired |
+| `form990_compensation` | ✅ EIN-keyed, top 10 latest year | `_needs_compensation()` — comp keyword set | ✅ Wired |
+| `eada_instlevel` | ✅ UNITID-keyed, 3 years | `_needs_athletics()` — athletics keyword set | ✅ Wired |
+| `eada_sports` | ✅ UNITID-keyed, latest year | `_needs_athletics()` — same set | ✅ Wired |
+| `form990_governance` | ✅ EIN-keyed, latest year | `_needs_governance()` — governance keyword set | ✅ Wired |
+| `form990_related_orgs` | ❌ | — | Out of scope |
+
+**Trigger word sets (exact sets in `jenni/synthesizer.py`):**
+
+```python
+_EXPENSE_WORDS = {
+    "advertising", "marketing", "spend", "spending", "budget",
+    "promotion", "promotional", "expense", "expenses", "expenditure",
+    "expenditures", "cost", "costs",
+}
+
+_ENDOWMENT_WORDS = {
+    "endowment", "corpus", "draw", "drawdown", "distribution",
+    "payout", "spending", "investment", "perpetual", "restricted",
+}
+# Also triggers on phrases: "spending rate", "investment return"
+
+_COMP_WORDS = {
+    "compensation", "salary", "salaries", "earn", "earns", "earned",
+    "pay", "paid", "president", "coach", "officer", "executive",
+}
+# Also triggers on phrase: "highest paid"
+
+_ATHLETICS_WORDS = {
+    "athletics", "athletic", "sports", "sport", "football", "basketball",
+    "soccer", "hockey", "lacrosse", "rowing", "tennis", "swimming",
+    "acc", "ncaa", "conference", "coaching",
+}
+
+_GOVERNANCE_WORDS = {
+    "board", "governance", "trustees", "directors", "independent",
+    "conflict", "audit", "oversight", "fiduciary", "policy",
+}
+```
+
+**Format functions in `jenni/synthesizer.py`:**
+- `_format_part_ix_block(history, peer_context)` — advertising/IT/fundraising by FY + peer medians
+- `_format_schedule_d_block(history)` — BOY/EOY, investment return, contributions, grants, corpus breakdown
+- `_format_compensation_block(rows, jesuit=False)` — ranked officers with base/bonus/deferred; Jesuit note
+- `_format_eada_instlevel_block(history)` — revenue/expense/net/aid/recruiting/coach salaries/participants
+- `_format_eada_sports_block(rows)` — sport-by-sport P&L ordered by expenses
+- `_format_governance_block(row)` — board size/independence/policies/audit/govt grants
+
+**Jesuit compensation convention:** `institution_master.jesuit_institution = 1` signals that the
+president will not appear on Schedule J (compensation flows through Society of Jesus). The
+compensation formatter adds a warning note when `jesuit=True`. BC (Fr. Leahy), Georgetown,
+Holy Cross, and other Jesuit institutions are affected. Highest Schedule J earner at these
+institutions is typically a head coach or investment professional.
+
+**Data availability (validation set):**
 - Harvard: schedule_d 4 rows (FY2020-2023), compensation 104 rows, eada_instlevel 18 rows, eada_sports 367 rows
 - BC: schedule_d 4 rows (FY2020-2023), compensation 74 rows (incl. Hafley $3.8M FY2023), eada_instlevel 19 rows, eada_sports 327 rows
 
-### Part IX Peer Context ✓ (2026-04-01)
+### Part IX Peer Context ✓ (2026-04-01, commit a89b364)
 
-`_compute_part_ix_peer_context()` added to `query_resolver.py`. Computes Carnegie peer medians
-and institution percentiles for three Part IX metrics per fiscal year:
-- `advertising_total` = advertising_prog + advertising_mgmt + advertising_fundraising
-- `it_total` = it_prog + it_mgmt + it_fundraising
-- `fundraising_peer_median` = prof_fundraising_fees
+`_compute_part_ix_peer_context()` added to `query_resolver.py`. For each fiscal year in an
+institution's Part IX history, computes Carnegie peer medians and the institution's percentile
+rank for three expense line items:
+- `advertising_total` = advertising_prog + advertising_mgmt + advertising_fundraising (Ln 12)
+- `it_total` = it_prog + it_mgmt + it_fundraising (Ln 14)
+- `prof_fundraising_fees` = prof_fundraising_fees (Ln 11e)
 
-**Implementation:** pulls peer EINs from `institution_master` (same `carnegie_basic`), fetches their
-`form990_part_ix` rows from `990_data.db`, computes `statistics.median()` and percentile rank in
-Python. Stored as `part_ix_peer_context` (keyed by `fiscal_year_end`) in the institution data
-package. `_format_part_ix_block()` in `synthesizer.py` updated to accept and render peer context
-inline per year.
+**Implementation:** queries `institution_master` (ipeds_conn) for all active EINs with the same
+`carnegie_basic`, then fetches their `form990_part_ix` rows from `990_data.db` for matching
+fiscal years. Medians computed with `statistics.median()`, percentile as fraction of peers
+below the institution's value. Requires `MIN_PEER_COUNT` peers per year or the year is skipped.
+Stored as `part_ix_peer_context: dict[int, dict]` (keyed by `fiscal_year_end`) in the
+institution data package. `_format_part_ix_block(history, peer_context)` in `synthesizer.py`
+renders peer median and percentile inline below each institution's line item.
+
+**Why this matters:** Absolute Part IX spend figures are uninterpretable without peer context.
+See Bentley canonical reference case below.
 
 ---
 
