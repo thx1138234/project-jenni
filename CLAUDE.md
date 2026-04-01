@@ -1242,6 +1242,70 @@ trigger condition (query type or keyword match).
 - Harvard: schedule_d 4 rows (FY2020-2023), compensation 104 rows, eada_instlevel 18 rows, eada_sports 367 rows
 - BC: schedule_d 4 rows (FY2020-2023), compensation 74 rows (incl. Hafley $3.8M FY2023), eada_instlevel 19 rows, eada_sports 327 rows
 
+### Part IX Peer Context ✓ (2026-04-01)
+
+`_compute_part_ix_peer_context()` added to `query_resolver.py`. Computes Carnegie peer medians
+and institution percentiles for three Part IX metrics per fiscal year:
+- `advertising_total` = advertising_prog + advertising_mgmt + advertising_fundraising
+- `it_total` = it_prog + it_mgmt + it_fundraising
+- `fundraising_peer_median` = prof_fundraising_fees
+
+**Implementation:** pulls peer EINs from `institution_master` (same `carnegie_basic`), fetches their
+`form990_part_ix` rows from `990_data.db`, computes `statistics.median()` and percentile rank in
+Python. Stored as `part_ix_peer_context` (keyed by `fiscal_year_end`) in the institution data
+package. `_format_part_ix_block()` in `synthesizer.py` updated to accept and render peer context
+inline per year.
+
+---
+
+### Canonical Reference Case — Bentley Advertising Benchmark (2026-04-01)
+
+**Query:** "What is the appropriate advertising spend benchmark for a school like Bentley and
+what does JENNI data suggest about spend efficiency?" `--year 2022`
+
+**Why this is the canonical example:** Before Part IX peer context, the $620/enrolled-student
+advertising spend figure appeared to represent underinvestment — no peer comparison was possible
+and the model had to hedge ("M1 cohort distribution not available for direct percentile ranking").
+After peer context, the analytical conclusion changed completely.
+
+**The data that changed the conclusion:**
+
+| FY | Bentley Spend | % of Total Exp | Peer Median | Bentley Percentile |
+|---|---|---|---|---|
+| FY2020 | $1,761,576 | 0.57% | $1,203,644 | 65th |
+| FY2021 | $3,145,140 | 1.10% | $1,144,854 | 82nd |
+| FY2022 | $3,350,185 | 1.03% | $1,373,151 | 81st |
+| FY2023 | $3,342,607 | 1.00% | $1,408,905 | 79th |
+
+Peer group: Carnegie M1, n≈144 filers per year.
+
+**The analytical conclusion peer context unlocked:**
+
+Bentley is NOT underinvesting in advertising. At the 79th–81st percentile of M1 peers,
+spending ~2.4× the peer median (~$1.4M), the absolute spend level is at the upper edge of
+what is defensible for a tuition-dependent M1 institution. The problem is not top-of-funnel
+awareness — it is conversion.
+
+Evidence: Bentley's yield rate (20.4%) is at the 58th percentile despite revenue/FTE at the
+93rd percentile and net price at the 95th percentile. The institution charges top-decile prices
+and attracts enough applications, but does not convert admitted students at the rate its
+selectivity and pricing would predict. Marginal advertising dollars are therefore better
+directed toward admitted-student engagement than brand awareness.
+
+**What the functional allocation confirmed:** FY2021–FY2023 advertising was classified 98–99%
+to program services (enrollment marketing), consistent with recruiting spend. The FY2021 step-up
+from $1.8M to $3.1M was a deliberate strategic decision — not a one-year anomaly — and has been
+sustained for three consecutive years.
+
+**Pattern for future queries using this framework:**
+1. Absolute spend alone is uninterpretable without peer context.
+2. Peer percentile + yield/conversion metrics together identify whether the problem is
+   awareness (low applications, low pctile spend) or conversion (low yield despite high spend).
+3. Functional allocation (prog vs. mgmt vs. fundraising) confirms whether spend is enrollment
+   marketing or institutional brand — they have different efficiency standards.
+
+**Commit:** `a89b364` (Part IX peer context wired)
+
 ### Phase 2 Complete
 - [x] GitHub repo public — https://github.com/thx1138234/project-jenni
 - [ ] PostgreSQL on Supabase, migrated from SQLite
