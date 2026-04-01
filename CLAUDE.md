@@ -1449,6 +1449,7 @@ sustained for three consecutive years.
 - **Python:** 3.x (standard library sqlite3; `requests` required for downloader)
 - **Git:** initialized at commit c3a4680 (Phase 1 IPEDS checkpoint, March 2026)
 - **Database:** SQLite at `data/databases/ipeds_data.db` (.gitignored — rebuild from source)
+- **End every session:** `git push origin main` — commit without push leaves remote stale and CLAUDE.md unavailable to new conversation windows and collaborators.
 
 ---
 
