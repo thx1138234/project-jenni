@@ -126,9 +126,10 @@ The compounding is the product.
 ### Mission Over Mechanism
 
 JENNI's mission is understanding civilization's knowledge institutions at a depth and
-historical scale previously impossible. Not just American higher education. Not just the
-institutions that file 990s. The full scope — the universities, libraries, museums, research
-institutions, and learned societies that carry and transmit what humanity knows.
+historical scale previously impossible. Today, the data supports American higher education —
+the institutions that file 990s, report to NCES, and participate in federal disclosure
+programs. That is the current scope, and it is a meaningful one. The architecture is not
+designed to stop there.
 
 The current model, the current interface, the current architecture are expressions of that
 mission — not the mission itself. Claude Sonnet is an expression. SQLite is an expression.
