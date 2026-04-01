@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import difflib
 import sqlite3
+import statistics
 import time
 from pathlib import Path
 from typing import Optional
@@ -265,6 +266,98 @@ def _dict_rows(conn: sqlite3.Connection, sql: str, params=()) -> list[dict]:
 # Context assembly
 # ---------------------------------------------------------------------------
 
+def _compute_part_ix_peer_context(
+    ein: str,
+    carnegie_basic,
+    part_ix_history: list[dict],
+    ipeds_conn: sqlite3.Connection,
+    db990_conn: sqlite3.Connection,
+) -> dict[int, dict]:
+    """
+    Compute Carnegie peer medians and institution percentiles for three Part IX
+    metrics: advertising_total, it_total, and prof_fundraising_fees.
+
+    Returns a dict keyed by fiscal_year_end.  Only years with MIN_PEER_COUNT or
+    more peers reporting Part IX data are included.
+    """
+    if not part_ix_history or not carnegie_basic or not ein:
+        return {}
+
+    fiscal_years = [r["fiscal_year_end"] for r in part_ix_history]
+    if not fiscal_years:
+        return {}
+
+    # All active peers with the same Carnegie basic (institution itself included)
+    peer_eins = [
+        r["ein"]
+        for r in _dict_rows(ipeds_conn, """
+            SELECT ein FROM institution_master
+            WHERE carnegie_basic = ? AND ein IS NOT NULL AND is_active = 1
+        """, (carnegie_basic,))
+    ]
+    if len(peer_eins) < MIN_PEER_COUNT:
+        return {}
+
+    ein_ph = ",".join("?" * len(peer_eins))
+    fy_ph  = ",".join("?" * len(fiscal_years))
+    peer_rows = _dict_rows(db990_conn, f"""
+        SELECT ein, fiscal_year_end,
+               (COALESCE(advertising_prog, 0) + COALESCE(advertising_mgmt, 0)
+                + COALESCE(advertising_fundraising, 0))  AS adv_total,
+               (COALESCE(it_prog, 0) + COALESCE(it_mgmt, 0)
+                + COALESCE(it_fundraising, 0))           AS it_total,
+               COALESCE(prof_fundraising_fees, 0)         AS pf_total
+        FROM form990_part_ix
+        WHERE ein IN ({ein_ph})
+          AND fiscal_year_end IN ({fy_ph})
+    """, peer_eins + fiscal_years)
+
+    # Group by fiscal year
+    by_fy: dict[int, list[dict]] = {}
+    for row in peer_rows:
+        by_fy.setdefault(row["fiscal_year_end"], []).append(row)
+
+    def _pctile(values: list[float], inst_val: float) -> float:
+        """Fraction of peers below the institution's value (0–1)."""
+        return sum(1 for v in values if v < inst_val) / len(values) if values else 0.0
+
+    result: dict[int, dict] = {}
+    for inst_row in part_ix_history:
+        fy    = inst_row["fiscal_year_end"]
+        peers = by_fy.get(fy, [])
+        n     = len(peers)
+        if n < MIN_PEER_COUNT:
+            continue
+
+        inst_adv = (
+            (inst_row.get("advertising_prog") or 0)
+            + (inst_row.get("advertising_mgmt") or 0)
+            + (inst_row.get("advertising_fundraising") or 0)
+        )
+        inst_it = (
+            (inst_row.get("it_prog") or 0)
+            + (inst_row.get("it_mgmt") or 0)
+            + (inst_row.get("it_fundraising") or 0)
+        )
+        inst_pf = inst_row.get("prof_fundraising_fees") or 0
+
+        adv_vals = [r["adv_total"] for r in peers]
+        it_vals  = [r["it_total"]  for r in peers]
+        pf_vals  = [r["pf_total"]  for r in peers]
+
+        result[fy] = {
+            "peer_n":                  n,
+            "advertising_peer_median": statistics.median(adv_vals),
+            "advertising_peer_pct":    _pctile(adv_vals, inst_adv),
+            "it_peer_median":          statistics.median(it_vals),
+            "it_peer_pct":             _pctile(it_vals, inst_it),
+            "fundraising_peer_median": statistics.median(pf_vals),
+            "fundraising_peer_pct":    _pctile(pf_vals, inst_pf),
+        }
+
+    return result
+
+
 def _load_institution_data(
     unitid: int,
     quant_conn: sqlite3.Connection,
@@ -345,6 +438,17 @@ def _load_institution_data(
             WHERE ix.ein = ?
             ORDER BY ix.fiscal_year_end
         """, (ein,))
+
+    # Part IX peer context — Carnegie peer medians/percentiles for advertising, IT, fundraising
+    part_ix_peer_context: dict[int, dict] = {}
+    if part_ix_history:
+        part_ix_peer_context = _compute_part_ix_peer_context(
+            ein or "",
+            master.get("carnegie_basic"),
+            part_ix_history,
+            ipeds_conn,
+            db990_conn,
+        )
 
     # form990_schedule_d — endowment detail, all TEOS years
     schedule_d_history: list[dict] = []
@@ -427,6 +531,7 @@ def _load_institution_data(
         "stress":                stress,
         "narratives":            narratives,
         "part_ix_history":       part_ix_history,
+        "part_ix_peer_context":  part_ix_peer_context,
         "schedule_d_history":    schedule_d_history,
         "compensation_rows":     compensation_rows,
         "governance_row":        governance_row,

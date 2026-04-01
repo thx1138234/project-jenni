@@ -222,7 +222,7 @@ def _format_context_for_model(context: dict) -> str:
         part_ix = data.get("part_ix_history", [])
         if part_ix and _needs_part_ix(context["query"], context["query_type"]):
             parts.append(f"PART IX — FUNCTIONAL EXPENSES (form990_part_ix, TEOS/irsx, {len(part_ix)} years):")
-            parts.append(_format_part_ix_block(part_ix))
+            parts.append(_format_part_ix_block(part_ix, data.get("part_ix_peer_context", {})))
             parts.append("")
 
         # Schedule D — endowment detail
@@ -359,18 +359,29 @@ def _needs_governance(query: str) -> bool:
     return bool(set(query.lower().split()) & _GOVERNANCE_WORDS)
 
 
-def _format_part_ix_block(history: list[dict]) -> str:
-    """Format form990_part_ix rows into a readable expense block."""
+def _format_part_ix_block(history: list[dict], peer_context: dict | None = None) -> str:
+    """Format form990_part_ix rows into a readable expense block.
+
+    peer_context is keyed by fiscal_year_end (int) and contains:
+        peer_n, advertising_peer_median, advertising_peer_pct,
+        it_peer_median, it_peer_pct, fundraising_peer_median, fundraising_peer_pct
+    """
     if not history:
         return "  (No Part IX data available)"
     lines = []
     for row in history:
-        fy  = row.get("fiscal_year_end", "?")
-        adv_prog = row.get("advertising_prog") or 0
-        adv_mgmt = row.get("advertising_mgmt") or 0
-        adv_fund = row.get("advertising_fundraising") or 0
+        fy       = row.get("fiscal_year_end", "?")
+        peer     = (peer_context or {}).get(fy, {})
+        peer_n   = peer.get("peer_n")
+
+        adv_prog  = row.get("advertising_prog") or 0
+        adv_mgmt  = row.get("advertising_mgmt") or 0
+        adv_fund  = row.get("advertising_fundraising") or 0
         adv_total = adv_prog + adv_mgmt + adv_fund
         it_prog   = row.get("it_prog") or 0
+        it_mgmt   = row.get("it_mgmt") or 0
+        it_fund   = row.get("it_fundraising") or 0
+        it_total  = it_prog + it_mgmt + it_fund
         pf_fees   = row.get("prof_fundraising_fees") or 0
         inv_fees  = row.get("invest_mgmt_fees") or 0
         tot_exp   = (
@@ -388,10 +399,38 @@ def _format_part_ix_block(history: list[dict]) -> str:
         )
         if adv_pct is not None:
             lines.append(f"    Advertising % total exp      {adv_pct:.2%}")
-        if it_prog:
-            lines.append(f"    IT expenses — prog svc (Ln14) ${it_prog:>11,.0f}")
+
+        # Peer context for advertising
+        adv_med    = peer.get("advertising_peer_median")
+        adv_pctile = peer.get("advertising_peer_pct")
+        if adv_med is not None and peer_n is not None:
+            lines.append(
+                f"    Advertising peer median       ${adv_med:>11,.0f}"
+                f"  ({adv_pctile * 100:.0f}th pctile among {peer_n} Carnegie peers)"
+            )
+
+        # IT expenses (total across all three functional columns)
+        if it_total:
+            lines.append(f"    IT expenses (Ln14)           ${it_total:>12,.0f}")
+            it_med    = peer.get("it_peer_median")
+            it_pctile = peer.get("it_peer_pct")
+            if it_med is not None and peer_n is not None:
+                lines.append(
+                    f"    IT peer median               ${it_med:>12,.0f}"
+                    f"  ({it_pctile * 100:.0f}th pctile)"
+                )
+
+        # Professional fundraising fees
         if pf_fees:
             lines.append(f"    Prof fundraising fees (Ln11e) ${pf_fees:>11,.0f}")
+            pf_med    = peer.get("fundraising_peer_median")
+            pf_pctile = peer.get("fundraising_peer_pct")
+            if pf_med is not None and peer_n is not None:
+                lines.append(
+                    f"    Prof fundraising peer median ${pf_med:>11,.0f}"
+                    f"  ({pf_pctile * 100:.0f}th pctile)"
+                )
+
         if inv_fees:
             lines.append(f"    Investment mgmt fees (Ln11f)  ${inv_fees:>11,.0f}")
         lines.append(
