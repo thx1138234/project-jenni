@@ -1575,11 +1575,19 @@ python3 ingestion/scorecard/loader.py --db data/databases/scorecard_data.db
 | Zone 3 (current) | 2021–2024 | FY2019–FY2024 | ✓ (irsx source) | ✓ — all supplemental parsers run |
 | Zone 3+ (refresh) | 2025+ | FY2024+ | ongoing | ongoing |
 
-**Zone 2 (TEOS index years 2017–2020) is inaccessible**: The IRS TEOS bulk ZIPs for
-index years 2017, 2018, 2019, and 2020 all return HTTP 302 redirecting to
-`https://www.irs.gov/404`. The index CSVs are accessible but the actual ZIP files
-are not downloadable. This was confirmed March 2026 by probing all 12 monthly ZIP
-patterns for each year. Only index years 2021+ have accessible bulk ZIPs.
+**Zone 2 (TEOS index years 2017–2020) is inaccessible — confirmed boundary (2026-04-02).**
+Exhaustive probe: 36/36 failures. All four URL patterns tested × all five validation
+institutions (Babson, Bentley, BC, Harvard, MIT) × index years 2018 and 2019. Every
+bulk ZIP request returns HTTP 302 → `https://www.irs.gov/404`. This is not rate limiting
+or transient — it is a permanent IRS access revocation for pre-2021 bulk ZIPs.
+
+**Index CSVs are accessible and returning valid data.** The index CSVs for years 2018
+and 2019 list real EINs, object IDs, and filing metadata. The CSVs confirm which
+filings exist but the ZIP files containing the XML are not downloadable.
+
+**Bentley FY2018 follow-up pending:** Bentley (EIN 041081650) FY2018 is absent from
+the 2019 index CSV. Probe the 2020 index for EIN 041081650 as a separate investigation
+to determine whether Bentley filed late or whether the filing is in a different index year.
 
 **Practical result**: Supplemental schedule coverage (Schedule D, Part IX, Schedule J,
 Schedule R, Part VI governance) begins at FY2019/FY2020 and cannot be extended
