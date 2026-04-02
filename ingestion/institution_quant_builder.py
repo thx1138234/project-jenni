@@ -359,16 +359,16 @@ def build_value(conn_out: sqlite3.Connection,
                 conn_ipeds: sqlite3.Connection) -> int:
     logger.info("Stage: value metrics (scorecard)")
 
-    # Scorecard is single-year (data_year=2023); map to survey_year=2022
-    SCORECARD_SURVEY_YEAR = 2022
+    # Join on data_year = survey_year + 1 to support historical net price series
     written = 0
 
     for row in conn_scorecard.execute("""
-        SELECT unitid, avg_net_price_pub, avg_net_price_priv,
+        SELECT unitid, data_year, avg_net_price_pub, avg_net_price_priv,
                earnings_6yr_median, median_debt, completion_rate_4yr
         FROM scorecard_institution
     """):
         uid = row["unitid"]
+        survey_year = row["data_year"] - 1
         # Pick relevant net price (priv preferred; fallback to pub)
         net_p = row["avg_net_price_priv"] or row["avg_net_price_pub"]
         earn  = row["earnings_6yr_median"]
@@ -392,17 +392,17 @@ def build_value(conn_out: sqlite3.Connection,
         ).fetchone()
         ein_val = ein["ein"] if ein else None
 
-        ensure_row(conn_out, uid, ein_val, SCORECARD_SURVEY_YEAR)
+        ensure_row(conn_out, uid, ein_val, survey_year)
         for metric, value in vals.items():
             if value is not None:
                 conn_out.execute(
                     f"UPDATE institution_quant SET {metric}_value=? WHERE unitid=? AND survey_year=?",
-                    (value, uid, SCORECARD_SURVEY_YEAR)
+                    (value, uid, survey_year)
                 )
         written += 1
 
     conn_out.commit()
-    logger.info(f"  value: {written} institutions updated (survey_year={SCORECARD_SURVEY_YEAR})")
+    logger.info(f"  value: {written} institution-years updated (historical + current)")
     return written
 
 

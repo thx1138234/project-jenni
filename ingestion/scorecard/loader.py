@@ -17,6 +17,14 @@ Usage:
     python3 ingestion/scorecard/loader.py --db data/databases/scorecard_data.db \
         --unitid 164580 164739 166027
 
+    # Historical net price backfill — data_years 2009-2022 (2023 already loaded)
+    python3 ingestion/scorecard/loader.py --db data/databases/scorecard_data.db \
+        --historical
+
+    # Historical for specific UNITIDs only
+    python3 ingestion/scorecard/loader.py --db data/databases/scorecard_data.db \
+        --historical --unitid 164580 164739 166027 164924 166683
+
     # Program-level load for 2014-present
     python3 ingestion/scorecard/loader.py --db data/databases/scorecard_data.db \
         --programs --start-year 2014
@@ -99,6 +107,30 @@ PROG_FIELDS = ",".join([
 
 FALLBACK_DATA_YEAR = 2023
 
+# Historical net price backfill: years 2009–2022 (2023 is loaded via "latest" fields).
+# NPT4_PUB / NPT4_PRIV first available in MERGED_2008-09, which maps to API year 2009.
+HISTORICAL_YEARS = list(range(2009, 2023))
+
+# Net price field templates for historical year-prefixed API access.
+# Each entry: (api_path_suffix, scorecard_institution column name)
+_NP_FIELD_TEMPLATES: list[tuple[str, str]] = [
+    ("cost.avg_net_price.public",                           "avg_net_price_pub"),
+    ("cost.avg_net_price.private",                          "avg_net_price_priv"),
+    ("cost.net_price.public.by_income_level.0-30000",       "np_pub_0_30k"),
+    ("cost.net_price.public.by_income_level.30001-48000",   "np_pub_30_48k"),
+    ("cost.net_price.public.by_income_level.48001-75000",   "np_pub_48_75k"),
+    ("cost.net_price.public.by_income_level.75001-110000",  "np_pub_75_110k"),
+    ("cost.net_price.public.by_income_level.110001-plus",   "np_pub_110k_plus"),
+    ("cost.net_price.private.by_income_level.0-30000",      "np_priv_0_30k"),
+    ("cost.net_price.private.by_income_level.30001-48000",  "np_priv_30_48k"),
+    ("cost.net_price.private.by_income_level.48001-75000",  "np_priv_48_75k"),
+    ("cost.net_price.private.by_income_level.75001-110000", "np_priv_75_110k"),
+    ("cost.net_price.private.by_income_level.110001-plus",  "np_priv_110k_plus"),
+]
+
+# Columns written by historical load (subset of scorecard_institution)
+_HIST_COLS = ["unitid", "data_year"] + [col for _, col in _NP_FIELD_TEMPLATES]
+
 
 # ---------------------------------------------------------------------------
 # DB helpers
@@ -154,6 +186,147 @@ def _get(session: requests.Session, api_key: str, params: dict,
 # ---------------------------------------------------------------------------
 # Institution load
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Historical net price helpers
+# ---------------------------------------------------------------------------
+
+def _hist_field_map(years: list[int]) -> dict[str, tuple[int, str]]:
+    """Build {api_field: (year, col_name)} for year-prefixed net price fields."""
+    m: dict[str, tuple[int, str]] = {}
+    for y in years:
+        for suffix, col in _NP_FIELD_TEMPLATES:
+            m[f"{y}.{suffix}"] = (y, col)
+    return m
+
+
+def _hist_results_to_rows(
+    results: list[dict],
+    field_map: dict[str, tuple[int, str]],
+) -> list[dict]:
+    """
+    Convert API results (one entry per institution) into rows for scorecard_institution.
+    One row per (unitid, year) — only years where at least one net price value is non-null.
+    """
+    all_rows: list[dict] = []
+    for result in results:
+        uid = result["id"]
+        by_year: dict[int, dict] = {}
+        for api_field, (year, col) in field_map.items():
+            val = result.get(api_field)
+            if val is not None:
+                if year not in by_year:
+                    by_year[year] = {"unitid": uid, "data_year": year}
+                by_year[year][col] = val
+        # Fill missing net price columns with None so every row has all _HIST_COLS
+        for yr, row in by_year.items():
+            for _, col in _NP_FIELD_TEMPLATES:
+                if col not in row:
+                    row[col] = None
+            all_rows.append(row)
+    return all_rows
+
+
+def _hist_upsert_sql() -> str:
+    """Build UPSERT SQL for historical net price rows."""
+    ph  = ", ".join("?" for _ in _HIST_COLS)
+    upd = ", ".join(f"{c}=excluded.{c}" for c in _HIST_COLS
+                    if c not in ("unitid", "data_year"))
+    return (
+        f"INSERT INTO scorecard_institution ({', '.join(_HIST_COLS)}) VALUES ({ph}) "
+        f"ON CONFLICT(unitid, data_year) DO UPDATE SET {upd}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Historical load
+# ---------------------------------------------------------------------------
+
+def load_institutions_historical(
+    conn: sqlite3.Connection,
+    api_key: str,
+    years: list[int] | None = None,
+    unitids: list[int] | None = None,
+    year_batch_size: int = 5,
+    dry_run: bool = False,
+) -> int:
+    """
+    Backfill net price data for historical years via year-prefixed API fields.
+
+    Strategy: batch years (default 5 at a time) to minimise API calls.
+    5 years × 12 fields = 60 fields per page well under URL limits.
+    For 14 years (2009-2022) and ~64 pages: 3 batches × 64 pages = 192 API calls.
+
+    Only rows with at least one non-null net price value are inserted.
+    Uses ON CONFLICT DO UPDATE so it is safe to re-run.
+    """
+    if years is None:
+        years = HISTORICAL_YEARS
+
+    session = requests.Session()
+    session.headers["Accept"] = "application/json"
+    upsert_sql = _hist_upsert_sql()
+    total_rows = 0
+
+    # Split years into batches
+    year_batches = [
+        years[i : i + year_batch_size]
+        for i in range(0, len(years), year_batch_size)
+    ]
+
+    for batch in year_batches:
+        field_map  = _hist_field_map(batch)
+        fields_str = "id," + ",".join(field_map.keys())
+        yr_label   = f"{batch[0]}–{batch[-1]}"
+        logger.info(f"Historical batch years {yr_label} "
+                    f"({len(batch)} years, {len(field_map)} fields) ...")
+
+        if unitids:
+            for uid in unitids:
+                data    = _get(session, api_key, {"id": uid, "fields": fields_str})
+                rows    = _hist_results_to_rows(data.get("results", []), field_map)
+                if rows:
+                    if not dry_run:
+                        conn.executemany(upsert_sql, [[r[c] for c in _HIST_COLS] for r in rows])
+                    total_rows += len(rows)
+                time.sleep(0.15)
+            if not dry_run:
+                conn.commit()
+        else:
+            # Full paginated load
+            data   = _get(session, api_key, {"fields": fields_str, "per_page": 100, "page": 0})
+            total  = data["metadata"]["total"]
+            pages  = -(-total // 100)
+            logger.info(f"  {total:,} institutions, {pages} pages")
+
+            rows = _hist_results_to_rows(data.get("results", []), field_map)
+            if not dry_run and rows:
+                conn.executemany(upsert_sql, [[r[c] for c in _HIST_COLS] for r in rows])
+                conn.commit()
+            total_rows += len(rows)
+
+            for page in range(1, pages):
+                time.sleep(0.2)
+                data    = _get(session, api_key,
+                               {"fields": fields_str, "per_page": 100, "page": page})
+                results = data.get("results", [])
+                if not results:
+                    break
+                rows = _hist_results_to_rows(results, field_map)
+                if not dry_run and rows:
+                    conn.executemany(upsert_sql, [[r[c] for c in _HIST_COLS] for r in rows])
+                    if page % 20 == 0:
+                        conn.commit()
+                total_rows += len(rows)
+                if page % 20 == 0 or page == pages - 1:
+                    logger.info(f"  ... page {page}/{pages-1}, "
+                                f"{total_rows:,} rows so far (batch {yr_label})")
+
+            if not dry_run:
+                conn.commit()
+
+    return total_rows
+
 
 def _api_to_inst_row(result: dict) -> dict:
     row = {"unitid": result["id"], "data_year": FALLBACK_DATA_YEAR}
@@ -333,6 +506,8 @@ def main():
     parser.add_argument("--db", required=True)
     parser.add_argument("--unitid", type=int, nargs="+",
                         help="Specific UNITIDs (omit for full paginated load)")
+    parser.add_argument("--historical", action="store_true",
+                        help="Backfill net price for years 2009-2022 (2023 already loaded)")
     parser.add_argument("--programs", action="store_true",
                         help="Load program-level data instead of institution-level")
     parser.add_argument("--start-year", type=int, default=2014,
@@ -349,7 +524,15 @@ def main():
     conn = sqlite3.connect(db_path)
     init_db(conn)
 
-    if args.programs:
+    if args.historical:
+        logger.info(f"Starting historical net price backfill (years {HISTORICAL_YEARS[0]}–{HISTORICAL_YEARS[-1]}) ...")
+        n = load_institutions_historical(
+            conn, api_key,
+            unitids=args.unitid or None,
+            dry_run=args.dry_run,
+        )
+        logger.info(f"Historical backfill complete: {n:,} institution-year rows written")
+    elif args.programs:
         logger.info("Starting program-level load ...")
         n = load_programs(conn, api_key,
                           start_year=args.start_year, dry_run=args.dry_run)
