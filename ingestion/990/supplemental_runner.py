@@ -11,6 +11,7 @@ Parsers run in sequence (each makes one pass over all XML files):
   4. schedule_r_parser   → form990_related_orgs    (related orgs, Schedule R)
                         → form990_related_transactions
   5. governance_parser   → form990_governance      (Part VI board/policy flags)
+  6. part_viii_parser    → form990_part_viii       (revenue sub-lines, Part VIII Tier 1)
 
 Designed to be idempotent: re-running replaces existing rows for each object_id.
 Run this after any new XML files are downloaded (Zone 2, annual refresh, etc.).
@@ -45,7 +46,7 @@ def _load(name: str) -> object:
     return mod
 
 
-PARSER_NAMES = ['schedule_d', 'part_ix', 'compensation', 'schedule_r', 'governance']
+PARSER_NAMES = ['schedule_d', 'part_ix', 'compensation', 'schedule_r', 'governance', 'part_viii']
 
 
 def run_all(db: str, xml_dir: Path, parsers: list[str]) -> None:
