@@ -254,6 +254,13 @@ def _format_context_for_model(context: dict) -> str:
             parts.append(_format_eada_sports_block(eada_sports))
             parts.append("")
 
+        # Part VIII revenue sub-lines
+        p8 = data.get("part_viii_row")
+        if p8 and _needs_part_viii(context["query"]):
+            parts.append("PART VIII REVENUE SUB-LINES (form990_part_viii):")
+            parts.append(_format_part_viii_block(p8))
+            parts.append("")
+
         # Governance
         gov = data.get("governance_row")
         if gov and _needs_governance(context["query"]):
@@ -338,6 +345,20 @@ _GOVERNANCE_WORDS = {
     "board", "governance", "trustees", "directors", "independent",
     "conflict", "audit", "oversight", "fiduciary", "policy",
 }
+
+_PART_VIII_WORDS = {
+    "revenue", "revenues", "breakdown", "grants", "government",
+    "tuition", "program", "contribution", "contributions",
+    "room", "board", "sources",
+}
+
+
+def _needs_part_viii(query: str) -> bool:
+    q = query.lower()
+    return bool(set(q.split()) & _PART_VIII_WORDS) or \
+           "revenue breakdown" in q or "program revenue" in q or \
+           "government grants" in q or "tuition revenue" in q or \
+           "room and board" in q
 
 
 def _needs_schedule_d(query: str, query_type: str) -> bool:
@@ -561,6 +582,30 @@ def _format_eada_sports_block(rows: list[dict]) -> str:
         lines.append(
             f"    {sport:<22} Rev ${rev:>12,.0f} | Exp ${exp:>12,.0f} | Net ${net:>+12,.0f}"
         )
+    return "\n".join(lines)
+
+
+def _format_part_viii_block(row: dict) -> str:
+    """Format form990_part_viii revenue sub-lines as a waterfall."""
+    fy = row.get("fiscal_year_end", "?")
+    lines = [f"  PART VIII REVENUE SUB-LINES (form990_part_viii, FY{fy}):"]
+
+    govt = row.get("govt_grants_amt")
+    if govt is not None:
+        lines.append(f"    Line 1e  Government grants:          ${govt:>15,.0f}")
+
+    other_contrib = row.get("all_other_contributions_amt")
+    if other_contrib is not None:
+        lines.append(f"    Line 1f  All other contributions:    ${other_contrib:>15,.0f}")
+
+    slots = [("2a", "2b", "2c", "2d", "2e")]
+    for slot in ["2a", "2b", "2c", "2d", "2e"]:
+        amt  = row.get(f"prog_svc_revenue_{slot}")
+        desc = row.get(f"prog_svc_desc_{slot}") or ""
+        if amt is not None:
+            label = f"Line {slot}  {desc[:30]:<30}" if desc else f"Line {slot}  (no description){'':>14}"
+            lines.append(f"    {label}  ${amt:>15,.0f}")
+
     return "\n".join(lines)
 
 

@@ -495,6 +495,23 @@ def _load_institution_data(
             LIMIT 10
         """, (ein, ein))
 
+    # form990_part_viii — most recent TEOS year (revenue sub-lines)
+    part_viii_row: dict | None = None
+    if ein:
+        rows = _dict_rows(db990_conn, """
+            SELECT fiscal_year_end, govt_grants_amt, all_other_contributions_amt,
+                   prog_svc_revenue_2a, prog_svc_desc_2a,
+                   prog_svc_revenue_2b, prog_svc_desc_2b,
+                   prog_svc_revenue_2c, prog_svc_desc_2c,
+                   prog_svc_revenue_2d, prog_svc_desc_2d,
+                   prog_svc_revenue_2e, prog_svc_desc_2e
+            FROM form990_part_viii
+            WHERE ein = ?
+            ORDER BY fiscal_year_end DESC
+            LIMIT 1
+        """, (ein,))
+        part_viii_row = rows[0] if rows else None
+
     # form990_governance — most recent TEOS year
     governance_row: dict | None = None
     if ein:
@@ -548,6 +565,7 @@ def _load_institution_data(
         "part_ix_peer_context":  part_ix_peer_context,
         "schedule_d_history":    schedule_d_history,
         "compensation_rows":     compensation_rows,
+        "part_viii_row":         part_viii_row,
         "governance_row":        governance_row,
         "eada_instlevel_history": eada_instlevel_history,
         "eada_sports_rows":      eada_sports_rows,
