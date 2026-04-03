@@ -728,10 +728,10 @@ This asymmetry is by design — financial metrics are limited to the TEOS window
 demand metrics use the full IPEDS longitudinal range, and value metrics reflect the single
 Scorecard year loaded. As additional years are loaded, coverage expands without schema changes.
 
-**Current build (v1.0, March 2026): 25,376 rows, survey_years 2019–2022**
-- Financial: 5,070 institution-years (private nonprofits with 990 filings)
-- Demand: 24,882 institution-years (all IPEDS institutions)
-- Value: 5,784 institutions (Scorecard 2022 only, mapped to survey_year=2022)
+**Current build (v2.0, April 2026): 79,345 total rows, survey_years 2008–2023**
+- Financial: 1,327 institutions at SY2022 (private nonprofits with 990 filings; +39 from EIN corrections)
+- Demand: 24,882+ institution-years (all IPEDS institutions, survey_years 2016–2022)
+- Value: Scorecard net price historical series 2008–2022 (avg_net_price + 10 income-band fields); earnings/debt/grad_rate single vintage 2022 only
 - Athletics: 7,985 institution-years; 3,117 with `athletics_to_expense_pct`
 - Peers: Carnegie peer group stats (min 5 peers); 3,911 with peer data in 2022
 - Trends: 1yr, 3yr, direction for all metrics where ≥2 years available
@@ -747,12 +747,12 @@ rm data/databases/institution_quant.db
     --out     data/databases/institution_quant.db \
     --stage   all
 ```
-Expected: 25,376 rows, Babson survey_year=2022 data_completeness_pct=96.2.
+Expected: 79,345 rows, Babson survey_year=2022 data_completeness_pct=100.0.
 
 **Known gaps (carry forward):**
 - `retention_rate`: populated from EF Part D `ret_pcf` (first-time full-time, 0–100 → stored as fraction). Coverage 65.6% (117,970 of 160,861 ipeds_ef rows). Institutions not in EF Part D (typically non-degree-granting or specialized) are NULL.
 - `grad_rate_150`: uses Scorecard `completion_rate_4yr` (single year 2022 only); ipeds_gr.gba_cohort always NULL
-- `net_price`, `earnings_to_debt_ratio`, `net_price_to_earnings`: Scorecard single year only — confirmed: scorecard_institution has only data_year=2023 (6,322 rows). Historical Scorecard data requires separate bulk download from data.ed.gov (institution-level files available back to ~2010). Add to roadmap as Scorecard historical backfill.
+- `net_price`: historical series now loaded — Scorecard data_years 2009–2023 (survey_years 2008–2022) via `load_institutions_historical()` in `ingestion/scorecard/loader.py` (commit ef7abd3). `earnings_to_debt_ratio`, `net_price_to_earnings`, `grad_rate_150`: still single vintage (Scorecard data_year=2023 → survey_year=2022 only) — earnings and completion data not available in historical API fields.
 - `athletics_to_expense_pct`: private nonprofits only (requires 990 functional expenses as denominator)
 - `formula_version = '1.0'`: bump this when metric formulas change; enables git isolation of formula changes
 
@@ -1006,7 +1006,11 @@ Document decisions here as they're made so they don't get relitigated.
 - [ ] `tests/test_schema_integrity.py` passes clean
 - [x] `CHANGELOG.md` current
 - [x] Full foundation gut check complete — 990 and IPEDS Finance validated across FASB and GASB (March 2026)
-- [x] `financial_stress_signals` table built — 1,363 institutions scored, EIN-level, FY2020-2022, 3-year trending (commit b402f3c)
+- [x] `financial_stress_signals` table built — 1,363 institutions scored, EIN-level, FY2020-2022, 3-year trending (commit b402f3c); rebuilt April 2026 → 1,368 institutions after EIN corrections
+- [x] Part IX Phase B — 84 columns, all 25 lines, 5,171 rows (commit f276e4c)
+- [x] Scorecard historical net price backfill — 15 years avg_net_price + 10 income-band fields, data_years 2009–2022; institution_quant rebuilt to 79,345 rows (commit ef7abd3)
+- [x] Part VIII Tier 1 — `form990_part_viii` table: govt_grants, all_other_contributions, prog_svc_revenue/desc 2a–2e; 5,134 rows, supplemental_runner wired (commit 5af7317)
+- [x] EIN corrections for 6 R1/R2 institutions (Columbia, Rochester, Drexel, Stevens, Loma Linda, Santa Clara) + Northeastern MIN(unitid) fix in institution_quant_builder; 990 data loaded for all 6; institution_quant financial coverage SY2022 → 1,327 institutions (commit d069478)
 
 **IPEDS known open items (carry forward):**
 - `enrtot` NULL for **2000–2007** EF rows (expanded from 2000–2001):
@@ -1109,7 +1113,7 @@ confirmed across the full validation set.
   financial_profile, hand-crafted for 5 validation institutions)
 - `jenni/` package: config, system prompt (accordion epistemic rules, domain conventions),
   query_resolver, synthesizer, delivery, CLI
-- `institution_quant` v1.0: 25,376 rows, 25 metrics, peer percentiles, Carnegie peer groups
+- `institution_quant` v1.0→v2.0: 79,345 rows, 25 metrics, peer percentiles, Carnegie peer groups; historical net price series added April 2026
 - pell_pct storage bug fixed (was 0–100, corrected to 0–1 fraction; 22,952 rows patched)
 - retention_rate populated from EF Part D `ret_pcf` (65.6% coverage, 2000–2023)
 - All peer_pct display bugs fixed (synthesizer + delivery: `pct*100`)
