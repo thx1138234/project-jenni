@@ -157,14 +157,28 @@ def extract_entities(query: str, max_results: int = 3) -> list[dict]:
 
     # Phase 2: substring match against institution_name — merges with alias results
     # so both institutions resolve in queries like "Compare BC and Georgetown …"
+    #
+    # Token-overlap guard: require each distinctive token of the candidate name
+    # (non-stopword, len >= 4) to appear as a whole word in the query.
+    # This prevents "Eastern University" from matching inside "Northeastern University"
+    # because "eastern" is not a whole word in the query tokens.
+    _SUBSTR_STOPWORDS = {"university", "college", "institute", "school", "of", "the",
+                         "and", "at", "for", "state", "city", "new"}
+    query_tokens = set(query_lower.split())
     name_map = {rec["institution_name"].lower(): rec for rec in index}
-    names_lower = list(name_map.keys())
 
     for name_lower, rec in name_map.items():
-        if name_lower in query_lower:
-            uid = rec["unitid"]
-            if uid not in candidates:
-                candidates[uid] = {**rec, "match_score": 1.0, "match_method": "exact_substring"}
+        if name_lower not in query_lower:
+            continue
+        # Whole-word token check: all distinctive tokens of the candidate name
+        # must appear as complete tokens in the query.
+        name_tokens = [t for t in name_lower.split()
+                       if t not in _SUBSTR_STOPWORDS and len(t) >= 4]
+        if name_tokens and not all(t in query_tokens for t in name_tokens):
+            continue
+        uid = rec["unitid"]
+        if uid not in candidates:
+            candidates[uid] = {**rec, "match_score": 1.0, "match_method": "exact_substring"}
 
     # Return immediately if any clean match was found — Phase 3 is a fallback
     # only for queries where neither alias nor substring matched anything.
