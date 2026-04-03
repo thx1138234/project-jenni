@@ -1482,6 +1482,37 @@ Reference commit: `d294b9b` — workflow reminder (always push to origin, not ju
 
 ---
 
+## Claude Code Plugin Stack
+
+**Standing policy:** Install plugins that add genuine, JENNI-specific value. Reject anything that primarily serves
+non-Python stacks, trading/finance framing, or adds competing project-state tooling. Plugin installs are user-scoped
+(apply to all Claude Code sessions), so each install carries a global cost — evaluate before enabling.
+
+### Installed (2026-04-02)
+
+| Plugin | Version | Rationale |
+|---|---|---|
+| `data-engineering@claude-plugins-official` | 0.1.0 | Warehouse exploration, pipeline authoring, `analyzing-data` skill. Marginal relevance (JENNI uses SQLite, not dbt/Airflow), but `analyzing-data` skill useful for ad-hoc data exploration. |
+| `pyright-lsp@claude-plugins-official` | 1.0.0 | Python type-checking LSP. Directly relevant — entire ingestion and JENNI layer is Python. Surfaces type errors in synthesizer, query_resolver, and builder scripts. |
+| `claude-md-management@claude-plugins-official` | 1.0.0 | CLAUDE.md audit and session-learning capture. High value — this project depends on CLAUDE.md currency. Provides `/audit-claude-md` and session summary tooling. |
+| `security-guidance@claude-plugins-official` | unknown | Hook that warns on SQL injection, command injection, XSS patterns when editing files. Relevant — synthesizer and query_resolver construct SQL strings. |
+
+### Evaluated but not installed
+
+| Plugin | Outcome | Reason |
+|---|---|---|
+| `machine-learning-ops` | **Not found** — does not exist in official marketplace (2026-04-02) | Requested but unavailable. If added to marketplace, evaluate: useful for scoring/trend models only if they reach production. |
+| `python-development` | **Not found** — does not exist in official marketplace (2026-04-02) | Requested but unavailable. `pyright-lsp` covers the Python tooling need. |
+| `quantitative-analysis` | **Not found** — does not exist in official marketplace (2026-04-02) | Likely trading/portfolio framing; JENNI's quantitative analysis is institutional, not financial-market. Would defer even if available. |
+| `conductor` | **Not found** — does not exist in official marketplace (2026-04-02) | Track/state model could conflict with CLAUDE.md as source of truth. Would evaluate compatibility before enabling. |
+
+### What to install next (if evaluating additional plugins)
+
+- `code-review@claude-plugins-official` — multi-agent PR review with confidence scoring. Install when PR volume increases.
+- `commit-commands@claude-plugins-official` — streamlines commit/push workflow. Evaluate against existing `/commit` skill to avoid duplication.
+
+---
+
 ## Open Items — Next Session Priority Order
 
 These items are defined, scoped, and ready to build. Priority order reflects PM assessment as of 2026-04-02.
