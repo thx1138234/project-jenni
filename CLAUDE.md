@@ -1187,8 +1187,29 @@ that goes beyond what the data says into how to act on it.
   rather than "Baseline — no confirmed signals." This is acceptable — the terminal header
   is the authoritative display and renders correctly. Model narrative language is
   interpretive and the framing was still accurate.
-- `jenni compare` multi-institution command exists but was not included in validation run.
-  Validate before using for named-peer side-by-side outputs.
+- `jenni compare` multi-institution command **validated 2026-04-02** — Bentley vs. Northeastern at 100% completeness. Producing valid side-by-side output in production.
+
+### Alpha Test Results ✓ (2026-04-02)
+
+Five queries run against production data. Re-run of Q2 and Q3 after EIN/Northeastern fixes:
+
+**Q2 — Northeastern trajectory (re-run with "recent news"):**
+- Completeness: **100.0%** (was 76.9% before MIN(unitid) fix)
+- resolver_ms: **15,437ms** — web search layer fired on keyword "recent news"; expected behavior
+- synth_ms: 39,508ms | tokens_in: 5,173 | tokens_out: 1,725
+- Financial metrics now populated: operating margin +4.9%, tuition dependency 84.5%, debt-to-assets 37.7%, endowment/student $56,377 (3rd pctile R1), endowment runway 0.7yr (8th pctile)
+- Search layer surfaced: ~107,000 applications for 2026-27, London campus reference — both web-sourced, model correctly flagged as unverified
+- Entity resolver: **1 result only** (Northeastern Boston, UNITID 167358) — Eastern University spurious match eliminated by whole-word token guard fix (commit 25bd71e)
+
+**Q3 — Bentley vs Northeastern comparison:**
+- Completeness: **100.0%** (was 84.6%)
+- resolver_ms: 116ms | synth_ms: 53,689ms | tokens_in: 6,100 | tokens_out: 2,750
+- Full financial head-to-head now possible: Northeastern operating margin 4.9% (62nd pctile R1) vs Bentley 4.0% (77th pctile M1); Northeastern endowment/student at 3rd pctile R1 vs Bentley 85th pctile M1
+- Model correctly applied the Carnegie peer group caveat: percentiles are within-cohort and not directly comparable across M1 and R1 classifications
+
+**Fixes committed during alpha test (2026-04-02):**
+- `25bd71e` — Entity resolver: whole-word token guard prevents "Eastern University" from matching inside "Northeastern University" queries. Token check: all distinctive name tokens (non-stopword, len≥4) must appear as whole words in query token set.
+- `71db945` — `form990_part_viii` wired to synthesizer: `_needs_part_viii()` triggers on revenue/grants/tuition/contribution keywords; `_format_part_viii_block()` renders govt grants (Line 1e), all-other-contributions (Line 1f), and program service sub-lines 2a–2e as labeled revenue waterfall. Validated on Northeastern revenue breakdown query — govt grants $234M, tuition $2.18B visible in model output.
 
 ### JENNI Search Layer + Observability ✓ (2026-03-31)
 
@@ -1306,7 +1327,7 @@ by `_format_context_for_model()` in `synthesizer.py` when its trigger fires. Tri
 keyword-only — no `query_type` catch-alls (those caused over-firing: schedule_d appearing
 in advertising comparisons, part_ix firing on all profile queries).
 
-**Complete wired state (as of 2026-04-01):**
+**Complete wired state (as of 2026-04-02):**
 
 | Supplemental Table | Loaded? | Trigger Function | Status |
 |---|---|---|---|
@@ -1316,6 +1337,7 @@ in advertising comparisons, part_ix firing on all profile queries).
 | `eada_instlevel` | ✅ UNITID-keyed, 3 years | `_needs_athletics()` — athletics keyword set | ✅ Wired |
 | `eada_sports` | ✅ UNITID-keyed, latest year | `_needs_athletics()` — same set | ✅ Wired |
 | `form990_governance` | ✅ EIN-keyed, latest year | `_needs_governance()` — governance keyword set | ✅ Wired |
+| `form990_part_viii` | ✅ EIN-keyed, latest year | `_needs_part_viii()` — revenue/grants/tuition keyword set | ✅ Wired (2026-04-02) |
 | `form990_related_orgs` | ❌ | — | Out of scope |
 
 **Trigger word sets (exact sets in `jenni/synthesizer.py`):**
