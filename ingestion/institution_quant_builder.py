@@ -162,13 +162,30 @@ def build_financial(conn_out: sqlite3.Connection,
     logger.info("Stage: financial metrics")
 
     # Canonical EIN→UNITID map
+    # For EINs shared across multiple campuses, prefer the most research-intensive
+    # campus (lowest carnegie_basic value among degree-granting tiers).
+    # Fall back to MIN(unitid) when carnegie_basic is tied or NULL.
     ein_to_unitid = {}
     for row in conn_ipeds.execute("""
-        SELECT ein, MIN(unitid) as unitid FROM institution_master
+        SELECT ein,
+               MIN(CASE WHEN carnegie_basic > 0 THEN carnegie_basic END) as best_carnegie,
+               MIN(unitid) as fallback_unitid
+        FROM institution_master
         WHERE ein IS NOT NULL AND ein != '' AND ein != '-1'
         GROUP BY ein
     """):
-        ein_to_unitid[row["ein"]] = row["unitid"]
+        ein = row["ein"]
+        best_carnegie = row["best_carnegie"]
+        fallback_unitid = row["fallback_unitid"]
+        if best_carnegie is not None:
+            # Pick the unitid with the best (lowest positive) carnegie_basic
+            uid_row = conn_ipeds.execute("""
+                SELECT MIN(unitid) as unitid FROM institution_master
+                WHERE ein = ? AND carnegie_basic = ?
+            """, (ein, best_carnegie)).fetchone()
+            ein_to_unitid[ein] = uid_row["unitid"] if uid_row else fallback_unitid
+        else:
+            ein_to_unitid[ein] = fallback_unitid
 
     # Load 990 filings for fiscal_year_end range needed
     fy_years = [sy + 1 for sy in SURVEY_YEARS]
