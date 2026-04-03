@@ -1613,3 +1613,59 @@ disturbing existing data.
 | `form990_governance` | governance_parser.py | Part VI (board/policy) | 5,171 | FY2019–FY2024 |
 
 All row counts as of March 2026. Zone 2 backfill not feasible (pre-2021 TEOS ZIPs inaccessible).
+
+---
+
+### 990 Coverage Universe — Confirmed Audit (2026-04-02)
+
+**Confirmed coverage:** 1,661 private nonprofit institutions with 990 data in form990_filings.
+**Total private nonprofits in institution_master (iclevel 1/2, control=2):** 2,528.
+**Gap:** 854 institutions with EIN in institution_master but zero 990 rows.
+
+#### Gap Breakdown by Category
+
+| Category | Institutions missing 990 | Notes |
+|---|---|---|
+| Unclassified (carnegie_basic=NULL or -3) | ~405 | Expected — many are non-degree-granting, closed, or branch campuses |
+| Faith-related (carnegie_basic=24) | 153 | Many file 990-EZ rather than full 990; not a coverage gap |
+| R1 research universities | 2 | **EIN audit in progress** — Columbia, Rochester |
+| R2 research universities | 5 | **EIN audit in progress** — BYU ✓, Drexel, Loma Linda, Stevens, + 1 unconfirmed |
+| D/PU doctoral | 8 | Mixed — some EIN issues, some genuine non-filers |
+| M1/M2/M3 master's | 22 | Includes some EIN issues |
+| B4/B-Diverse/B-Arts | 50 | Mostly small liberal arts; some genuine non-filers |
+| Specialized/Associates/Other | ~209 | Lower analytical priority |
+
+**Expected boundary (not a coverage gap):** Faith-related institutions (~153) and unclassified/branch campuses (~405) are not analytically core. Many file 990-EZ, not full Form 990. Do not attempt bulk backfill for these categories.
+
+#### R1/R2/M1 EIN Audit Results (2026-04-02) — PENDING CORRECTION
+
+Six institutions confirmed to have **wrong EINs** in institution_master. These explain their zero 990 coverage — the EIN join fails because the stored EIN doesn't match any 990 filing. BYU is correct.
+
+| UNITID | Institution | DB EIN (wrong) | Correct EIN | Verification |
+|---|---|---|---|---|
+| 190150 | Columbia University (NY, R1) | 603800000 | **135598093** | ProPublica: "Trustees Of Columbia University" |
+| 195030 | University of Rochester (NY, R1) | 263800000 | **160743209** | ProPublica: "University Of Rochester" |
+| 117636 | Loma Linda University (CA, R2) | 931221825 | **951816009** | ProPublica: "Loma Linda University" |
+| 186867 | Stevens Institute of Technology (NJ, R2) | 022148735 | **221487354** | ProPublica: "The Trustees Of The Stevens Institute Of Technology" |
+| 212841 | Drexel University (PA, R2) | 231352693 | **231352630** | ProPublica: "Drexel University" |
+| 230038 | Brigham Young University (UT, R2) | 870217280 | 870217280 | **CORRECT — no change needed** |
+| 122931 | Santa Clara University (CA, D/PU) | 941156697 | **941156617** | ProPublica: "President Board Of Trustees Santa Clara College" (legal name) |
+
+**Status:** Awaiting Claude PM approval before running UPDATE statements on institution_master. Once corrected, run 990 loader for these EINs and rebuild institution_quant.
+
+#### Northeastern University — institution_quant Propagation Bug (2026-04-02)
+
+**Symptom:** JENNI queries on "Northeastern University" show 53.8% completeness with NULL operating_margin, tuition_dependency, and all 990-derived financial metrics.
+
+**Root cause:** `institution_quant_builder.py` line 167 uses `MIN(unitid)` to resolve EIN→UNITID when multiple UNITIDs share one EIN:
+```python
+SELECT ein, MIN(unitid) as unitid FROM institution_master
+WHERE ein IS NOT NULL AND ein != '' AND ein != '-1'
+GROUP BY ein
+```
+
+Northeastern's EIN `041679980` maps to three UNITIDs: 118888 (Oakland, M2), 167358 (main Boston campus, R1), 482705 (Professional Programs, D/PU). `MIN()` selects 118888 — the Oakland campus. All 12 form990_filings rows are bound to UNITID 118888. UNITID 167358 (the institution users query) gets NULL financial metrics.
+
+**Confirmed:** UNITID 118888 has `operating_margin_value` and `tuition_dependency_value` populated for SY2019–2022. UNITID 167358 has NULL for all financial metrics across all years.
+
+**Fix needed:** Change the EIN→UNITID resolution in `build_financial()` to prefer the primary/flagship campus rather than the numerically smallest UNITID. The correct approach: prefer the UNITID with the highest-tier Carnegie classification (lowest numeric value that is a degree-granting tier: 15 < 16 < 17 < 18...), or prefer the UNITID matching `carnegie_basic IN (15,16,17,18)` over branch/professional campuses. Awaiting Claude PM direction before implementing.
