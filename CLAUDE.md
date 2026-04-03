@@ -1009,7 +1009,7 @@ Document decisions here as they're made so they don't get relitigated.
 - [x] `financial_stress_signals` table built — 1,363 institutions scored, EIN-level, FY2020-2022, 3-year trending (commit b402f3c); rebuilt April 2026 → 1,368 institutions after EIN corrections
 - [x] Part IX Phase B — 84 columns, all 25 lines, 5,171 rows (commit f276e4c)
 - [x] Scorecard historical net price backfill — 15 years avg_net_price + 10 income-band fields, data_years 2009–2022; institution_quant rebuilt to 79,345 rows (commit ef7abd3)
-- [x] Part VIII Tier 1 — `form990_part_viii` table: govt_grants, all_other_contributions, prog_svc_revenue/desc 2a–2e; 5,134 rows, supplemental_runner wired (commit 5af7317)
+- [x] Part VIII Tier 1 — `form990_part_viii` table: govt_grants, all_other_contributions, prog_svc_revenue/desc 2a–2e; 5,134 rows, supplemental_runner wired (commit 5af7317); wired to JENNI synthesizer with `_needs_part_viii()` trigger (commit 71db945)
 - [x] EIN corrections for 6 R1/R2 institutions (Columbia, Rochester, Drexel, Stevens, Loma Linda, Santa Clara) + Northeastern MIN(unitid) fix in institution_quant_builder; 990 data loaded for all 6; institution_quant financial coverage SY2022 → 1,327 institutions (commit d069478)
 
 **IPEDS known open items (carry forward):**
@@ -1469,6 +1469,59 @@ sustained for three consecutive years.
 
 ---
 
+## Working Model — Two-Agent Architecture
+
+This project operates with a two-agent working model established April 2026:
+
+- **Claude PM** (strategic/architectural layer): Owns product direction, architectural decisions, prioritization, and session planning. Issues tasks with specific requirements and acceptance criteria. Reviews diagnostic outputs before approving fixes. Does not write code directly.
+- **Claude Code** (implementation layer): Executes tasks, writes code, runs loaders, commits. Reports exact diagnostic output before taking any action. Stops and reports after each task in a sequence — does not batch multiple tasks without intermediate confirmation.
+
+**Protocol:** Diagnostic tasks report before fixing. EIN corrections, schema changes, and institution_master updates require explicit PM approval before execution. `git push` at end of every session.
+
+Reference commit: `d294b9b` — workflow reminder (always push to origin, not just commit locally).
+
+---
+
+## Open Items — Next Session Priority Order
+
+These items are defined, scoped, and ready to build. Priority order reflects PM assessment as of 2026-04-02.
+
+### 1. Learning Layer (HIGH PRIORITY — architecture complete, not yet built)
+Three tables + five components + CLI curation interface. Build spec exists in Claude PM conversation history.
+
+**Tables:**
+- `jenni_institutional_insights` — per-institution validated insights (insight text, source query, confidence, promoted flag)
+- `jenni_patterns` — cross-institutional patterns (pattern description, supporting institution set, trigger conditions)
+- `jenni_query_log` — already built (in `jenni_documents.db`); feeds pattern detection
+
+**Components to build:**
+1. Pattern detector — runs after each query, checks for cross-institutional signals matching known patterns
+2. Insight promoter — CLI tool to review, edit, and promote insights from query log to insight table
+3. Context injector — pulls relevant promoted insights into the model context package at query time
+4. Pattern matcher — matches incoming query to known patterns, prepopulates synthesis framing
+5. Curation interface — `jenni curate` CLI for reviewing and approving staged insights
+
+### 2. Bentley FY2018 Missing from TEOS Index (LOW EFFORT — one probe query)
+Bentley (EIN 041081650) is absent from the 2019 TEOS index CSV. Probe the 2020 index CSV for this EIN to determine if the FY2018 filing was submitted late (filed in a later index year) or is genuinely missing. One query against the index CSV; if found, download and parse.
+
+### 3. Broader EIN Audit — B4/B-Diverse Gap (LOWER PRIORITY)
+406 B4/B-Diverse/specialized institutions in institution_master have no 990 data despite having EINs. Systematic audit pass needed. Lower priority than R1/R2 because these institutions are less analytically central. Pattern from R1/R2 audit: NCES IPEDS stores EINs with occasional digit transpositions and format errors. Likely ~30–50% of the 406 have correctable EINs.
+
+### 4. Scorecard Completion Rate — C150_4 Bulk CSV (MEDIUM EFFORT — manual download required)
+C150_4 (4-year graduation rate) is available in MERGED CSV files from 1997-98 through 2022-23. The API suppresses it for selective small institutions (returns null for Babson, Bentley, etc.) — bulk CSV has actual values. **Blocker:** The bulk download site (`collegescorecard.ed.gov/data/`) is a JavaScript SPA; direct URL scraping fails. Requires manually navigating to the page in a browser, locating the "All Data Files" ZIP, and confirming the current URL pattern before building an automated downloader. Once URL is confirmed, the loader pattern is straightforward.
+
+### 5. Part VIII Phase B — Tier 2 Revenue Fields (LOWER PRIORITY — deferred)
+Tier 1 (govt_grants, all_other_contributions, prog_svc_revenue 2a–2e) is loaded and wired. Tier 2 fields not yet captured:
+- `NoncashContributionsAmt` (Line 1g) — noncash contributions
+- `UnrelatedBusinessRevenueAmt` — UBI by program service line
+- Lines 2f–2g (6th and 7th program service lines — rare; <5% of institutions use them)
+Defer until there is a specific analytical use case requiring Tier 2 detail.
+
+### 6. Power Law / Trend Fitting — Structural Trajectory Analysis (ARCHITECTURAL DECISION NEEDED)
+Current trend fields in institution_quant (`trend_1yr`, `trend_3yr`, `trend_dir`) are arithmetic differences and direction flags. For enrollment and financial metrics with long histories (15+ years), fitting a log-linear trend line would surface structural acceleration/deceleration patterns that simple year-over-year differences miss. Requires architectural decision before build: (a) store fitted slope + R² in institution_quant as additional columns, or (b) compute on demand in the resolver. Option (a) is consistent with the pre-compute-everything principle; option (b) avoids schema churn. Bring to PM before implementing.
+
+---
+
 ## Environment
 
 - **OS:** Linux Mint (Ubuntu Noble base)
@@ -1677,21 +1730,10 @@ Six institutions confirmed to have **wrong EINs** in institution_master. These e
 | 230038 | Brigham Young University (UT, R2) | 870217280 | 870217280 | **CORRECT — no change needed** |
 | 122931 | Santa Clara University (CA, D/PU) | 941156697 | **941156617** | ProPublica: "President Board Of Trustees Santa Clara College" (legal name) |
 
-**Status:** Awaiting Claude PM approval before running UPDATE statements on institution_master. Once corrected, run 990 loader for these EINs and rebuild institution_quant.
+**Status: FIXED — commit d069478 (2026-04-02).** All 6 UPDATE statements applied (1 row each). ProPublica + TEOS data loaded; institution_quant rebuilt. Columbia FY2023 max revenue $7.1B confirms correct EIN.
 
-#### Northeastern University — institution_quant Propagation Bug (2026-04-02)
+#### Northeastern University — institution_quant Propagation Bug
 
-**Symptom:** JENNI queries on "Northeastern University" show 53.8% completeness with NULL operating_margin, tuition_dependency, and all 990-derived financial metrics.
+**Status: FIXED — commit d069478 (2026-04-02).**
 
-**Root cause:** `institution_quant_builder.py` line 167 uses `MIN(unitid)` to resolve EIN→UNITID when multiple UNITIDs share one EIN:
-```python
-SELECT ein, MIN(unitid) as unitid FROM institution_master
-WHERE ein IS NOT NULL AND ein != '' AND ein != '-1'
-GROUP BY ein
-```
-
-Northeastern's EIN `041679980` maps to three UNITIDs: 118888 (Oakland, M2), 167358 (main Boston campus, R1), 482705 (Professional Programs, D/PU). `MIN()` selects 118888 — the Oakland campus. All 12 form990_filings rows are bound to UNITID 118888. UNITID 167358 (the institution users query) gets NULL financial metrics.
-
-**Confirmed:** UNITID 118888 has `operating_margin_value` and `tuition_dependency_value` populated for SY2019–2022. UNITID 167358 has NULL for all financial metrics across all years.
-
-**Fix needed:** Change the EIN→UNITID resolution in `build_financial()` to prefer the primary/flagship campus rather than the numerically smallest UNITID. The correct approach: prefer the UNITID with the highest-tier Carnegie classification (lowest numeric value that is a degree-granting tier: 15 < 16 < 17 < 18...), or prefer the UNITID matching `carnegie_basic IN (15,16,17,18)` over branch/professional campuses. Awaiting Claude PM direction before implementing.
+Root cause was `MIN(unitid)` in `build_financial()` resolving Northeastern's shared EIN to UNITID 118888 (Oakland, M2) instead of 167358 (Boston, R1). Fixed by two-pass query: select lowest positive `carnegie_basic` for each EIN, then `MIN(unitid)` within that tier. After fix: UNITID 167358 operating_margin_value = +4.9%, tuition_dependency_value = 84.5% at SY2022. Confirmed.
