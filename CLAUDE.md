@@ -1011,7 +1011,7 @@ Document decisions here as they're made so they don't get relitigated.
 - [x] Scorecard historical net price backfill — 15 years avg_net_price + 10 income-band fields, data_years 2009–2022; institution_quant rebuilt to 79,345 rows (commit ef7abd3)
 - [x] Part VIII Tier 1 — `form990_part_viii` table: govt_grants, all_other_contributions, prog_svc_revenue/desc 2a–2e; 5,134 rows, supplemental_runner wired (commit 5af7317); wired to JENNI synthesizer with `_needs_part_viii()` trigger (commit 71db945)
 - [x] EIN corrections for 6 R1/R2 institutions (Columbia, Rochester, Drexel, Stevens, Loma Linda, Santa Clara) + Northeastern MIN(unitid) fix in institution_quant_builder; 990 data loaded for all 6; institution_quant financial coverage SY2022 → 1,327 institutions (commit d069478)
-- [x] Quant analytics layer — `institution_trajectories.db`, 7 metrics × 2 windows, linear/exp/power/logistic + ruptures breakpoints, deterministic trajectory_summary (commit pending)
+- [x] Analytics layer — `institution_trajectories.db`, 7 metrics × 2 windows, linear/exp/power/logistic + ruptures breakpoints, deterministic trajectory_summary (commit pending)
 
 **IPEDS known open items (carry forward):**
 - `enrtot` NULL for **2000–2007** EF rows (expanded from 2000–2001):
@@ -1471,7 +1471,7 @@ sustained for three consecutive years.
 
 ---
 
-## Quant Analytics Layer — institution_trajectories
+## Analytics Layer — institution_trajectories
 
 **Database:** `data/databases/institution_trajectories.db` (separate DB, gitignored, covered by S3 sync)
 **Builder:** `ingestion/trajectories_builder.py`

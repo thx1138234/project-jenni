@@ -2,7 +2,7 @@
 """
 ingestion/trajectories_builder.py
 ----------------------------------
-Quant analytics layer: fits trajectory models for key institutional metrics.
+Analytics layer: fits trajectory models for key institutional metrics.
 
 For each institution-metric combination, fits two windows:
   1. Full available history
