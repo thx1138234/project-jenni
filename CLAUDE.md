@@ -1011,6 +1011,7 @@ Document decisions here as they're made so they don't get relitigated.
 - [x] Scorecard historical net price backfill — 15 years avg_net_price + 10 income-band fields, data_years 2009–2022; institution_quant rebuilt to 79,345 rows (commit ef7abd3)
 - [x] Part VIII Tier 1 — `form990_part_viii` table: govt_grants, all_other_contributions, prog_svc_revenue/desc 2a–2e; 5,134 rows, supplemental_runner wired (commit 5af7317); wired to JENNI synthesizer with `_needs_part_viii()` trigger (commit 71db945)
 - [x] EIN corrections for 6 R1/R2 institutions (Columbia, Rochester, Drexel, Stevens, Loma Linda, Santa Clara) + Northeastern MIN(unitid) fix in institution_quant_builder; 990 data loaded for all 6; institution_quant financial coverage SY2022 → 1,327 institutions (commit d069478)
+- [x] Quant analytics layer — `institution_trajectories.db`, 7 metrics × 2 windows, linear/exp/power/logistic + ruptures breakpoints, deterministic trajectory_summary (commit pending)
 
 **IPEDS known open items (carry forward):**
 - `enrtot` NULL for **2000–2007** EF rows (expanded from 2000–2001):
@@ -1466,6 +1467,125 @@ sustained for three consecutive years.
 - [ ] PostgreSQL on Supabase, migrated from SQLite
 - [x] College Scorecard loaded (scorecard_data.db: 6,322 institution rows, 217,530 program rows)
 - [ ] Read-only API endpoint live
+
+---
+
+## Quant Analytics Layer — institution_trajectories
+
+**Database:** `data/databases/institution_trajectories.db` (separate DB, gitignored, covered by S3 sync)
+**Builder:** `ingestion/trajectories_builder.py`
+**Schema:** `schema/trajectories_schema.sql`
+**Commit:** see Phase 1 checklist above
+
+### Purpose
+
+A pre-computed trajectory layer sitting between institution_quant and the JENNI intelligence layer.
+For each institution × metric combination, fits mathematical trend models and detects structural breaks.
+Enables JENNI to say "tuition revenue grew exponentially at R²=0.96 over 12 years, with no structural break"
+rather than computing this on demand or approximating from year-over-year trend fields.
+
+### Metrics (initial set — formula_version 1.0)
+
+| Metric | Source | Year Convention | Range |
+|---|---|---|---|
+| `enrollment_total` | `ipeds_ef.enrtot` | Survey year | 2000–2022 |
+| `tuition_revenue` | `form990_filings.program_service_revenue` | Survey year (fy-1) | All available (2011+) |
+| `operating_margin` | `institution_quant.operating_margin_value` | Survey year | 2019–2022 |
+| `tuition_dependency` | `institution_quant.tuition_dependency_value` | Survey year | 2019–2022 |
+| `endowment_eoy` | `form990_schedule_d.endowment_eoy` | Fiscal year | All available (2019+) |
+| `net_assets` | `form990_filings.net_assets_eoy` | Survey year (fy-1) | All available (2011+) |
+| `total_functional_expenses` | `form990_filings.total_functional_expenses` | Survey year (fy-1) | All available (2011+) |
+
+### Windows
+
+Two rows per institution-metric pair:
+1. **Full history** — all available data points (year_start = first data year)
+2. **Rolling 10-year** — last 10 data points only (only inserted when distinct from full history, i.e., > 10 points available)
+
+The rolling window is omitted if ≤ 10 points exist (same as full history).
+
+### Models Fitted
+
+- **linear** — `scipy.stats.linregress`; always valid
+- **exponential** — log-linear; requires all y > 0
+- **power_law** — log-log; requires all y > 0; x = year - year_start + 1
+- **logistic** — bounded curve_fit; L ∈ [max(y), 3·max(y)]; skipped on convergence failure
+
+Best fit = highest R². Tie-breaking order: linear > exponential > power_law > logistic.
+
+### Structural Break Detection
+
+Uses `ruptures` library (Pelt RBF, pen=3). Requires ≥ 8 data points. Confidence = piecewise R² minus
+single-linear R². `breakpoint_detected = 1` only when `confidence > 0.15`.
+
+### Regime Classification (deterministic)
+
+`insufficient_data` | `stable` | `growth` | `declining` | `recovering` | `accelerating`
+
+Classification is purely mathematical from fit parameters and breakpoint slopes — no model calls.
+`stable` when `abs(slope) < 0.005` or best_fit_model = 'flat'.
+
+### trajectory_summary
+
+Fully deterministic string interpolation — no LLM calls. Method tag = `deterministic_v1`.
+Example: "Tuition revenue grew exponentially from 2011 to 2022 (12 observations, R²=0.96)."
+
+### formula_version Policy
+
+`formula_version = '1.0'` is the initial version. The UNIQUE constraint is on
+`(unitid, metric, year_start, year_end, formula_version)`. If fitting logic changes,
+increment formula_version — do NOT backfill the old version. Old rows remain queryable
+as historical baselines. The builder always writes the current formula_version.
+
+### Build Stats (2026-04-03, formula_version 1.0)
+
+| Stat | Value |
+|---|---|
+| Total rows | 105,082 |
+| R² > 0.80 | 9,173 (8.7%) |
+| Structural breaks detected | 65 |
+| Insufficient data (< 5 points) | 82,414 (78.4%) |
+
+The high insufficient_data rate is expected: `operating_margin` and `tuition_dependency` have only 4
+years of data (2019-2022) from institution_quant, always below the 5-point minimum. `endowment_eoy`
+likewise has ≤ 4 TEOS fiscal years for most institutions. These will become fittable as annual data
+accumulates.
+
+### Validation Findings (five MA institutions, full-history window)
+
+| Institution | Metric | Best Fit | R² | Regime | Finding |
+|---|---|---|---|---|---|
+| Boston College | tuition_revenue | exponential | 0.99 | growth | Near-perfect exp fit |
+| MIT | tuition_revenue | logistic | 0.96 | growth | S-curve plateau forming |
+| Northeastern | tuition_revenue | exponential | 0.96 | growth | Confirmed strong growth |
+| Northeastern | net_assets | exponential | 0.95 | growth | Exponential endowment growth |
+| Babson | net_assets | exponential | 0.96 | growth | Consistent pattern |
+| Bentley | enrollment_total | logistic | 0.83 | declining | **Artifact — see note** |
+| Northeastern | enrollment_total (10yr) | exponential | 0.79 | growth | Post-2013 growth confirmed |
+
+**Enrollment "declining" artifact:** When enrollment plateaus (Bentley, Boston College full-history),
+the logistic S-curve fits well but classifies the tail as "declining" because the logistic slope at
+the plateau turns negative. The `regime = 'declining'` label is mathematically correct but misleading
+for an institution with stable enrollment. The `trajectory_summary` will say "declined along an S-curve"
+which conflicts with user intuition. **Resolution pending:** consider adding a `plateau` regime or
+clamping logistic slope direction by comparing first-third vs last-third mean values.
+
+**Northeastern enrollment_total (full history, 2008-2022):** power_law R²=0.085 with a structural
+break in 2012 (regime = accelerating). The low full-history R² is expected — Northeastern's enrollment
+strategy shifted sharply around 2012-2015. The rolling 10yr window (2013-2022) shows exponential
+R²=0.79, confirming sustained post-inflection growth.
+
+### Rebuild Command
+
+```bash
+.venv/bin/python3 ingestion/trajectories_builder.py \
+    --ipeds data/databases/ipeds_data.db \
+    --quant data/databases/institution_quant.db \
+    --990   data/databases/990_data.db \
+    --out   data/databases/institution_trajectories.db \
+    --stage all
+# ~275 seconds / 13,609 institutions
+```
 
 ---
 
