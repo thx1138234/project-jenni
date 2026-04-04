@@ -260,11 +260,33 @@ def classify_regime(
     pre_break_slope: float | None,
     post_break_slope: float | None,
     data_points: int,
+    values: list[float] | None = None,
+    years: list[int] | None = None,
 ) -> str:
     if data_points < MIN_DATA_POINTS or best_fit_model in ('insufficient_data', None):
         return 'insufficient_data'
     params = json.loads(best_fit_params) if best_fit_params else {}
     slope  = params.get('slope', params.get('b', 0))
+
+    # Plateau detection for logistic fits: absolute final-segment slope < 5% of series mean.
+    # Uses post_break_slope when a breakpoint was detected, otherwise the final-third slope.
+    if best_fit_model == 'logistic' and values and len(values) >= MIN_DATA_POINTS:
+        series_mean = float(np.mean(np.abs(values)))
+        plateau_threshold = 0.05 * series_mean if series_mean > 0 else 0.0
+        if breakpoint_detected and post_break_slope is not None:
+            final_slope_abs = abs(post_break_slope)
+        else:
+            n = len(values)
+            third = max(n // 3, 2)
+            final_y = list(values[-third:])
+            final_x = list(years[-third:]) if years else list(range(third))
+            if len(final_y) >= 2:
+                final_slope_abs = abs(float(scipy.stats.linregress(final_x, final_y).slope))
+            else:
+                final_slope_abs = abs(slope)
+        if final_slope_abs < plateau_threshold:
+            return 'plateau'
+
     if breakpoint_detected:
         pre  = pre_break_slope or 0
         post = post_break_slope or 0
@@ -302,7 +324,11 @@ def direction_from_slope(slope: float | None) -> str:
 def build_trajectory_summary(row: dict) -> str:
     label   = METRIC_LABELS.get(row['metric'], row['metric'])
     pattern = PATTERN_LABELS.get(row['best_fit_model'] or 'insufficient_data', 'with unknown pattern')
-    direction = direction_from_params(row['best_fit_model'] or 'insufficient_data', row['best_fit_params'])
+    regime  = row.get('regime', '')
+    if regime == 'plateau':
+        direction = 'plateaued'
+    else:
+        direction = direction_from_params(row['best_fit_model'] or 'insufficient_data', row['best_fit_params'])
     r2_str  = (f"R²={row['best_fit_r2']:.2f}"
                if row['best_fit_r2'] is not None else 'R²=n/a')
     base = (
@@ -482,6 +508,8 @@ def build_row(
         base['pre_break_slope'],
         base['post_break_slope'],
         n,
+        values=values,
+        years=years,
     )
 
     # Deterministic summary
