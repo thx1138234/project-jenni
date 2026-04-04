@@ -268,6 +268,15 @@ def _format_context_for_model(context: dict) -> str:
             parts.append(_format_governance_block(gov))
             parts.append("")
 
+        # Prior validated insights from the learning layer
+        prior = data.get("prior_insights", [])
+        if prior:
+            parts.append("PRIOR VALIDATED INSIGHTS (from learning layer):")
+            for row in prior:
+                conf = (row.get("confidence") or "?").upper()
+                parts.append(f"  [{conf}] {row.get('insight_text', '')}")
+            parts.append("")
+
     # Scorecard single-year caveat — always present; model must cite when
     # referencing net_price, earnings_to_debt_ratio, net_price_to_earnings,
     # or grad_rate_150.
@@ -662,6 +671,24 @@ def _build_request_params(context: dict) -> tuple[str, int, str]:
     return model, max_tokens, user_turn
 
 
+def _run_extraction(narrative: str, context: dict) -> None:
+    """
+    Post-synthesis insight extraction. Runs Haiku against the narrative to
+    surface candidate insights. Failures are silently swallowed — extraction
+    must never disrupt the primary synthesis path.
+    """
+    try:
+        import sqlite3 as _sqlite3
+        from jenni.learning.extractor import JENNIInsightExtractor
+        from jenni.config import DB_990 as _DB_990
+        extractor = JENNIInsightExtractor()
+        conn = _sqlite3.connect(str(_DB_990))
+        extractor.extract_and_store(narrative, context, conn)
+        conn.close()
+    except Exception:
+        pass
+
+
 def synthesize(context: dict) -> dict:
     """
     Non-streaming API call.  Used for --json output where the full response
@@ -680,8 +707,10 @@ def synthesize(context: dict) -> dict:
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_turn}],
     )
+    narrative = response.content[0].text
+    _run_extraction(narrative, context)
     return {
-        "text":           response.content[0].text,
+        "text":           narrative,
         "model":          model,
         "model_label":    _MODEL_LABELS.get(model, model),
         "input_tokens":   response.usage.input_tokens,
@@ -722,8 +751,10 @@ def synthesize_stream(context: dict):
             yield chunk
         final = stream.get_final_message()
 
+    narrative = "".join(collected)
+    _run_extraction(narrative, context)
     yield {
-        "text":           "".join(collected),
+        "text":           narrative,
         "model":          model,
         "model_label":    _MODEL_LABELS.get(model, model),
         "input_tokens":   final.usage.input_tokens,

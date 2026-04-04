@@ -122,6 +122,11 @@ def log_query(
     """
     query_id = _query_id()
 
+    # Sanitize query text before storage — strip role-identifying patterns
+    from jenni.learning.sanitizer import sanitize_query
+    raw_query = context.get("query", "")
+    stored_query = sanitize_query(raw_query)
+
     institutions = json.dumps([
         e.get("institution_name", "")
         for e in context.get("entities", [])
@@ -144,7 +149,7 @@ def log_query(
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             query_id,
-            context.get("query", ""),
+            stored_query,
             context.get("query_type", ""),
             institutions,
             model_used,

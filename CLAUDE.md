@@ -1467,6 +1467,7 @@ sustained for three consecutive years.
 - [ ] PostgreSQL on Supabase, migrated from SQLite
 - [x] College Scorecard loaded (scorecard_data.db: 6,322 institution rows, 217,530 program rows)
 - [ ] Read-only API endpoint live
+- [x] Learning layer — validator, sanitizer, extractor, pattern agent, curation CLI (2026-04-03)
 
 ---
 
@@ -1633,26 +1634,141 @@ non-Python stacks, trading/finance framing, or adds competing project-state tool
 
 ---
 
+## Learning Layer ✓ (2026-04-03)
+
+JENNI accumulates validated knowledge between sessions. The learning layer stores validated per-institution
+insights, detects cross-institutional patterns, and injects prior knowledge into model context at query time.
+All five components are live as of commit (2026-04-03).
+
+### Tables (in `990_data.db`)
+
+**`jenni_institutional_insights`** — Validated per-institution insights. One row per unique
+`(unitid, insight_text)` pair. Fields: `unitid`, `institution_name`, `insight_text`, `evidence_tier`,
+`confidence`, `source_tables`, `fiscal_year_end`, `insight_type`, `extraction_method`, `status`,
+`superseded_by`, `created_at`, `updated_at`.
+
+- `status`: `active` (default) | `superseded` | `rejected` — never physically deleted.
+- `extraction_method`: `seeded` | `model_extracted` | `curator_promoted`
+- `evidence_tier`: 1 (federal data) | 2 (cross-validated inference) | 3 (search-verified) | 4–5 (never stored)
+
+**`jenni_patterns`** — Cross-institutional patterns (5+ distinct institutions). Fields: `pattern_text`,
+`supporting_unitids` (JSON), `institution_count`, `evidence_tier`, `confidence`, `status`, `pattern_type`,
+`created_at`, `updated_at`. Phase 1: keyword co-occurrence grouping. Phase 2: embedding similarity
+(no schema change required).
+
+### Components
+
+**1. Validator — `jenni/learning/validator.py`**
+
+`JENNIInsightValidator.validate(proposed, context)` gates all insight writes.
+
+**Validation hierarchy (Tiers 1–5):**
+| Tier | Source | Stored? | Confidence |
+|---|---|---|---|
+| 1 | Federal data (990, IPEDS, EADA, Scorecard) | ✅ Yes | high |
+| 2 | Cross-validated inference (2+ Tier 1 sources) | ✅ Yes | high |
+| 3 | Search-verified (web search confirmed) | ✅ Yes | medium |
+| 4 | Unverified claim | ❌ Never stored | — |
+| 5 | Speculation / hallucination | ❌ Never stored | — |
+
+Checks (in order): unitid required → data domain keywords → personal info signals →
+evidence tier ≥ 4 rejected → Tier 1 contradiction check (Phase 2 placeholder).
+
+**2. Sanitizer — `jenni/learning/sanitizer.py`**
+
+`sanitize_query(query_text)` strips role-revealing content before `jenni_query_log` writes.
+Patterns: `as (cfo|president|...)`, `I work at`, `my institution`, `we are/have/did`, etc.
+Replaced with `[role removed]`. Raw query is never stored.
+
+**3. Extractor — `jenni/learning/extractor.py`**
+
+`JENNIInsightExtractor.extract_and_store(narrative, context, db_conn)` fires silently after
+every synthesis. Uses Claude Haiku (cost control). Parses JSON array of candidate insights,
+resolves institution names to unitids via `institution_master`, runs each through the validator,
+writes approved candidates with `extraction_method='model_extracted'`. All failures swallowed —
+extraction never disrupts the synthesis path.
+
+Wired in `jenni/synthesizer.py` as `_run_extraction()`, called after both `synthesize()`
+and `synthesize_stream()`.
+
+**4. Pattern Agent — `jenni/learning/pattern_agent.py`**
+
+Weekly batch job. `detect_patterns(db_conn)` groups active insights by `insight_type`, returns
+candidates where distinct `unitid` count ≥ 5. `store_patterns(db_conn, candidates)` writes to
+`jenni_patterns` with `confidence='low'` and `status='candidate'` for human curation.
+
+Run: `.venv/bin/python3 -m jenni.learning.pattern_agent --db data/databases/990_data.db`
+
+Phase 2 upgrade: replace `insight_type` grouping with embedding similarity — architecture identical,
+only the grouping logic changes. No schema migration required.
+
+**5. Curation CLI — `jenni curate`**
+
+| Flag | Action |
+|---|---|
+| `--pending` | Rich table of all active insights (id, institution, tier, confidence, type, method, text) |
+| `--promote <id>` | Advance confidence: low→medium or medium→high |
+| `--supersede <id> --by <new_id>` | Set `status='superseded'`, `superseded_by=new_id` |
+| `--reject <id>` | Set `status='rejected'` — never deletes |
+| `--to-narrative <id>` | Write insight to `institution_narratives` in `institution_quant.db`, mark `extraction_method='curator_promoted'` |
+
+### Prior Insights Injection
+
+`jenni/query_resolver.py` `_load_institution_data()` loads up to 10 active insights per institution
+(ordered by evidence_tier ASC, confidence DESC). Injected into model context in
+`jenni/synthesizer.py` `_format_context_for_model()` after the governance block:
+
+```
+PRIOR VALIDATED INSIGHTS (from learning layer):
+  [HIGH] Boston College tuition revenue follows a near-perfect exponential growth curve...
+  [MEDIUM] Northeastern's enrollment trajectory shows a structural break in 2012...
+```
+
+### Three Seed Insights (Tier 1, all active)
+
+| ID | Institution | Evidence | Confidence | Finding |
+|---|---|---|---|---|
+| 1 | Boston College (164924) | institution_trajectories, institution_quant | high | Tuition revenue exponential growth 2008–2022, R²=0.99. ACC investment and selective admissions posture confirmed. |
+| 2 | MIT (166683) | institution_trajectories, institution_quant | high | Tuition revenue decelerating on logistic S-curve (R²=0.96). Deliberate enrollment constraint + endowment-funded aid, not revenue maximization. |
+| 3 | Northeastern (167358) | institution_trajectories, ipeds_ef | medium | Structural break 2012, exponential growth post-break (rolling 10yr R²=0.79). Pre-2012 and post-2012 are financially distinct periods. |
+
+Evidence basis: all three derived directly from `institution_trajectories` curve fits (formula_version 1.0)
+and confirmed against multi-year IPEDS and 990 data. No model generation in trajectory_summary —
+all text is deterministic string interpolation (`method_tag = 'deterministic_v1'`).
+
+### Deterministic Summary Principle
+
+`trajectory_summary` strings in `institution_trajectories` are pure Python string interpolation.
+No LLM calls. No generation. The text is fully reproducible from the fit parameters alone.
+Example: "Total enrollment plateaued along an S-curve from 2008 to 2022 (15 obs, R²=0.83)."
+
+This principle is non-negotiable. The trajectory layer must be a ground-truth surface, not
+a synthesis artifact. If a trajectory_summary is wrong, the fix is in the Python code, not the model.
+
+### Open Embedding Field
+
+`jenni_institutional_insights` has no embedding column in Phase 1. The Phase 2 upgrade path:
+add `embedding BLOB` (same pattern as `jenni_documents`), populate at write time using
+Anthropic embeddings, activate semantic search in the extractor and pattern agent. No schema
+migration required — `ALTER TABLE ... ADD COLUMN embedding BLOB` with NULL default is safe
+against existing rows. Pattern agent Phase 2 replaces `insight_type` grouping with
+embedding cosine similarity — architecture unchanged, grouping logic only.
+
+### Current State (2026-04-03)
+
+- `jenni_institutional_insights`: 3 rows (all seeded, all active)
+- `jenni_patterns`: 0 rows (pattern agent requires 5+ institutions per type; will populate as insights accumulate)
+- Post-synthesis extraction: active and wired; Haiku call fires after every synthesis
+- Prior insights injection: confirmed end-to-end (BC seeded insight appeared verbatim in BC test query synthesis)
+- `jenni curate --pending`: 3 rows rendered correctly
+
+---
+
 ## Open Items — Next Session Priority Order
 
-These items are defined, scoped, and ready to build. Priority order reflects PM assessment as of 2026-04-02.
+These items are defined, scoped, and ready to build. Priority order reflects PM assessment as of 2026-04-03.
 
-### 1. Learning Layer (HIGH PRIORITY — architecture complete, not yet built)
-Three tables + five components + CLI curation interface. Build spec exists in Claude PM conversation history.
-
-**Tables:**
-- `jenni_institutional_insights` — per-institution validated insights (insight text, source query, confidence, promoted flag)
-- `jenni_patterns` — cross-institutional patterns (pattern description, supporting institution set, trigger conditions)
-- `jenni_query_log` — already built (in `jenni_documents.db`); feeds pattern detection
-
-**Components to build:**
-1. Pattern detector — runs after each query, checks for cross-institutional signals matching known patterns
-2. Insight promoter — CLI tool to review, edit, and promote insights from query log to insight table
-3. Context injector — pulls relevant promoted insights into the model context package at query time
-4. Pattern matcher — matches incoming query to known patterns, prepopulates synthesis framing
-5. Curation interface — `jenni curate` CLI for reviewing and approving staged insights
-
-### 2. Bentley FY2018 Missing from TEOS Index (LOW EFFORT — one probe query)
+### 1. Bentley FY2018 Missing from TEOS Index (LOW EFFORT — one probe query)
 Bentley (EIN 041081650) is absent from the 2019 TEOS index CSV. Probe the 2020 index CSV for this EIN to determine if the FY2018 filing was submitted late (filed in a later index year) or is genuinely missing. One query against the index CSV; if found, download and parse.
 
 ### 3. Broader EIN Audit — B4/B-Diverse Gap (LOWER PRIORITY)

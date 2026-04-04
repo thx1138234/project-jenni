@@ -656,6 +656,165 @@ def data(institution, year, all_years, json_output):
 
 
 # ---------------------------------------------------------------------------
+# curate
+# ---------------------------------------------------------------------------
+
+@jenni.command()
+@click.option("--pending",    is_flag=True, default=False,
+              help="List model_extracted insights awaiting review")
+@click.option("--promote",    type=int, default=None, metavar="ID",
+              help="Promote insight confidence: low→medium or medium→high")
+@click.option("--supersede",  type=int, default=None, metavar="ID",
+              help="Mark insight as superseded (requires --by)")
+@click.option("--by",         type=int, default=None, metavar="NEW_ID",
+              help="New insight ID that supersedes the old one (used with --supersede)")
+@click.option("--reject",     type=int, default=None, metavar="ID",
+              help="Reject an insight (sets status=rejected, never deletes)")
+@click.option("--to-narrative", type=int, default=None, metavar="ID",
+              help="Copy insight text to institution_narratives and mark as curator_promoted")
+def curate(pending, promote, supersede, by, reject, to_narrative):
+    """Review, promote, reject, and escalate validated insights.
+
+    Examples:\n
+        jenni curate --pending\n
+        jenni curate --promote 3\n
+        jenni curate --supersede 1 --by 4\n
+        jenni curate --reject 2\n
+        jenni curate --to-narrative 3
+    """
+    import sqlite3
+    from datetime import datetime, timezone
+
+    conn = sqlite3.connect(str(DB_990))
+    conn.row_factory = sqlite3.Row
+    now = datetime.now(timezone.utc).isoformat()
+
+    if pending:
+        rows = conn.execute("""
+            SELECT id, unitid, institution_name, confidence, evidence_tier,
+                   source_tables, insight_type, extraction_method,
+                   created_at, insight_text
+            FROM jenni_institutional_insights
+            WHERE status = 'active'
+            ORDER BY evidence_tier ASC, confidence DESC, created_at DESC
+        """).fetchall()
+        if not rows:
+            console.print("[green]No active insights awaiting review.[/green]")
+            conn.close()
+            return
+        t = Table(
+            title=f"Active Insights ({len(rows)} total)",
+            box=box.SIMPLE_HEAD,
+            title_style="bold cyan",
+        )
+        t.add_column("ID",          width=5,  justify="right")
+        t.add_column("Institution", max_width=28)
+        t.add_column("Tier",        width=5,  justify="center")
+        t.add_column("Conf",        width=7,  justify="center")
+        t.add_column("Type",        width=14)
+        t.add_column("Method",      width=16)
+        t.add_column("Insight",     max_width=60)
+        _CONF_COLORS = {"high": "green", "medium": "yellow", "low": "dim"}
+        for r in rows:
+            conf  = r["confidence"] or "?"
+            color = _CONF_COLORS.get(conf, "white")
+            t.add_row(
+                str(r["id"]),
+                (r["institution_name"] or "")[:28],
+                str(r["evidence_tier"] or "?"),
+                f"[{color}]{conf}[/{color}]",
+                (r["insight_type"] or "—")[:14],
+                (r["extraction_method"] or "—")[:16],
+                (r["insight_text"] or "")[:60],
+            )
+        console.print(t)
+
+    elif promote is not None:
+        row = conn.execute(
+            "SELECT id, confidence FROM jenni_institutional_insights WHERE id = ?",
+            (promote,),
+        ).fetchone()
+        if not row:
+            console.print(f"[red]Insight {promote} not found.[/red]")
+        else:
+            _UP = {"low": "medium", "medium": "high"}
+            current = row["confidence"] or "low"
+            new_conf = _UP.get(current)
+            if not new_conf:
+                console.print(f"[yellow]Insight {promote} already at '{current}' — cannot promote further.[/yellow]")
+            else:
+                conn.execute(
+                    "UPDATE jenni_institutional_insights SET confidence=?, updated_at=? WHERE id=?",
+                    (new_conf, now, promote),
+                )
+                conn.commit()
+                console.print(f"[green]Insight {promote}: {current} → {new_conf}[/green]")
+
+    elif supersede is not None:
+        if by is None:
+            console.print("[red]--supersede requires --by <new_id>[/red]")
+        else:
+            conn.execute(
+                "UPDATE jenni_institutional_insights "
+                "SET status='superseded', superseded_by=?, updated_at=? WHERE id=?",
+                (by, now, supersede),
+            )
+            conn.commit()
+            console.print(f"[yellow]Insight {supersede} marked superseded by {by}.[/yellow]")
+
+    elif reject is not None:
+        conn.execute(
+            "UPDATE jenni_institutional_insights SET status='rejected', updated_at=? WHERE id=?",
+            (now, reject),
+        )
+        conn.commit()
+        console.print(f"[red]Insight {reject} rejected (audit trail preserved).[/red]")
+
+    elif to_narrative is not None:
+        row = conn.execute(
+            "SELECT unitid, institution_name, insight_text, insight_type, confidence "
+            "FROM jenni_institutional_insights WHERE id = ? AND status = 'active'",
+            (to_narrative,),
+        ).fetchone()
+        if not row:
+            console.print(f"[red]Insight {to_narrative} not found or not active.[/red]")
+        else:
+            from jenni.config import DB_QUANT
+            qconn = sqlite3.connect(str(DB_QUANT))
+            qconn.execute("""
+                INSERT OR REPLACE INTO institution_narratives
+                    (unitid, narrative_type, content, confidence,
+                     source, valid_from)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                row["unitid"],
+                row["insight_type"] or "trajectory",
+                row["insight_text"],
+                row["confidence"],
+                "curator_promoted",
+                now[:10],   # date only
+            ))
+            qconn.commit()
+            qconn.close()
+            # Mark as curator_promoted in the insights table
+            conn.execute(
+                "UPDATE jenni_institutional_insights "
+                "SET extraction_method='curator_promoted', updated_at=? WHERE id=?",
+                (now, to_narrative),
+            )
+            conn.commit()
+            console.print(
+                f"[green]Insight {to_narrative} copied to institution_narratives "
+                f"for unitid={row['unitid']} ({row['institution_name']}).[/green]"
+            )
+
+    else:
+        console.print("[yellow]Specify one of: --pending, --promote, --supersede, --reject, --to-narrative[/yellow]")
+
+    conn.close()
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 

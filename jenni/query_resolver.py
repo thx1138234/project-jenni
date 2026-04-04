@@ -555,6 +555,15 @@ def _load_institution_data(
             ORDER BY total_expenses DESC
         """, (unitid, unitid))
 
+    # jenni_institutional_insights — active validated insights for this institution
+    prior_insights = _dict_rows(db990_conn, """
+        SELECT insight_text, confidence, insight_type, fiscal_year_end
+        FROM jenni_institutional_insights
+        WHERE unitid = ? AND status = 'active'
+        ORDER BY evidence_tier ASC, confidence DESC
+        LIMIT 10
+    """, (unitid,))
+
     return {
         "master":                master,
         "quant_latest":          quant_latest,
@@ -569,6 +578,7 @@ def _load_institution_data(
         "governance_row":        governance_row,
         "eada_instlevel_history": eada_instlevel_history,
         "eada_sports_rows":      eada_sports_rows,
+        "prior_insights":        prior_insights,
     }
 
 
