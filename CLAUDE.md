@@ -1754,13 +1754,28 @@ migration required — `ALTER TABLE ... ADD COLUMN embedding BLOB` with NULL def
 against existing rows. Pattern agent Phase 2 replaces `insight_type` grouping with
 embedding cosine similarity — architecture unchanged, grouping logic only.
 
-### Current State (2026-04-03)
+### Current State (2026-04-04)
 
-- `jenni_institutional_insights`: 3 rows (all seeded, all active)
+**Commit:** `fffdb03` (five components + three seed insights). `schema/learning_schema.sql` added with UNIQUE(unitid, insight_text) constraint in separate follow-up (seed_loader bug fix).
+
+- `jenni_institutional_insights`: **4 rows** (all seeded, all active)
 - `jenni_patterns`: 0 rows (pattern agent requires 5+ institutions per type; will populate as insights accumulate)
-- Post-synthesis extraction: active and wired; Haiku call fires after every synthesis
+- Post-synthesis extraction: active and wired; Haiku call fires after every synthesis — **known issue:** extractor prompt returns human-readable source_tables, failing validator tier check. See Open Items → Extractor Prompt Tuning.
 - Prior insights injection: confirmed end-to-end (BC seeded insight appeared verbatim in BC test query synthesis)
-- `jenni curate --pending`: 3 rows rendered correctly
+- `jenni curate --pending`: 4 rows rendered correctly after Bentley insight seeded
+
+**Four seed insights:**
+| ID | Institution | Type | Confidence | Finding Summary |
+|---|---|---|---|---|
+| 1 | Boston College (164924) | trajectory | high | Tuition revenue exponential 2008–2022, R²=0.99 |
+| 2 | MIT (166683) | trajectory | high | Tuition revenue logistic S-curve, R²=0.96, deliberate constraint |
+| 3 | Northeastern (167358) | trajectory | medium | Structural break 2012, exponential post-break R²=0.79 |
+| 7 | Bentley (164739) | trajectory | high | Ad spend 79th–81st pctile M1, yield 58th pctile — conversion problem not awareness |
+
+**Schema fix applied (2026-04-04):** Original schema had no UNIQUE constraint on `jenni_institutional_insights`. `seed_loader.py` re-run triggered duplicate inserts (rows 4–6 created). Fixed by:
+1. Deleting duplicate rows 4–6
+2. Recreating table with `UNIQUE (unitid, insight_text)` in place
+3. Creating `schema/learning_schema.sql` as the canonical schema file
 
 ---
 
@@ -1768,7 +1783,47 @@ embedding cosine similarity — architecture unchanged, grouping logic only.
 
 These items are defined, scoped, and ready to build. Priority order reflects PM assessment as of 2026-04-03.
 
-### 1. Bentley FY2018 Missing from TEOS Index (LOW EFFORT — one probe query)
+### 1. Extractor Prompt Tuning (MEDIUM — after additional query volume)
+The Haiku extraction prompt generates structurally valid JSON but returns human-readable `source_tables`
+strings ("advertising spend, Carnegie M1 peer benchmarks") instead of actual table names
+(`form990_part_ix`, `institution_quant`). The validator's `_assess_tier()` finds no TIER1_SOURCES
+overlap → Tier 4 → all candidates rejected silently. Root cause confirmed 2026-04-04 via direct
+Haiku probe on the Bentley advertising narrative.
+
+**Fix:** Update `EXTRACTION_PROMPT` in `jenni/learning/extractor.py` to explicitly instruct Haiku
+to use only the following table names in `source_tables`:
+`form990_filings`, `form990_part_ix`, `form990_schedule_d`, `form990_compensation`,
+`institution_quant`, `institution_trajectories`, `ipeds_ef`, `institution_master`,
+`scorecard_institution`. Include a one-line example in the prompt. No validator or schema changes
+required — the prompt is the only failure point.
+
+**Defer until:** 5+ additional queries have run to build up a baseline query log for prompt
+calibration. Run a post-fix batch test against the 5 validation institutions before declaring fixed.
+
+### 2. Pattern Agent Weekly Cron Job (LOW EFFORT — not yet scheduled)
+`jenni/learning/pattern_agent.py` is written and tested but has no scheduled runner.
+Pattern detection requires 5+ distinct unitids per `insight_type` — this threshold will only
+be met as `jenni_institutional_insights` accumulates rows across sessions.
+
+**When to schedule:** After extractor prompt tuning produces consistent model_extracted rows.
+Scheduling before then would always produce 0 patterns (insufficient data per type).
+
+**Cron target:** `0 2 * * 0` (Sunday 2am, consistent with S3 backup cadence).
+Command: `.venv/bin/python3 -m jenni.learning.pattern_agent --db data/databases/990_data.db`
+
+### 3. Vector Embeddings — Pending PostgreSQL Migration
+`jenni_institutional_insights` has no `embedding` column in Phase 1. Phase 2 upgrade path:
+- Add `embedding BLOB` column (safe: `ALTER TABLE ... ADD COLUMN embedding BLOB` with NULL default)
+- Populate at write time in the extractor using Anthropic embeddings API
+- Pattern agent Phase 2: replace `insight_type` grouping with embedding cosine similarity
+- Semantic insight retrieval in `query_resolver._load_institution_data()`: retrieve by embedding
+  proximity to query rather than by unitid equality
+
+**Blocker:** PostgreSQL migration (Supabase). SQLite stores embeddings as BLOBs, which works
+but lacks vector index support. Activate after PostgreSQL migration — pgvector gives ANN search
+at scale without full-scan cosine loops.
+
+### 4. Bentley FY2018 Missing from TEOS Index (LOW EFFORT — one probe query)
 Bentley (EIN 041081650) is absent from the 2019 TEOS index CSV. Probe the 2020 index CSV for this EIN to determine if the FY2018 filing was submitted late (filed in a later index year) or is genuinely missing. One query against the index CSV; if found, download and parse.
 
 ### 3. Broader EIN Audit — B4/B-Diverse Gap (LOWER PRIORITY)

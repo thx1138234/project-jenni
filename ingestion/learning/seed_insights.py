@@ -61,4 +61,21 @@ SEED_INSIGHTS: list[dict] = [
         "source_tables": "institution_trajectories,ipeds_ef",
         "fiscal_year_end": 2022,
     },
+    {
+        "unitid": 164739,
+        "institution_name": "Bentley University",
+        "insight_text": (
+            "Bentley University spends 2.4\u00d7 the Carnegie M1 advertising peer median "
+            "(79th\u201381st percentile, FY2021\u2013FY2023, ~$3.3M vs $1.4M peer median), "
+            "yet yield rate is 20.4% (58th percentile) against a net price of $37,930 "
+            "(95th percentile). The enrollment constraint is not top-of-funnel awareness "
+            "but admitted-student conversion: at M1\u2019s highest price quartile, yield "
+            "compression is structurally expected. Marginal advertising investment should "
+            "shift from brand awareness toward admitted-student engagement."
+        ),
+        "evidence_tier": 2,
+        "confidence": "high",
+        "source_tables": "form990_part_ix,institution_quant,institution_master",
+        "fiscal_year_end": 2023,
+    },
 ]
